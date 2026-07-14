@@ -1,0 +1,3798 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>நூலக வரவு செலவு மேலாண்மை - திண்டுக்கல்</title>  
+    <style>
+
+  /* --- GLOBAL PAGE SETUP --- */
+  body {
+  margin: 0;
+  padding: 20px;
+  background: linear-gradient(135deg, #4e73df, #1cc88a);
+  font-family: 'Segoe UI', Arial, sans-serif;
+  color: #333;
+  min-height: 100vh;
+}
+
+  /* --- MAIN CARD BOX --- */
+ .container {
+  width: 100%;
+  max-width: 460px;
+  margin: 20px auto;   /* 🔥 இதுதான் key */
+  background: #ffffffee;
+  backdrop-filter: blur(5px);
+  border-radius: 18px;
+  padding: 28px;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.25);
+    animation: fadeIn 0.5s ease-out;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* --- HEADINGS --- */
+  h2 {
+    text-align: center;
+    margin-top: 0;
+    font-size: 24px;
+    color: #2c3e50; /* dark blue */
+    font-weight: 700;
+  }
+
+  h3 {
+    text-align: center;
+    margin-bottom: 10px;
+    font-size: 20px;
+    color: #34495e;
+    font-weight: 600;
+  }
+
+  label {
+    font-size: 15px;
+    font-weight: 600;
+    color: #2d3436;
+    margin-top: 15px;
+    display: block;
+  }
+
+  /* --- FORM INPUTS --- */
+  select, input {
+    width: 100%;
+    padding: 14px;
+    font-size: 16px;
+    border-radius: 12px;
+    border: 2px solid #dcdde1;
+    background: #f7f9fc;
+    transition: 0.3s;
+  }
+
+  select:focus, input:focus {
+    border-color: #4e73df;
+    box-shadow: 0 0 5px #4e73dfaa;
+    outline: none;
+  }
+
+  /* --- BUTTONS --- */
+  button {
+    width: 100%;
+    padding: 14px;
+    margin-top: 12px;
+    border: none;
+    border-radius: 12px;
+    font-size: 17px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.25s;
+  }
+
+  button:hover {
+    transform: scale(1.03);
+  }
+
+  button:active {
+    transform: scale(0.97);
+  }
+
+  /* --- BUTTON COLORS --- */
+  button:not(.back-btn) {
+    background: linear-gradient(135deg, #4e73df, #1cc88a);
+    color: white;
+  }
+
+  .back-btn {
+    background: linear-gradient(135deg, #e74a3b, #c0392b) !important;
+    color: white;
+  }
+
+  /* --- MESSAGES --- */
+  .success {
+    background: #d4edda;
+    border-left: 5px solid #28a745;
+    padding: 10px;
+    margin-top: 10px;
+    border-radius: 10px;
+    color: #155724;
+    font-weight: 600;
+  }
+
+  .error {
+    background: #f8d7da;
+    border-left: 5px solid #e74a3b;
+    padding: 10px;
+    margin-top: 10px;
+    border-radius: 10px;
+    color: #721c24;
+    font-weight: 600;
+  }
+
+  /* --- STAGES (screens) --- */
+  .stage {
+    display: none;
+  }
+ 
+  /* --- EMAIL BOX --- */
+  .single-email-box {
+    display: flex;
+    align-items: center;
+    background: #e8fff1;
+    border: 2px solid #1cc88a;
+    padding: 15px;
+    border-radius: 12px;
+    margin: 10px 0;
+  }
+
+  .single-email-box input {
+    transform: scale(1.5);
+    margin-right: 15px;
+  }
+
+  /* --- SUB-PAGES INSIDE STAGE 4 --- */
+  .sub-stage {
+    padding: 15px;
+    background: #f4f6f8;
+    border-radius: 12px;
+    margin-bottom: 15px;
+    box-shadow: inset 0 0 8px rgba(0,0,0,0.05);
+  }
+.loading-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  margin: 30px auto;
+  padding: 25px 30px;
+  width: 85%;
+  max-width: 320px;
+
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.18);
+
+  animation: fadeScale 0.35s ease-out;
+}
+
+.loading-card p {
+  margin: 12px 0 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #1e40af;
+  text-align: center;
+}
+
+/* 🔄 Spinner */
+.spinner {
+  width: 38px;
+  height: 38px;
+  border: 4px solid #dbeafe;
+  border-top: 4px solid #2563eb;
+  border-radius: 50%;
+  animation: spin 0.9s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes fadeScale {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+.btn-spinner {
+  width: 20px;
+  height: 20px;
+  border: 3px solid rgba(255,255,255,0.4);
+  border-top: 3px solid white;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  display: inline-block;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+/* Stage 0 – colourful lines */
+
+#stage0 h2 {
+  color: #1e3a8a;        /* Dark Blue */
+}
+
+#stage0 h3 {
+  color: #047857;        /* Green */
+}
+
+#stage0 hr {
+  border: none;
+  height: 3px;
+  background: linear-gradient(to right, #6366f1, #22c55e);
+}
+
+#stage0 label {
+  color: #7c2d12;        /* Brown */
+}
+
+#stage0 select {
+  border: 2px solid #2563eb;
+  background-color: #eff6ff;
+  color: #1e40af;
+}
+
+#stage0 select option {
+  color: #1f2937;
+}
+
+/* Libraries list (dynamic content) */
+#librariesDiv {
+  color: #92400e;        /* Orange-brown */
+}
+/* ===============================
+   Stage 4A – 4G : Colourful Titles
+   =============================== */
+
+/* Common style for all step titles */
+#stage4 .sub-stage h4 {
+  font-weight: 800;
+  font-size: 17px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  margin-top: 0;
+  margin-bottom: 15px;
+}
+
+/* 🔵 Step 4A – Newspapers */
+#stage4A h4 {
+  color: #1e40af;
+  background: #e0f2fe;
+  border-left: 6px solid #2563eb;
+}
+
+/* 🟢 Step 4B – Daily wages */
+#stage4B h4 {
+  color: #065f46;
+  background: #dcfce7;
+  border-left: 6px solid #16a34a;
+}
+
+/* 🟡 Step 4C – Electricity / Rent */
+#stage4C h4 {
+  color: #92400e;
+  background: #fef3c7;
+  border-left: 6px solid #f59e0b;
+}
+
+/* 🟣 Step 4D – Bus & Travel */
+#stage4D h4 {
+  color: #5b21b6;
+  background: #ede9fe;
+  border-left: 6px solid #7c3aed;
+}
+
+/* 🟠 Step 4E – Post / Stationery */
+#stage4E h4 {
+  color: #9a3412;
+  background: #ffedd5;
+  border-left: 6px solid #f97316;
+}
+
+/* 🔴 Step 4F – Other Expenses */
+#stage4F h4 {
+  color: #991b1b;
+  background: #fee2e2;
+  border-left: 6px solid #dc2626;
+}
+
+/* ✅ Step 4G – Completion */
+#stage4G h4 {
+  color: #064e3b;
+  background: #d1fae5;
+  border-left: 6px solid #10b981;
+}
+
+/* Spinner */
+.btn-spinner {
+  width: 18px;
+  height: 18px;
+  border: 3px solid rgba(255,255,255,0.4);
+  border-top: 3px solid #fff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+button.loading {
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+  .section-title {
+    font-size: 20px;
+    font-weight: 800;
+    text-align: center;
+    margin: 25px 0 10px;
+    letter-spacing: 1px;
+    text-decoration: underline;
+  }
+
+  /* 🔵 பதிவு செய்தல் */
+  .section-title.entry {
+    color: #1e40af;   /* Deep Blue */
+  }
+
+  /* 🟢 அறிக்கைகள் */
+  .section-title.report {
+    color: #047857;   /* Emerald Green */
+  }
+/* 🔰 Stage 0 Header */
+.stage0-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.header-title {
+  text-align: center;
+  flex: 1;
+}
+
+.header-logo {
+  width: 70px;
+  max-height: 80px;
+  object-fit: contain;
+}
+
+/* Mobile friendly */
+@media (max-width: 480px) {
+  .header-logo {
+    width: 55px;
+  }
+  .header-title h2 {
+    font-size: 20px;
+  }
+  .header-title h3 {
+    font-size: 16px;
+  }
+}
+/* ===== Premium Preview Table ===== */
+
+.premium-table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+  background: #ffffff;
+  font-size: 15px;
+}
+
+.premium-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.premium-table tr:nth-child(even):not(.section-row):not(.total-row) {
+  background: #f9fafb;
+}
+
+.section-row td {
+  font-weight: 700;
+  text-align: center;
+  color: #fff;
+  letter-spacing: 0.5px;
+}
+
+.income-section td {
+  background: #2563eb;
+}
+
+.usage-section td {
+  background: #16a34a;
+}
+
+.total-row {
+  background: #dcfce7 !important;
+  font-weight: 700;
+  font-size: 16px;
+  color: #065f46;
+}
+
+/* Preview Card Style */
+.preview-overlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0,0,0,0.7);
+  z-index: 1000;
+  overflow-y: auto;
+  padding: 20px;
+}
+
+.preview-card {
+  background: white;
+  max-width: 450px;
+  margin: 20px auto;
+  padding: 25px;
+  border-radius: 15px;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+}
+
+.preview-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.preview-total {
+  font-size: 20px;
+  font-weight: 800;
+  color: #1e40af;
+  text-align: center;
+  margin-top: 15px;
+  padding: 10px;
+  background: #eff6ff;
+  border-radius: 10px;
+}
+@keyframes blink-red {
+  0%, 100% {
+    color: #000000;              /* இயல்பு கருப்பு */
+    background-color: #ffffff;   /* வெள்ளை பின்னணி */
+  }
+  50% {
+    color: #ffffff;              /* வெள்ளை எழுத்து */
+    background-color: #dc2626;   /* சிவப்பு பின்னணி */
+  }
+}
+
+.blink-red {
+  animation: blink-red 1.2s infinite;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+</style>
+
+
+</head>
+<body>
+<div class="container">
+
+    <div id="stage0" class="stage" style="display:block;">
+     
+    <!-- 🔰 Header with Logos -->
+<div class="stage0-header">
+  <!-- Left Logo -->
+  <img
+    src="https://drive.google.com/thumbnail?id=1AwZy-uxszelJlyda0Kfvv4_CVgEUBayX&sz=w120"
+    class="header-logo left-logo"
+    alt="Library Logo">
+
+  <!-- Center Titles -->
+  <div class="header-title">
+    <h2>மாவட்ட நூலக அலுவலகம்</h2>
+    <h3>திண்டுக்கல் மாவட்டம்</h3>
+    <div id="adminBadge" style="display:none; margin-top:6px; font-size:13px; font-weight:800; color:#92400e; background:#fef3c7; border:1px solid #f59e0b; border-radius:8px; padding:3px 10px;">🔑 Admin Mode</div>
+  </div>
+
+  <!-- Right Logo -->
+  <img
+    src="https://drive.google.com/thumbnail?id=18TDopjRYV_uiSQxxM861-hgQiKoBP_Ap&sz=w120"
+    class="header-logo right-logo"
+    alt="Tamil Nadu Logo">
+</div>
+
+<hr>
+    <label>நூலக வகையைத் தேர்ந்தெடுங்கள்</label>
+    <select id="typeSelect" onchange="loadLibraries();handleLibraryTypeUI();"></select>
+ 
+    <div id="librariesDiv" style="margin-top:20px;"></div> 
+    </div>
+
+    <div id="stage1" class="stage">
+    <h3>உள்நுழைவு சரிபார்ப்பு</h3>
+    <p style="text-align:center;font-weight:bold;color:#007bff;" id="libNameDisplay"></p>
+
+    <div id="emailBox"></div>
+    <div id="msg" class="error"></div>
+
+   
+  <button onclick="backToType()" class="back-btn" style="margin-top:20px;">வகை தேர்வுக்கு திரும்பு</button>
+  </div>
+
+   <div id="stage3" class="stage">
+    <h3>முகப்புப் பக்கம்</h3>
+    <p style="
+  text-align:center;
+  font-weight:700;
+  font-size:20px;
+  color:#0f172a;
+  background:#e0f2fe;
+  padding:10px 14px;
+  border-radius:12px;
+  margin:12px 0;">
+  
+  📚 
+  <span id="finalLib"
+        style="color:#1d4ed8; font-size:22px; font-weight:800;">
+  </span>
+
+  <br>
+
+  <span id="finalEmail"
+        style="color:#7c3aed; font-size:22px; font-weight:800;">
+  </span>
+</p>
+    <hr>
+    <!-- 🔷 Section Headings -->
+<div class="section-title entry">பதிவு செய்தல்</div>
+
+    <button id="contingentBtn" onclick="handleContingentClick()" style="position:relative;">  1. சில்லறை செலவினப் பட்டியல்</button>
+
+<button id="receiptBtn" onclick="go(5,'வரவினங்களை பதிவு செய்தல்')"style="background:#a64dff; color:white; position:relative;">  2. நூலக வரவினங்கள்
+</button>
+<div id="adminNewsBtnWrap" style="display:none;">
+  <button onclick="go(6,'நாளிதழ் மேலாண்மை')" style="background:#7c3aed; color:white;">🛠 நாளிதழ் மேலாண்மை (Admin)</button>
+</div>
+<div class="section-title report">அறிக்கைகள்</div>
+ <div id="mailSuccessCard"
+     class="success"
+     style="display:none; text-align:center; font-size:16px;">
+</div>
+
+<!-- 🔽 கடந்த ஆண்டு தணிக்கைப் படிவம் - ஆண்டு தேர்வு Modal -->
+<div id="yearSelectModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.45); z-index:9999; align-items:center; justify-content:center;">
+  <div style="background:#ffffff; border-radius:14px; padding:22px; width:90%; max-width:340px; text-align:center; box-shadow:0 8px 24px rgba(0,0,0,0.3);">
+    <div style="font-weight:800; font-size:16px; color:#4c1d95; margin-bottom:14px;">
+      📑 எந்த ஆண்டு தணிக்கைப் படிவம் வேண்டும் என்பதை தேர்வு செய்யுங்கள்
+    </div>
+    <select id="prevYearSelect" style="width:100%; padding:10px; border-radius:8px; border:1px solid #cbd5e1; font-size:15px; margin-bottom:16px;">
+      <option value="">-- ஆண்டைத் தேர்வு செய்யவும் --</option>
+      <option value="2024-2025">1. 2024-2025</option>
+      <option value="2025-2026">2. 2025-2026</option>
+    </select>
+    <div style="display:flex; gap:10px; justify-content:center;">
+      <button id="prevYearConfirmBtn" onclick="confirmPrevYearReceiptExpense(this)" style="background:#7c3aed; color:white; border:none; padding:10px 18px; border-radius:8px; font-weight:700;">பெறு</button>
+      <button onclick="closePrevYearModal()" style="background:#e2e8f0; color:#334155; border:none; padding:10px 18px; border-radius:8px; font-weight:700;">ரத்து செய்</button>
+    </div>
+  </div>
+</div>
+
+    <button onclick="openApprovedExpenseMail(this)" style="background:#ff9800;"> 1. அனுமதிக்கப்பட்ட சில்லறைச் செலவினம்</button>
+    
+    <button onclick="openReceiptAcknowledgement(this)" style="background:#10b981;"> 2.  நூலக வரவுத் தொகைக்கு ஒப்புதல்</button>
+    <button onclick="openYearlyReceiptAbstract(this)" style="background:#0ea5e9;">   3. 📊 நடப்பு ஆண்டு சுருக்கம் – நூலக வரவுகள்</button>
+    <button onclick="openYearlyExpenseAbstract(this)" style="background:#ef4444;">   4. 📊 நடப்பு ஆண்டு சுருக்கம் – நூலக செலவுகள்</button>
+    <button onclick="openPrevYearReceiptExpense(this)" style="background:#7c3aed;"> 5. 📑 கடந்த ஆண்டு வரவு-செலவு(தணிக்கைப் படிவம்</button>
+    <button onclick="openClaimPdf(this)" style="background:#1e88e5;">   6.📥 📄 சில்லறை செலவினப் பட்டியல் நகல் எடுத்தல் </button>
+   
+
+     <button onclick="backToType()" style="background:#f44336;margin-top:30px;">    வெளியேறு</button>
+        <!-- 🔳 Remittance QR Code (BELOW the button) -->
+<div style="margin-top:15px; text-align:center;">
+
+  <!-- 🔺 Title ABOVE QR -->
+  <div style="
+    font-size:15px;
+    font-weight:700;
+    color:#1e40af;
+    margin-bottom:8px;">
+    பணம் செலுத்த வேண்டிய QR CODE
+  </div>
+
+  <!-- 🔳 QR Image -->
+  <img
+    src="https://drive.google.com/thumbnail?id=13sz2EVlBkujXcZpdUkAcmBOaG63E7aTl&sz=w300"
+    style="
+      max-width:160px;
+      border:1px solid #ccc;
+      border-radius:10px;
+      box-shadow:0 2px 6px rgba(0,0,0,0.25);
+    "
+    alt="Remittance QR Code">
+
+  <!-- 🔻 PhonePe + Google Pay LOGOS -->
+  <div style="
+    margin-top:10px;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    gap:18px;">
+    
+    <!-- PhonePe -->
+    <img
+      src="https://drive.google.com/thumbnail?id=1BQ6xdkwZ89wecGn8yfKGRG7NsX-VmQbb"
+      alt="PhonePe"
+      style="height:32px;">
+
+    <!-- Google Pay -->
+    <img
+      src="https://drive.google.com/thumbnail?id=1iwQFwhc7VhE8NPoPg760npggui2C0wre"
+      alt="Google Pay"
+      style="height:32px;">
+  </div>
+  
+</div>
+  
+
+
+
+</div>
+
+    <div id="stage4" class="stage">
+    <h3 id="pageTitle" style="color:#28a745;"></h3>
+    <p style="text-align:center;font-weight:bold;color:#666;">நூலகம்: <span id="libForContingent"></span></p>
+    <hr>
+
+   <label for="monthYear">நடப்பு மாதம் மற்றும் வருடம் (MM/YYYY)</label>
+<input type="text" id="monthYear" placeholder="உதாரணம்: 12/2025" readonly style="background-color:#f0f0f0; color:#333;">
+<div id="contingentErrorTop" class="error" style="display:none;"></div>
+
+<form id="contingentForm">
+<div id="existingWarning" class="success" style="display:none;"></div>
+<div id="stage4A" class="sub-stage">
+    <h4>படி 1/2: 📰 நாளிதழ்கள் செலவினம் (தொகை ₹)</h4>
+    <div style="border:1px solid #ccc; padding:15px; border-radius:10px; margin-bottom:20px;">
+        <!-- ✅ நாளிதழ் input fields இப்போது dynamic ஆக renderNewspaperInputs() மூலம் இங்கே render ஆகும் -->
+        <!-- "NEWSPAPER LIST" Master Sheet-ல் Active=Yes உள்ள நாளிதழ்கள் மட்டும், அந்த நூலகத்திற்கு ஏற்ப தெரியும் -->
+        <div id="newsPaperSection">
+          <p style="text-align:center;color:#888;">நாளிதழ் பட்டியல் ஏற்றப்படுகிறது...</p>
+        </div>
+    </div>
+   <button type="button" id="nextBtn4B" onclick="nextStage(4, '4B')">அடுத்து (தினக்கூலி விவரங்கள்)</button>
+</div>
+
+           <div id="stage4B" class="sub-stage" style="display:none;">
+    <h4>படி 2/2: 👩‍💻 தினக்கூலி விவரங்கள்</h4>
+    <div id="stage4BError" class="error" style="display:none; margin:15px 0; padding:12px;"></div>
+    <div style="border:1px solid #ccc; padding:15px; border-radius:10px; margin-bottom:20px;">
+     <div id="labourSection" style="border:1px solid #ccc; padding:15px; border-radius:10px; margin-bottom:20px;">
+
+<label>தினக்கூலி கூட்டுநர் பெயர் (தமிழில்)</label>
+<input type="text" id="partnerNameTamil" placeholder="பெயர் (Text)">
+
+<label>கூட்டுநர் பணிபுரிந்த நாட்கள்</label>
+<input type="number" id="partnerDays" min="0" value="0" oninput="validateWorkingDays(this)">
+
+<label>தினக்கூலி நூலகப் பணியாளர் பெயர் (தமிழில்)</label>
+<input type="text" id="staffNameTamil" placeholder="பெயர் (Text)">
+
+<label>தினக்கூலி பணியாளர் பணிபுரிந்த நாட்கள்</label>
+<input type="number" id="staffDays" min="0" value="0" oninput="validateWorkingDays(this)">
+
+</div>
+
+
+<div id="partTimeStaffSection">
+
+<label>பகுதி நேர நூலகத்தின் தினக்கூலிப் பணியாளர் பெயர்</label>
+<input type="text" id="partTimeStaffName" placeholder="பெயர் (Text)">
+
+<label>பகுதி நேர நூலகத்தில் பணியாற்றிய நாட்கள்</label>
+<input type="number" id="partTimeStaffDays" min="0" value="0" oninput="validateWorkingDays(this)">
+
+</div>
+   </div>
+    
+       <button type="button" id="nextBtnFrom4B" onclick="validateAndNextFrom4B()">
+  அடுத்து (மின்கட்டணம், வாடகை, wifi, Xerox விவரங்கள்) →
+</button>
+        <button type="button" onclick="prevStage('4A')" class="back-btn">⬅️ முன்பக்கம்</button>
+</div>
+ 
+     <!-- ==================== stage4C: மின் கட்டணம் முதல் நகலெடுத்தல் வரை ==================== -->
+<div id="stage4C" class="sub-stage" style="display:none;">
+  <!-- stage4C உள்ளே -->
+
+    <h4>படி 3/7: ⚡ மின் கட்டணம் முதல் நகலெடுத்தல் வரை</h4>
+    <div id="stage4CError" class="error" style="display:none; margin:12px 0; padding:10px;"></div>
+    <div style="border:1px solid #ccc; padding:15px; border-radius:10px; margin-bottom:20px;">
+        <label>மின்சார கட்டணத் தொகை (₹)</label>
+        <input type="number" id="electricityBill" min="0" value="0">
+        
+        <label>கட்டிட உரிமையாளர் பெயர்</label>
+        <input type="text" id="rentOwnerName" placeholder="உரிமையாளர் பெயர்">
+        
+        <label>வாடகைத் தொகை (₹)</label>
+        <input type="number" id="rentAmount" min="0" value="0">
+        
+        <label>வைஃபை / தொலைபேசி தொகை (₹)</label>
+        <input type="number" id="phoneWifiAmount" min="0" value="0">
+        
+        <label>குடிநீர் வரி (₹)</label>
+        <input type="number" id="waterTax" min="0" value="0">
+        
+        <label>நகல் எடுத்த செலவினம் (₹)</label>
+        <input type="number" id="photocopyAmount" min="0" value="0">
+    </div>
+        <button type="button" onclick="validateAndNextFrom4C()">அடுத்து(பேருந்து கட்டணம், போக்குவரத்துக் கட்டணம்) →</button>
+        <button type="button" onclick="prevStage('4B')" class="back-btn">⬅️ முன்பக்கம்</button>
+</div>
+
+      <!-- ==================== stage4D: பேருந்து & போக்குவரத்து கட்டணம் ==================== -->
+<!-- stage4D உள்ளே (முழு div) -->
+<div id="stage4D" class="sub-stage" style="display:none;">
+    <h4>படி 4/7: 🚌 பேருந்து & போக்குவரத்துக் கட்டணம்</h4>
+    
+    <!-- Error display area -->
+    <div id="stage4DError" class="error" style="display:none; margin:12px 0; padding:10px 14px;"></div>
+
+    <div style="border:1px solid #ccc; padding:15px; border-radius:10px; margin-bottom:20px;">
+        <h5>பேருந்து கட்டணம்</h5>
+        
+        <label>என்ன வகைக்காக கோரப்படுகிறது?</label>
+        <select id="busPurpose">
+            <option value="">-- தேர்ந்தெடுக்கவும் --</option>
+            <option value="கூடுதல் பொறுப்பு நூலகத்திற்கு சென்று வந்தமைக்காக">1. கூடுதல் பொறுப்பு நூலகத்திற்கு சென்று வந்தமைக்காக</option>
+            <option value="பணியாளர் கூட்டத்திற்கு சென்று வந்தமைக்காக">2. பணியாளர் கூட்டத்திற்கு சென்று வந்தமைக்காக</option>
+            <option value="ஊதிய மையத்திற்கு சென்று வந்தமைக்காக">3. ஊதிய மையத்திற்கு சென்று வந்தமைக்காக</option>
+        </select>
+        
+        <label>பேருந்து கட்டணம் கோரும் நாள்</label>
+        <input type="date" id="busDate">
+        
+        <label>கட்டணத் தொகை (₹)</label>
+        <input type="number" id="busAmount" min="0" value="0">
+        
+        <hr>
+        
+        <h5>போக்குவரத்துக் கட்டணம்</h5>
+        
+        <label>என்ன வகைக்காக கோரப்படுகிறது?</label>
+        <select id="travelPurpose">
+            <option value="">-- தேர்ந்தெடுக்கவும் --</option>
+            <option value="மைய நூலகத்தில் இருந்து நூல்கள் எடுத்து சென்றமைக்காக">1. மைய நூலகத்தில் இருந்து நூல்கள் எடுத்து சென்றமைக்காக</option>
+            <option value="நூலகப் பதிவேடுகளை எடுத்து வந்தமைக்காக">2. நூலகப் பதிவேடுகளை எடுத்து வந்தமைக்காக</option>
+            <option value="தளவாடங்கள் எடுத்து வந்தமைக்காக">3. தளவாடங்கள் எடுத்து வந்தமைக்காக</option>
+            <option value="தற்போது செயல்பட்டு வரும் நூலகத்தை இடம் மாற்றியதற்காக">தற்போது செயல்பட்டு வரும் நூலகத்தை இடம் மாற்றியதற்காக</option>
+        </select>
+        
+        <label>கட்டணம் கோரும் நாள்</label>
+        <input type="date" id="travelDate">
+        
+        <label>கட்டணத் தொகை (₹)</label>
+        <input type="number" id="travelAmount" min="0" value="0">
+    </div>
+    
+    <button type="button" onclick="validateAndNextFrom4D()">அடுத்து(அஞ்சல், பதிவேடுகள், நுகர்பொருள் போன்றவை) →</button>
+    <button type="button" onclick="prevStage('4C')" class="back-btn">⬅️ முன் பக்கம்</button>
+</div>
+       
+
+    <!-- ==================== stage4E: அஞ்சல் முதல் நுகர்பொருள் வரை ==================== -->
+<div id="stage4E" class="sub-stage" style="display:none;">
+    <h4>படி 5/7: ✉️ அஞ்சல் முதல் நுகர்பொருள் வரை</h4>
+    
+    <!-- Error display -->
+    <div id="stage4EError" class="error" style="display:none; margin:12px 0; padding:10px 14px;"></div>
+
+    <div style="border:1px solid #ccc; padding:15px; border-radius:10px; margin-bottom:20px;">
+        <label>அஞ்சல் அனுப்பிய செலவினம் (₹)</label>
+        <input type="number" id="postalAmount" min="0" value="0">
+        
+        <label>வாங்கிய பதிவேடு (விவரம்)</label>
+        <input type="text" id="registerItem" placeholder="எ.கா. வரவு பதிவேடு">
+        
+        <label>பதிவேடு தொகை (₹)</label>
+        <input type="number" id="registerAmount" min="0" value="0">
+        
+        <label>வாங்கிய எழுதுபொருள் (விவரம்)</label>
+        <input type="text" id="stationeryItem" placeholder="எ.கா. பேனா, நோட்டு">
+        
+        <label>எழுதுபொருள் தொகை (₹)</label>
+        <input type="number" id="stationeryAmount" min="0" value="0">
+        
+        <label>வாங்கிய மின்சாதனம் (விவரம்)</label>
+        <input type="text" id="electricalItem" placeholder="எ.கா. பல்பு">
+        
+        <label>மின்சாதன தொகை (₹)</label>
+        <input type="number" id="electricalAmount" min="0" value="0">
+        
+        <label>வாங்கிய நுகர்பொருள் (விவரம்)</label>
+        <input type="text" id="consumerItem" placeholder="எ.கா. சோப்பு">
+        
+        <label>நுகர்பொருள் தொகை (₹)</label>
+        <input type="number" id="consumerAmount" min="0" value="0">
+    </div>
+    
+    <button type="button" onclick="validateAndNextFrom4E()">அடுத்து(பிற செலவினங்கள்) →</button>
+    <button type="button" onclick="prevStage('4D')" class="back-btn">⬅️ முன் பக்கம்</button>
+</div>
+       
+
+    <!-- ==================== stage4F: பிற செலவினங்கள் ==================== -->
+<div id="stage4F" class="sub-stage" style="display:none;">
+    <h4>படி 6/7: 📌 பிற செலவினங்கள்</h4>
+    
+    <!-- Error display பகுதி -->
+    <div id="stage4FError" class="error" style="display:none; margin:12px 0; padding:10px 14px;"></div>
+
+    <div id="otherExpensesSection" style="border:1px solid #ccc; padding:15px; border-radius:10px; margin-bottom:20px;">
+        <h5>பிற செலவினங்கள் - 1</h5>
+        <label>பிற செலவினம் என்ன?</label>
+        <input type="text" id="otherExpense1Desc" placeholder="விவரம்">
+        
+        <label>தொகை (₹)</label>
+        <input type="number" id="otherExpense1Amount" min="0" value="0">
+        
+        <hr>
+        
+        <h5>பிற செலவினங்கள் - 2</h5>
+        <label>பிற செலவினம் என்ன?</label>
+        <input type="text" id="otherExpense2Desc" placeholder="விவரம்">
+        
+        <label>தொகை (₹)</label>
+        <input type="number" id="otherExpense2Amount" min="0" value="0">
+    </div>
+   
+    <div style="text-align:center; margin-top:15px;">   <button type="button" onclick="showContingentPreview()">    ✅ விவரங்களைச் சரிபார்த்து பதிவு செய்ய
+  </button>
+</div>
+    
+</div>
+
+     <!-- ==================== stage4G: முடிவு பக்கம் (தற்போதைய stage4C-ஐ இங்கு மாற்றவும்) ==================== -->
+<div id="stage4G" class="sub-stage" style="display:none;">
+    <h4>பதிவு முடிவு</h4>
+    <div id="contingentMsg" class="success" style="display:none;"></div>
+    <div id="contingentError" class="error" style="display:none;"></div>
+    <button type="button" onclick="show(3)" class="back-btn" style="margin-top:20px;">
+        மெனுவுக்கு திரும்பு
+    </button>
+</div>
+
+<!-- கீழே உள்ள button-கள் stage4F-இன் கீழே இருந்து தவறுதலாக இங்கு copy ஆகியிருக்கலாம். 
+     உண்மையில் stage4G-இல் submit button தேவையில்லை (ஏற்கனவே stage4F-இல் இருக்கும்).
+     ஆனால் நீங்கள் அனுப்பிய code-இல் இருப்பதால் சரியாக fix செய்து தருகிறேன். -->
+<button type="button" onclick="prevStage('4A')" class="back-btn">⬅️ ஆரம்ப பக்கத்திறகு</button>
+
+<div id="contingentPreviewOverlay" class="preview-overlay">
+  <div class="preview-card">
+    <h3 style="color:#2563eb;">பதிவு விவரங்கள் சரிபார்ப்பு</h3>
+    <div id="previewContent"></div>
+    <div id="previewTotalDisplay" class="preview-total"></div>
+    
+    <div style="display:flex; gap:10px; margin-top:20px;">
+      <button type="button" onclick="submitFromPreview()" style="background:#16a34a;">✅ சரி (பதிவு செய்யலாம்)</button>
+      <button type="button" onclick="closePreview()" class="back-btn">❌ தவறு (திருத்து)</button>
+    </div>
+  </div>
+</div>
+            
+    
+    </form>
+
+   <button onclick="show(3)" class="back-btn" style="margin-top:20px;">மெனுவுக்கு திரும்பு</button>
+  </div>
+
+</div>
+  </div>   <!-- stage4 முடிவு -->
+
+  <!-- ==================== STAGE 5: வரவினங்களை பதிவு செய்தல் ==================== -->
+  <style>
+ #stage5 {
+    width: 100%;
+    max-width: 400px;
+    margin: 20px auto;
+    padding: 25px;
+    background: #ffffff;
+    border-radius: 14px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+    border: 1px solid #e2e8f0;
+}
+
+ #stage5 label {
+  display: block;
+  margin: 12px 0 5px;
+  font-weight: 600;
+  color: #1e3a8a;
+}
+
+  #stage5 input[type="text"],
+  #stage5 input[type="date"],
+  #stage5 input[type="number"] {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #a5b4fc;
+    border-radius: 8px;
+    font-size: 16px;
+    background-color: #ffffff;
+    transition: border-color 0.2s;
+  }
+
+  #stage5 input:focus {
+    border-color: #6366f1;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(99,102,241,0.2);
+  }
+
+  #stage5 input[readonly] {
+    background-color: #f1f5f9;
+    font-weight: bold;
+    color: #1e40af;
+  }
+
+  #receiptForm h4 {
+    color: #1d4ed8;
+    margin: 25px 0 15px;
+    border-bottom: 2px solid #bfdbfe;
+    padding-bottom: 8px;
+  }
+
+  #receiptMsg, #receiptError {
+    padding: 12px;
+    border-radius: 8px;
+    font-weight: 500;
+  }
+
+  #receiptMsg {
+    background: #d1fae5;
+    color: #065f46;
+    border: 1px solid #a7f3d0;
+  }
+
+  #receiptError {
+    background: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+  }
+
+@keyframes blinkGlow {
+  0%   { background:#f43f5e; box-shadow:0 0 6px #f43f5e; }
+  50%  { background:#fde047; box-shadow:0 0 18px #fde047; }
+  100% { background:#f43f5e; box-shadow:0 0 6px #f43f5e; }
+}
+
+.blink-warning {
+  animation: blinkGlow 1.1s infinite;
+  color:#000 !important;
+  font-weight:800;
+}
+.blinkSelect{
+  animation: blinkColor 1s infinite;
+  border: 3px solid red;
+}
+
+@keyframes blinkColor{
+  0% {background:#fff3cd;}
+  50% {background:#ffcccc;}
+  100% {background:#fff3cd;}
+}
+@keyframes blink-red {
+  0% { color: red; opacity: 1; }
+  50% { color: darkred; opacity: 0.3; }
+  100% { color: red; opacity: 1; }
+}
+.error-blink {
+  animation: blink-red 0.5s infinite;
+  font-weight: bold;
+}
+
+</style>
+  <div id="stage5" class="stage">
+    <h3 id="receiptTitle" style="color:#28a745;">வரவினங்களை பதிவு செய்தல்</h3>
+    <p style="text-align:center;font-weight:bold;color:#666;">நூலகம்: <span id="libForReceipt"></span></p>
+    <hr>
+    <div style="margin-bottom:15px">
+<label style="text-align:center;font-weight:700;">
+பதிவு வகை தேர்வு செய்யவும்
+</label>
+
+<select id="receiptModeSelect" class="blinkSelect"
+        onchange="handleModeChange(this)"
+        style="width:100%; padding:10px; margin-bottom:15px;">
+  <option value="">-- தேர்வு செய்யவும் --</option>
+  <option value="income">கடந்த மாதம் நூலக வரவுகளை செலுத்தியுள்ளேன்</option>
+  <option value="usage">கடந்த மாதம் பணம் செலுத்தவில்லை – பயன்பாடு மட்டும்</option>
+</select>
+
+</div>
+    <form id="receiptForm">
+      <div id="bankSection">
+  <label for="utrNumber" style="text-align:center;">
+  Google Pay / PhonePe UTR எண் (11 அல்லது 12 இலக்கங்கள் மட்டும்)
+</label>
+
+<input type="text" id="utrNumber"
+       maxlength="12" pattern="\d{11,12}" required
+       placeholder="எ.கா: 123456789012"
+       style="width:220px; margin:6px auto 16px; display:block;
+              text-align:center; font-size:16px; font-weight:600;">
+
+<!-- 🔍 Check Button (இதுதான் Missing) -->
+<button type="button"
+        onclick="checkBankPayment()"
+        style="width:100%;
+               background:#0ea5e9;
+               color:white;
+               padding:12px;
+               border:none;
+               border-radius:10px;
+               font-weight:700;
+               margin-bottom:15px;">
+  🔍 Check and Validate Your Payment with Bank Statement
+</button>
+</div>
+<!-- Bank Validation Preview Card -->
+<div id="bankPreviewCard"
+     style="display:none;
+            margin:20px 0;
+            padding:20px;
+            background:#eff6ff;
+            border:2px solid #2563eb;
+            border-radius:12px;
+            box-shadow:0 4px 12px rgba(0,0,0,0.1);">
+
+  <h4 style="text-align:center; color:#1e40af; margin-top:0;">
+    🏦 Bank Statement Verification
+  </h4>
+
+  <p style="text-align:center; font-size:16px; font-weight:600;">
+    நீங்கள் செலுத்திய தொகை ரூ.
+    <span id="bankAmountDisplay"
+          style="color:#16a34a; font-size:20px; font-weight:800;">
+    </span>
+</p>
+
+<p style="text-align:center; font-size:15px; font-weight:600; margin-top:5px;">
+    செலுத்திய தேதி :
+    <span id="bankDateDisplay"
+          style="color:#2563eb; font-size:17px; font-weight:800;">
+    </span>
+</p>
+
+  <div style="text-align:center; margin-top:20px;">
+    <button type="button"
+            onclick="confirmBankAmount()"
+            style="background:#16a34a; color:white;
+                   padding:10px 25px;
+                   border:none;
+                   border-radius:8px;
+                   margin-right:15px;
+                   cursor:pointer;">
+      ✅ சரி
+    </button>
+
+    <button type="button"
+            onclick="rejectBankAmount()"
+            style="background:#ef4444; color:white;
+                   padding:10px 25px;
+                   border:none;
+                   border-radius:8px;
+                   cursor:pointer;">
+      ❌ தவறு
+    </button>
+  </div>
+</div>
+
+<!-- Remaining Card -->
+<div id="remainingCard"
+     style="display:none;
+            margin:15px 0;
+            padding:15px;
+            background:#f0fdf4;
+            border:2px solid #16a34a;
+            border-radius:10px;
+            text-align:center;
+            font-weight:700;
+            font-size:16px;">
+
+  மீதமுள்ள தொகை ரூ.
+  <span id="remainingAmountDisplay"
+        style="color:#15803d; font-size:18px;">
+  </span>
+</div>
+<label for="paymentDate" style="text-align:center;">
+  தொகை செலுத்திய நாள்
+</label>
+<input type="date" id="paymentDate" required readonly
+       style="width:180px; margin:6px auto 18px; display:block;
+              text-align:center; font-size:16px; font-weight:600;">
+
+ <h4 style="
+  text-align:center;
+  margin:25px 0 15px;
+  font-size:18px;
+  font-weight:700;
+  color:#1e40af;
+  border-bottom:2px solid #bfdbfe;
+  padding-bottom:8px;">
+  வரவு விவரங்கள் (₹)
+</h4>
+<div id="incomeSection">
+  <label style="text-align:center;">காப்புத்தொகை</label>
+<input type="number" id="deposit" min="0" max="99999" value="0" step="1"
+       style="width:140px; margin:6px auto 14px; display:block; text-align:center; font-weight:600;">
+
+<label style="text-align:center;">சந்தாத் தொகை</label>
+<input type="number" id="subscription" min="0" max="99999" value="0" step="1"
+       style="width:140px; margin:6px auto 14px; display:block; text-align:center; font-weight:600;">
+
+<label style="text-align:center;">காலதாமதக் கட்டணம்</label>
+<input type="number" id="lateFee" min="0" max="99999" value="0" step="1"
+       style="width:140px; margin:6px auto 14px; display:block; text-align:center; font-weight:600;">
+
+<label style="text-align:center;">நூல் விலைப் பிடித்தம்</label>
+<input type="number" id="bookFine" min="0" max="99999" value="0" step="1"
+       style="width:140px; margin:6px auto 14px; display:block; text-align:center; font-weight:600;">
+
+<label style="text-align:center;">பழைய பத்திரிக்கை விற்பனை</label>
+<input type="number" id="oldPaperSale" min="0" max="99999" value="0" step="1"
+       style="width:140px; margin:6px auto 14px; display:block; text-align:center; font-weight:600;">
+
+<label style="text-align:center;">பழைய நூல்கள் விற்பனை</label>
+<input type="number" id="oldBookSale" min="0" max="99999" value="0" step="1"
+       style="width:140px; margin:6px auto 14px; display:block; text-align:center; font-weight:600;">
+
+<label style="text-align:center;">புரவலர்</label>
+<input type="number" id="patron" min="0" max="99999" value="0" step="1"
+       style="width:140px; margin:6px auto 14px; display:block; text-align:center; font-weight:600;">
+
+<label style="text-align:center;">பெரும்புரவலர்</label>
+<input type="number" id="chiefPatron" min="0" max="99999" value="0" step="1"
+       style="width:140px; margin:6px auto 14px; display:block; text-align:center; font-weight:600;">
+
+<label style="text-align:center;">கொடையாளர்</label>
+<input type="number" id="donor" min="0" max="99999" value="0" step="1"
+       style="width:140px; margin:6px auto 14px; display:block; text-align:center; font-weight:600;">
+
+<label style="text-align:center;">இதர வரவுகள்</label>
+<input type="number" id="otherIncome" min="0" max="99999" value="0" step="1"
+       style="width:140px; margin:6px auto 14px; display:block; text-align:center; font-weight:600;">
+
+
+  <label style="
+  display:block;
+  text-align:center;
+  font-weight:700;
+  margin:25px 0 8px;
+  color:#1e40af;">
+  மொத்தம் செலுத்தியது
+</label>
+
+<input type="number" id="totalAmount" readonly
+       style="width:160px;
+              margin:0 auto 25px;
+              display:block;
+              text-align:center;
+              font-size:20px;
+              font-weight:700;
+              background:#e0f2fe;
+              color:#1e40af;
+              border:2px solid #93c5fd;
+              border-radius:10px;">
+
+ </div>
+
+ <h4 style="
+  text-align:center;
+  margin:30px 0 15px;
+  font-size:17px;
+  font-weight:700;
+  color:#92400e;
+  border-bottom:2px dashed #fde68a;
+  padding-bottom:8px;">
+  நூலகப் புள்ளி விவரம் (காலியாக இருக்கக் கூடாது)
+</h4>
+ <label style="text-align:center;">
+   வாசகர் வருகை 
+</label>
+<input type="number" id="visitors" min="0" required step="1"
+       style="width:160px; margin:6px auto 14px;
+              display:block; text-align:center; font-weight:600;">
+
+<label style="text-align:center;">
+   நூலிரவல் 
+</label>
+<input type="number" id="issues" min="0" required step="1"
+       style="width:160px; margin:6px auto 14px;
+              display:block; text-align:center; font-weight:600;">
+
+<label style="text-align:center;">
+ நூல்கள் பயன்பாடு 
+</label>
+<input type="number" id="usage" min="0" required step="1"
+       style="width:160px; margin:6px auto 14px;
+              display:block; text-align:center; font-weight:600;">
+
+  <div id="receiptMsg" class="success" style="display:none; margin:20px 0;"></div>
+  <div id="receiptError" class="error" style="display:none; margin:20px 0;"></div>
+
+  <div style="margin-top:30px; text-align:center;">
+    <button type="button" id="submitReceiptBtn" onclick="submitReceipt()" style="padding:12px 30px; font-size:1.1em;">
+      ✅ பதிவு செய்யவும்
+    </button>
+  </div>
+</form>
+<!-- Confirmation Preview Card (மறைந்திருக்கும்) -->
+<div id="receiptPreview" style="display:none; margin:25px 0; padding:20px; background:#f0fdf4; border:2px solid #16a34a; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.1);">
+  <h4 style="color:#15803d; text-align:center; margin-top:0;">பதிவு உறுதிப்படுத்தல் – தயவுசெய்து சரிபார்க்கவும்</h4>
+  
+ <div style="margin-top:15px;">
+  <table id="previewTable" class="premium-table">
+    
+    <tbody id="previewTableBody">
+      <!-- Rows will be added dynamically using JavaScript -->
+    </tbody>
+
+  </table>
+</div>
+
+  <div style="margin-top:25px; text-align:center;">
+    <button onclick="confirmAndSubmitReceipt(this)" style="background:#16a34a; color:white; padding:14px 32px; font-size:1.1em; border:none; border-radius:10px; margin-right:15px; cursor:pointer;">
+      ✅ சரி – பதிவு செய்
+    </button>
+    <button onclick="cancelReceiptSubmit(this)" style="background:#ef4444; color:white; padding:14px 32px; font-size:1.1em; border:none; border-radius:10px; cursor:pointer;">
+      ❌ ரத்து செய்
+    </button>
+  </div>
+</div>
+    <button onclick="show(3)" class="back-btn" style="margin-top:20px; width:100%;">
+      மெனுவுக்கு திரும்பு
+    </button>
+  </div>
+
+  <!-- 🛠 STAGE 6 — Admin Mode: நாளிதழ் மேலாண்மை (?admin URL மூலம் மட்டுமே அணுகக்கூடியது) -->
+  <div id="stage6" class="stage">
+    <h3>🛠 நாளிதழ் மேலாண்மை (Admin)</h3>
+    <hr>
+
+    <!-- ===== Section A: Master List (18 Slots) ===== -->
+    <div class="sub-stage">
+      <h4 style="color:#1e40af;background:#e0f2fe;border-left:6px solid #2563eb;padding:8px 12px;border-radius:10px;">
+        📋 நாளிதழ் பட்டியல் (Master List — 18 Slots)
+      </h4>
+      <p style="font-size:13px;color:#666;">
+        இங்கே பெயர்/அதிகபட்ச விலையை மாற்றலாம். காலி slot-க்கு பெயர் இல்லாமல் விட்டால், அது எந்த நூலகத்திலும் தெரியாது.
+      </p>
+      <div id="newsMasterListDiv">
+        <p style="text-align:center;color:#888;">ஏற்றப்படுகிறது...</p>
+      </div>
+      <button type="button" onclick="saveNewspaperMasterListUI()" style="background:#16a34a;color:white;">
+        💾 Master List Save செய்
+      </button>
+      <div id="newsMasterSaveMsg" class="success" style="display:none;"></div>
+    </div>
+
+    <!-- ===== Section B: Library-wise Active/Inactive Map ===== -->
+    <div class="sub-stage" style="margin-top:20px;">
+      <h4 style="color:#065f46;background:#dcfce7;border-left:6px solid #16a34a;padding:8px 12px;border-radius:10px;">
+        🏛️ நூலகம் வாரியாக நாளிதழ் ஒதுக்கீடு (ON/OFF)
+      </h4>
+      <label>நூலகத்தைத் தேர்ந்தெடுக்கவும்</label>
+      <select id="adminLibrarySelect" onchange="loadLibraryNewspaperMapUI()">
+        <option value="">-- நூலகத்தைத் தேர்வு செய்க --</option>
+      </select>
+
+      <div id="libraryNewsCheckListDiv" style="margin-top:15px;">
+        <p style="text-align:center;color:#888;">மேலே ஒரு நூலகத்தைத் தேர்ந்தெடுக்கவும்.</p>
+      </div>
+
+      <button type="button" id="saveLibraryMapBtn" onclick="saveLibraryNewspaperMapUI()" style="background:#16a34a;color:white;display:none;">
+        💾 இந்த நூலகத்திற்கு Save செய்
+      </button>
+      <div id="libraryMapSaveMsg" class="success" style="display:none;"></div>
+    </div>
+
+    <button onclick="adminBackFromNews()" class="back-btn" style="margin-top:20px; width:100%;">
+      மெனுவுக்கு திரும்பு
+    </button>
+  </div>
+
+</div>  <!-- container முடிவு -->
+<script src="{{ url_for('static', filename='gas-shim.js') }}"></script>
+<script>
+let newsPaperMaxRates = {};      // key -> maxRate (இப்போது dynamic, தற்போதைய நூலகத்தின் active நாளிதழ்களுக்கு மட்டும்)
+let newsPaperDisplayNames = {};  // key -> Tamil/English display name (alert செய்திக்கு)
+let activeNewspapers = [];       // getActiveNewspapersForLibrary()-ன் விடை (இந்த நூலகத்திற்கான Active நாளிதழ்கள்)
+// Slot 1-18 -> internal field key. Contingent Sheet-ல் column position இதை ஒட்டியே நிலைத்திருக்கும்.
+const NEWSPAPER_FIELD_KEYS = [
+  'dailyThanthi', 'hinduTamil', 'dinamani', 'theekathir', 'tamilMurasu',
+  'maalaiMalar', 'maalaiMurasu', 'theHindu', 'indianExpress', 'timesOfIndia',
+  'deccanChronicle', 'businessLine', 'economicTimes',
+  'paper14', 'paper15', 'paper16', 'paper17', 'paper18'
+];
+let existingRowIndex = null; 
+// ✅ Admin Mode: doGet()-ல் இருந்து server template மூலம் அமைக்கப்படுகிறது
+// URL-ல் ?admin என்று சேர்த்தால் (எ.கா: .../exec?admin) இது true ஆகும்
+let isAdminMode = {{ is_admin | tojson }};
+
+
+let selectedLib = "";
+let selectedEmails = [];
+let selectedEmail = "";
+let bankAmount = 0;
+let remainingAmount = 0;
+let dayLimits = { partner: 0, staff: 0, leave: 0, totalWD: 0 };
+let workingPeriodText = ""; // ஒரு முறை மட்டும் போதும்
+let maxWorkingDays = 0;     // ஒரு முறை மட்டும் போதும்
+
+const incomeFields = [
+  "deposit",
+  "subscription",
+  "lateFee",
+  "bookFine",
+  "oldPaperSale",
+  "oldBookSale",
+  "patron",
+  "chiefPatron",
+  "donor",
+  "otherIncome"
+];
+/**
+ * "NEWSPAPER LIST" Master Sheet-ல் Active=Yes உள்ள நாளிதழ்களை மட்டும், அந்த நூலகத்திற்கு ஏற்ப
+ * #newsPaperSection-ல் dynamic ஆக input fields ஆக வரைபடம் செய்யும்.
+ * activeList = getActiveNewspapersForLibrary()-ன் விடை: [{slot, key, name, maxRate}, ...]
+ * existingData = getExistingContingentData()-ன் data object (edit செய்யும்போது மதிப்புகளை நிரப்ப)
+ */
+function renderNewspaperInputs(activeList, existingData) {
+  existingData = existingData || {};
+  const container = document.getElementById('newsPaperSection');
+  if (!container) return;
+
+  newsPaperMaxRates = {};
+  newsPaperDisplayNames = {};
+
+  let html = '';
+
+  if (!activeList || activeList.length === 0) {
+    html += '<p style="color:#e74a3b;font-weight:600;text-align:center;">இந்த நூலகத்திற்கு நாளிதழ்கள் எதுவும் ஒதுக்கப்படவில்லை. (Admin-ஐத் தொடர்பு கொள்ளவும்)</p>';
+  } else {
+    activeList.forEach(item => {
+      if (!item.key) return;
+      newsPaperMaxRates[item.key] = item.maxRate;
+      newsPaperDisplayNames[item.key] = item.name;
+      const val = existingData[item.key] || 0;
+      html += '<label>' + item.name + '</label>' +
+              '<input type="number" id="np_' + item.key + '" data-key="' + item.key + '" ' +
+              'min="0" value="' + val + '" oninput="checkNewsPaperPrice(this, \'' + item.key + '\')">';
+    });
+  }
+
+  // Active இல்லாத slots-ல் ஏற்கனவே தரவு (old data) இருந்தால், அதை hidden field ஆக வைத்து பாதுகாக்கவும்
+  // (இதனால் Admin ஒரு நாளிதழை OFF செய்த பின்பும், அந்த மாதத்தின் பழைய தொகை தவறாக Submit-ல் 0 ஆகி இழக்காமல் இருக்கும்)
+  const activeKeys = (activeList || []).map(i => i.key);
+  NEWSPAPER_FIELD_KEYS.forEach(key => {
+    if (activeKeys.indexOf(key) === -1) {
+      const oldVal = existingData[key] || 0;
+      if (oldVal) {
+        html += '<input type="hidden" id="np_' + key + '" data-key="' + key + '" value="' + oldVal + '">';
+      }
+    }
+  });
+
+  container.innerHTML = html;
+  checkAllPrices();
+}
+
+function fillFormWithData(data) {
+  // ✅ நாளிதழ் தொகைகள் renderNewspaperInputs(activeNewspapers, data) மூலம் தனியாக நிரப்பப்படும் (go() function-ல்)
+
+  document.getElementById('partnerNameTamil').value = data.partnerNameTamil || "";
+  document.getElementById('partnerDays').value = data.partnerDays || 0;
+  document.getElementById('staffNameTamil').value = data.staffNameTamil || "";
+  document.getElementById('staffDays').value = data.staffDays || 0;
+  document.getElementById('partTimeStaffName').value = data.partTimeStaffName || "";
+  document.getElementById('partTimeStaffDays').value = data.partTimeStaffDays || 0;
+  document.getElementById('electricityBill').value = data.electricityBill || 0;
+  document.getElementById('rentOwnerName').value = data.rentOwnerName || "";
+  document.getElementById('rentAmount').value = data.rentAmount || 0;
+  document.getElementById('phoneWifiAmount').value = data.phoneWifiAmount || 0;
+  document.getElementById('waterTax').value = data.waterTax || 0;
+  document.getElementById('photocopyAmount').value = data.photocopyAmount || 0;
+
+   
+  document.getElementById('busPurpose').value = data.busPurpose || "";
+  document.getElementById('busDate').value = data.busDate || "";
+  document.getElementById('busAmount').value = data.busAmount || 0;
+  document.getElementById('travelPurpose').value = data.travelPurpose || "";
+  document.getElementById('travelDate').value = data.travelDate || "";
+  document.getElementById('travelAmount').value = data.travelAmount || 0;
+
+ 
+  document.getElementById('postalAmount').value = data.postalAmount || 0;
+  document.getElementById('registerItem').value = data.registerItem || "";
+  document.getElementById('registerAmount').value = data.registerAmount || 0;
+  document.getElementById('stationeryItem').value = data.stationeryItem || "";
+  document.getElementById('stationeryAmount').value = data.stationeryAmount || 0;
+  document.getElementById('electricalItem').value = data.electricalItem || "";
+  document.getElementById('electricalAmount').value = data.electricalAmount || 0;
+  document.getElementById('consumerItem').value = data.consumerItem || "";
+  document.getElementById('consumerAmount').value = data.consumerAmount || 0;
+
+  
+  document.getElementById('otherExpense1Desc').value = data.otherExpense1Desc || "";
+  document.getElementById('otherExpense1Amount').value = data.otherExpense1Amount || 0;
+  document.getElementById('otherExpense2Desc').value = data.otherExpense2Desc || "";
+  document.getElementById('otherExpense2Amount').value = data.otherExpense2Amount || 0;
+}
+function show(n){
+  document.querySelectorAll('.stage').forEach(s => s.style.display = 'none');
+  document.getElementById('stage' + n).style.display = 'block';
+}
+
+//// ---------------------------------------------------------------------
+// 1. Stage 4 (பல-படி படிவம்) செயல்பாடுகளுக்குத் தேவையான புதிய செயல்பாடுகள்
+// ---------------------------------------------------------------------
+function showSubStage(stageId) {
+  // எல்லா துணை-படிகளையும் மறைக்கவும்
+  document.querySelectorAll('.sub-stage').forEach(s => s.style.display = 'none');
+  
+  // கேட்கப்பட்ட துணை-படியைக் காண்பிக்க
+  document.getElementById('stage' + stageId).style.display = 'block';
+}
+
+function nextStage(current, next) {
+
+  if (next === '4B') {
+    controlDailyWageStaffFields();
+  }
+  
+  if (next === '4C') {
+    loadRentDetailsIfApplicable();
+  }
+  // monthYear readonly → step navigation-இல் check தேவையில்லை
+  showSubStage(next);
+}
+
+
+
+function prevStage(prev){
+  showSubStage(prev);
+}
+
+// ---------------------------------------------------------------------
+// 2. à®®à¯à®•à¯à®•à®¿à®¯ à®šà¯†à®¯à®²à¯à®ªà®¾à®Ÿà¯à®•à®³à¯ˆà®¤à¯ à®¤à®¿à®°à¯à®¤à¯à®¤à¯à®¤à®²à¯
+// ---------------------------------------------------------------------
+
+
+
+  
+
+  
+
+// ⚠️ குறிப்பு: இந்த இடத்தில் இருந்த பழைய go(n,title) function கீழே உள்ள
+// இரண்டாவது go(n,title) function-உடன் இணைக்கப்பட்டுள்ளது.
+// முழு செயல்பாடும் கீழே உள்ள go(n,title) function-ல் காணலாம்.
+
+
+
+function submitContingent() {
+    const monthYearInput = document.getElementById('monthYear');
+    let monthYear = monthYearInput.value.trim();
+
+    const libraryType = document.getElementById("typeSelect").value.trim();
+
+    // பகுதி நேர நூலகம் அல்லாத போது மட்டுமே stage4F இருக்க வேண்டும் என்று சரிபார்க்க
+    if (libraryType !== "பகுதி நேர நூலகம்") {
+        if (document.getElementById('stage4F').style.display !== 'block') {
+            alert("தயவுசெய்து அனைத்து படிகளையும் முடிக்கவும். பதிவு செய்ய முடியவில்லை!");
+            return;
+        }
+    }
+  if (!monthYear) {
+    const today = new Date();
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const yyyy = today.getFullYear();
+    monthYear = `${mm}/${yyyy}`;
+    monthYearInput.value = monthYear;
+  }
+
+  if (!/^\d{2}\/\d{4}$/.test(monthYear)) {
+  showSubStage('4G');
+  document.getElementById('contingentError').textContent =
+    "❌ மாதம்/வருடம் வடிவம் தவறு (MM/YYYY)";
+  document.getElementById('contingentError').style.display = 'block';
+  return;
+}
+  const data = {
+    loginEmail: window.selectedEmail,
+    libraryName: selectedLib,
+    libraryType: document.getElementById('typeSelect').value,
+    monthYear: monthYear,
+
+    // ✅ நாளிதழ் தொகைகள் dynamic ஆக #newsPaperSection-ல் render ஆன (visible + hidden) fields-லிருந்து சேகரிக்கப்படுகிறது
+    partnerNameTamil: document.getElementById('partnerNameTamil').value.trim(),
+    partnerDays: parseInt(document.getElementById('partnerDays').value) || 0,
+    staffNameTamil: document.getElementById('staffNameTamil').value.trim(),
+    staffDays: parseInt(document.getElementById('staffDays').value) || 0,
+    partTimeStaffName: document.getElementById('partTimeStaffName').value.trim(),
+    partTimeStaffDays: parseInt(document.getElementById('partTimeStaffDays').value) || 0,
+
+    electricityBill: parseInt(document.getElementById('electricityBill').value) || 0,
+    rentOwnerName: document.getElementById('rentOwnerName').value.trim(),
+    rentAmount: parseInt(document.getElementById('rentAmount').value) || 0,
+    phoneWifiAmount: parseInt(document.getElementById('phoneWifiAmount').value) || 0,
+    waterTax: parseInt(document.getElementById('waterTax').value) || 0,
+    photocopyAmount: parseInt(document.getElementById('photocopyAmount').value) || 0,
+
+    busPurpose: document.getElementById('busPurpose').value.trim(),
+    busDate: document.getElementById('busDate').value,
+    busAmount: parseInt(document.getElementById('busAmount').value) || 0,
+
+    travelPurpose: document.getElementById('travelPurpose').value.trim(),
+    travelDate: document.getElementById('travelDate').value,
+    travelAmount: parseInt(document.getElementById('travelAmount').value) || 0,
+
+    postalAmount: parseInt(document.getElementById('postalAmount').value) || 0,
+
+    registerItem: document.getElementById('registerItem').value.trim(),
+    registerAmount: parseInt(document.getElementById('registerAmount').value) || 0,
+
+    stationeryItem: document.getElementById('stationeryItem').value.trim(),
+    stationeryAmount: parseInt(document.getElementById('stationeryAmount').value) || 0,
+
+    electricalItem: document.getElementById('electricalItem').value.trim(),
+    electricalAmount: parseInt(document.getElementById('electricalAmount').value) || 0,
+
+    consumerItem: document.getElementById('consumerItem').value.trim(),
+    consumerAmount: parseInt(document.getElementById('consumerAmount').value) || 0,
+
+    otherExpense1Desc: document.getElementById('otherExpense1Desc').value.trim(),
+    otherExpense1Amount: parseInt(document.getElementById('otherExpense1Amount').value) || 0,
+
+    otherExpense2Desc: document.getElementById('otherExpense2Desc').value.trim(),
+    otherExpense2Amount: parseInt(document.getElementById('otherExpense2Amount').value) || 0
+  };
+
+  // ✅ #newsPaperSection-ல் render ஆன அனைத்து நாளிதழ் fields-ஐயும் (visible + hidden) data-ஆக சேர்க்கவும்
+  NEWSPAPER_FIELD_KEYS.forEach(key => { data[key] = 0; }); // default 0
+  document.querySelectorAll('#newsPaperSection [data-key]').forEach(el => {
+    data[el.dataset.key] = parseInt(el.value) || 0;
+  });
+
+ const submitBtn = document.querySelector('#stage4F button:last-of-type');
+if (submitBtn) {
+  submitBtn.textContent = "பதிவு செய்கிறது...";
+  submitBtn.disabled = true;
+}
+
+ google.script.run
+  .withSuccessHandler(res => {
+    if (submitBtn) {
+      submitBtn.textContent = "✅ பதிவு செய்யவும்";
+      submitBtn.disabled = false;
+    }
+
+      showSubStage('4G');
+
+     if (res.success) {
+  const msg = res.action === "updated"
+    ? `✅ வெற்றிகரமாக புதுப்பிக்கப்பட்டது! வரிசை: ${res.row}`
+    : `✅ வெற்றிகரமாக பதிவு செய்யப்பட்டது! வரிசை: ${res.row}`;
+  
+  document.getElementById('contingentMsg').textContent = msg;
+  document.getElementById('contingentMsg').style.display = 'block';
+} else {
+  document.getElementById('contingentError').textContent = `❌ ${res.message}`;
+  document.getElementById('contingentError').style.display = 'block';
+}
+    })
+    .withFailureHandler(err => {
+      if (submitBtn) {
+        submitBtn.textContent = "✅ பதிவு செய்யவும்";
+        submitBtn.disabled = false;
+      }
+     document.getElementById('contingentError').textContent = "சர்வர் பிழை: " + err.message;
+      document.getElementById('contingentError').style.display = 'block';
+    })
+    .submitOrUpdateContingent(data);
+}
+
+// ---------------------------------------------------------------------
+// 3. மற்ற செயல்பாடுகள் (பழையபடியே)
+// ---------------------------------------------------------------------
+
+// / பக்கம் ஏற்றியவுடன் நூலக வகைகளை ஏற்று
+window.onload = function() {
+  // ✅ Admin Mode இயங்குகிறதா எனச் சரிபார்த்து badge-ஐக் காட்டு
+  if (isAdminMode) {
+    const badge = document.getElementById('adminBadge');
+    if (badge) badge.style.display = 'inline-block';
+  }
+
+  // பக்கம் லோட் ஆனவுடன் நூலக வகைகளை (Types) ஏற்றுகிறது
+  google.script.run.withSuccessHandler(types => {
+    const sel = document.getElementById('typeSelect');
+    // முதலில் dropdown-ஐ காலி செய்து default option சேர்க்கவும்
+    sel.innerHTML = '<option value="">-- நூலக வகையைத் தேர்வு செய்க --</option>';
+    types.forEach(t => {
+      let opt = document.createElement('option');
+      opt.value = t;
+      opt.textContent = t;
+      sel.appendChild(opt);
+    });
+  }).getLibraryTypes();
+  
+  // ✅ Admin Mode: ?admin URL திறந்த உடனேயே, Login flow (நூலக வகை/நூலகம்/இமெயில்) தேவையில்லாமல்
+  // நேரடியாக "நாளிதழ் மேலாண்மை" screen-ஐக் காட்டவும்
+  if (isAdminMode) {
+    go(6, 'நாளிதழ் மேலாண்மை');
+  } else if (typeof show === "function") {
+    show(0);
+  }
+ // 🔹 Income fields live calculation
+  incomeFields.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.addEventListener("input", calculateRemainingAmount);
+    }
+  });
+// 🔹 நாளிதழ் விலைப் பட்டியல் இனி நூலகம்-வாரியாக go(4) திறக்கும்போது dynamic ஆக ஏற்றப்படும் (getActiveNewspapersForLibrary)
+
+  // ✅ Admin Mode-ல் இருந்தால் மட்டும் "நாளிதழ் மேலாண்மை" பட்டனைக் காட்டு
+  if (isAdminMode) {
+    const adminNewsBtnWrap = document.getElementById('adminNewsBtnWrap');
+    if (adminNewsBtnWrap) adminNewsBtnWrap.style.display = 'block';
+  }
+
+}; // window.onload முடிகிறது
+
+
+// வகை தேர்ந்தெடுத்தவுடன் அந்த வகை சார்ந்த நூலகங்களைப் பட்டியலிட
+function loadLibraries() {
+  const type = document.getElementById("typeSelect").value;
+  const div = document.getElementById("librariesDiv");
+  
+  if (!type) {
+    div.innerHTML = "";
+    return;
+  }
+  
+  div.innerHTML = `
+  <div class="loading-card">
+    <div class="spinner"></div>
+    <p>நூலகப் பட்டியல் ஏற்றப்படுகிறது...</p>
+  </div>
+`;
+
+  google.script.run
+    .withSuccessHandler(function(libraries) {
+      if (!libraries || libraries.length === 0) {
+        div.innerHTML = "<p class='error'>இந்த பிரிவில் நூலகங்கள் இல்லை.</p>";
+        return;
+      }
+
+      // இங்கே libraries என்ற பெயரை சரியாகப் பயன்படுத்தியுள்ளேன்
+      let html = `
+        <label style="display:block; margin-top:15px; font-weight:bold;">தயவுசெய்து உங்கள் நூலகத்தைத் தேர்ந்தெடுங்கள்</label>
+        <select id="libSelect" style="width:100%; padding:10px; margin-top:5px; border-radius:8px;">
+          <option value="">-- நூலகத்தைத் தேர்வு செய்க --</option>
+          ${libraries.map(lib => `<option value="${lib}">${lib}</option>`).join('')}
+        </select>
+       <button id="nextBtn"
+        onclick="selectLibrary()"
+        style="margin-top:15px; background:#28a745; color:white;
+               padding:12px; border:none; border-radius:8px;
+               width:100%; cursor:pointer; font-size:16px; font-weight:600;">
+  அடுத்து →
+</button>
+      `;
+
+      div.innerHTML = html; 
+    })
+    .withFailureHandler(err => {
+      console.error("getLibrariesByType பிழை:", err);
+      div.innerHTML = `<div class="error">சர்வர் பிழை: ${err.message || "தெரியாத பிழை"}</div>`;
+    })
+    .getLibrariesByType(type);
+}
+
+// நூலகத்தைத் தேர்ந்தெடுத்த பிறகு அடுத்த நிலைக்குச் செல்ல
+
+function selectLibrary(){
+  selectedLib = document.getElementById('libSelect').value;
+  document.getElementById('libNameDisplay').textContent = selectedLib;
+  showButtonSpinner();   
+  google.script.run.withSuccessHandler(res => {
+    hideButtonSpinner(); 
+    if(!res.success){
+      document.getElementById('msg').textContent = res.message;
+      return;
+    }
+
+    selectedEmails = res.emails;
+    document.getElementById('msg').textContent = '';
+    document.getElementById('libNameDisplay').textContent = res.library;
+
+    let emailHTML = '';
+    if(res.emails.length > 1){
+  emailHTML = `
+    <label>மின்னஞ்சலைத் தேர்வு செய்யவும்</label>
+    <select id="emailSel">
+      ${res.emails.map(e => `<option>${e}</option>`).join('')}
+    </select>
+    <button onclick="confirmEmail()">உறுதி செய்யவும்</button>
+  `;
+}else{
+  emailHTML = `
+    <div class="single-email-box">
+      <span>${res.emails[0]}</span>
+    </div>
+    <button onclick="confirmEmail()">உறுதி செய்யவும்</button>
+  `;
+}
+
+    document.getElementById('emailBox').innerHTML = emailHTML;
+    show(1);
+  }).getEmailsForLibrary(selectedLib);
+}
+
+function confirmEmail(){
+  let email = "";
+
+  if (selectedEmails.length > 1) {
+    email = document.getElementById('emailSel').value;
+    if (!email) {
+      document.getElementById('msg').textContent = "மின்னஞ்சலைத் தேர்வு செய்யவும்";
+      return;
+    }
+  } else {
+    email = selectedEmails[0];
+  }
+
+  // ✅ Login success
+// ✅ Login success
+selectedEmail = email;
+window.selectedEmail = email;
+
+// Library name
+document.getElementById('finalLib').textContent = selectedLib;
+
+// Login Email (NEW LINE)
+document.getElementById('finalEmail').textContent = selectedEmail;
+
+// 🔥 Dashboard
+show(3);
+
+fetchWorkingDays(); // 👈 இந்த வரியைச் சேர்த்தால் தான் பணி நாட்கள் விவரம் சர்வரிலிருந்து வரும்
+ 
+
+} 
+
+function openClaimPdf(btn) {
+  startLoading(btn);
+
+  const libraryName = document.getElementById("finalLib").innerText.trim();
+  const loginEmail  = window.selectedEmail;
+
+  if (!libraryName || !loginEmail) {
+    stopLoading(btn);   // 🔴 முக்கியம்
+    alert("நூலக பெயர் அல்லது மின்னஞ்சல் கிடைக்கவில்லை");
+    return;
+  }
+
+  google.script.run
+    .withSuccessHandler(res => {
+      stopLoading(btn);
+
+      const card = document.getElementById("mailSuccessCard");
+
+      if (res.success) {
+        card.innerHTML = `
+          ✅ <strong>CONTINGENT BILL</strong> — லிங்க் தயார்
+          <div style="margin-top:8px; display:flex; gap:10px; flex-wrap:wrap;">
+            <a href="${res.url}"
+               target="_blank"
+               rel="noopener"
+               style="color:#1d4ed8; font-weight:700; text-decoration:underline;">
+              🔗 PDF திறக்க (புதிய விண்டோ)
+            </a>
+            <a href="https://drive.google.com/uc?export=download&id=${res.fileId}"
+               target="_blank"
+               rel="noopener"
+               download
+               style="color:#065f46; font-weight:700; text-decoration:underline;">
+              ⬇️ PDF-ஐ Download செய்க
+            </a>
+          </div>
+        `;
+        card.style.display = "block";
+
+        // 🔥 bring into view (same UX)
+        card.scrollIntoView({ behavior: "smooth", block: "center" });
+
+        // ⏳ auto-hide நீக்கப்பட்டது — பயனர் click செய்யும் வரை link காட்சியில் இருக்கும்
+
+      } else {
+        card.innerHTML = `❌ ${res.message}`;
+        card.style.display = "block";
+      }
+    })
+    .withFailureHandler(err => {
+      stopLoading(btn);
+      alert("Server பிழை: " + err.message);
+    })
+    .shareContingentBill(loginEmail, libraryName);
+}
+function openApprovedExpenseMail(btn) {
+  startLoading(btn);
+
+  // ✅ stage3-ல் already set செய்யப்பட்ட library
+  const libraryName = document.getElementById("finalLib").innerText.trim();
+  const loginEmail  = window.selectedEmail;
+
+  if (!libraryName || !loginEmail) {
+    stopLoading(btn); // 🔴 இதுதான் முக்கிய fix
+    alert("நூலக பெயர் அல்லது மின்னஞ்சல் கிடைக்கவில்லை");
+    return;
+  }
+
+  // 🔥 Drive folder-ல் இருந்து இந்த நூலகத்திற்கான அனைத்து மாத PDF-களையும் தேடு
+  google.script.run
+    .withSuccessHandler(res => {
+      stopLoading(btn);
+
+      if (!res.success) {
+        const card = document.getElementById("mailSuccessCard");
+        card.innerHTML = `❌ ${res.message}`;
+        card.style.display = "block";
+        return;
+      }
+
+      showMonthPickerModal(res.months, loginEmail, {
+        submitFn: "shareApprovedExpenseMailByFileId",
+        successLabel: "சில்லறை செலவின அனுமதி"
+      });
+    })
+    .withFailureHandler(err => {
+      stopLoading(btn);
+      alert("Server பிழை: " + err.message);
+    })
+    .getAvailableMonthsForLibrary(libraryName);
+}
+
+// 🔥 மாதம் தேர்ந்தெடுக்கும் modal (dropdown) — பல பட்டன்களுக்கும் பொதுவாக பயன்படும்
+// options.submitFn   -> அழைக்க வேண்டிய server function பெயர் (string)
+// options.successLabel -> வெற்றி card-ல் காட்டவேண்டிய தலைப்பு
+function showMonthPickerModal(months, loginEmail, options) {
+  options = options || {};
+  const submitFn      = options.submitFn || "shareApprovedExpenseMailByFileId";
+  const successLabel  = options.successLabel || "சில்லறை செலவின அனுமதி";
+
+  // ஏற்கனவே ஒரு modal திறந்திருந்தால் நீக்கு
+  const existing = document.getElementById("monthPickerModal");
+  if (existing) existing.remove();
+
+  const modal = document.createElement("div");
+  modal.id = "monthPickerModal";
+  modal.style = "position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:9999;";
+
+  const optionsHtml = months.map((m, idx) => `
+    <option value="${idx}">${m.monthYear}</option>
+  `).join("");
+
+  modal.innerHTML = `
+    <div style="background:#fff;padding:20px 24px;border-radius:10px;min-width:280px;max-width:90%;">
+      <h3 style="margin-top:0;">மாதம் தேர்ந்தெடுக்கவும்</h3>
+      <select id="monthPickSelect"
+              style="width:100%;padding:10px;font-size:15px;border-radius:6px;border:1px solid #ccc;">
+        ${optionsHtml}
+      </select>
+      <div style="margin-top:18px;text-align:right;">
+        <button id="closeMonthBtn"
+                style="margin-right:8px;padding:8px 16px;border-radius:6px;border:1px solid #ccc;background:#f3f4f6;color:#111;font-weight:600;">மூடு</button>
+        <button id="confirmMonthBtn"
+                style="background:#ff9800;color:#fff;border:none;padding:8px 16px;border-radius:6px;font-weight:600;">அனுப்பு</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(modal);
+
+  // 🔥 மூடு → modal-ஐ நீக்கி, மெயின் டேஷ்போர்டு (ஏற்கனவே பின்னால் இருப்பது) தெரியும்
+  document.getElementById("closeMonthBtn").onclick = function () {
+    modal.remove();
+  };
+
+  document.getElementById("confirmMonthBtn").onclick = function () {
+    const select = document.getElementById("monthPickSelect");
+    if (!select || select.value === "") {
+      alert("மாதத்தை தேர்ந்தெடுக்கவும்");
+      return;
+    }
+    const chosen = months[parseInt(select.value)];
+    const confirmBtn = document.getElementById("confirmMonthBtn");
+    const closeBtn   = document.getElementById("closeMonthBtn");
+
+    // Spinner-ai kaati, moodu/select-ai mudakku (loading UX)
+    startLoading(confirmBtn);
+    closeBtn.disabled = true;
+    select.disabled = true;
+
+    google.script.run
+      .withSuccessHandler(res => {
+        modal.remove();
+        const card = document.getElementById("mailSuccessCard");
+        const pdfUrl = res.originalUrl || res.url;
+
+        if (res.success) {
+          card.innerHTML = `
+            ✅ <strong>${successLabel} (${chosen.monthYear})</strong> — லிங்க் தயார்
+
+            ${pdfUrl ? `
+      <div style="margin-top:8px;">
+        🔗 <a href="${pdfUrl}"
+             target="_blank"
+             style="color:#1d4ed8; font-weight:700; text-decoration:underline;">
+          PDF திறக்க
+        </a>
+            </div>` : ``}
+          `;
+          card.style.display = "block";
+
+          // 🔥 bring into view
+          card.scrollIntoView({ behavior: "smooth", block: "center" });
+
+          // ⏳ auto-hide நீக்கப்பட்டது — பயனர் விரும்பும் வரை card காட்சியில் இருக்கும்
+
+        } else {
+          card.innerHTML = `❌ ${res.message}`;
+          card.style.display = "block";
+        }
+      })
+      .withFailureHandler(err => {
+        stopLoading(confirmBtn);
+        closeBtn.disabled = false;
+        select.disabled = false;
+        alert("❌ Server பிழை: " + err.message);
+      })
+      [submitFn](loginEmail, chosen.fileId);
+  };
+}
+
+
+
+// ==================== வரவினங்கள் பதிவு ====================
+
+function calculateTotal() {
+  const fields = ['deposit','subscription','lateFee','bookFine','oldPaperSale',
+                  'oldBookSale','patron','chiefPatron','donor','otherIncome'];
+  let sum = 0;
+  fields.forEach(id => {
+    sum += parseInt(document.getElementById(id).value) || 0;
+  });
+  document.getElementById('totalAmount').value = sum;
+}
+
+// அனைத்து amount புலங்களிலும் மாற்றம் ஏற்படும்போது மொத்தத்தை புதுப்பி
+document.querySelectorAll('#receiptForm input[type="number"]:not(#totalAmount)').forEach(input => {
+  input.addEventListener('input', calculateTotal);
+});
+
+// புதிய உறுதிப்படுத்தல் காட்சி தயார் செய்யும் function
+function showReceiptPreview(data) {
+
+  const tbody = document.getElementById("previewTableBody");
+  tbody.innerHTML = "";
+
+  function addHeading(title, type) {
+  const row = document.createElement("tr");
+  row.classList.add("section-row");
+
+  if (type === "income") {
+    row.classList.add("income-section");
+  } else if (type === "usage") {
+    row.classList.add("usage-section");
+  }
+
+  const td = document.createElement("td");
+  td.colSpan = 2;
+  td.textContent = title;
+
+  row.appendChild(td);
+  tbody.appendChild(row);
+}
+
+  function addRow(label, value, isMoney = false, highlight = false) {
+  if (value === null || value === undefined || value === "" || Number(value) === 0) return;
+
+  const row = document.createElement("tr");
+
+  if (highlight) {
+    row.classList.add("total-row");
+  }
+
+  const td1 = document.createElement("td");
+  td1.textContent = label;
+
+  const td2 = document.createElement("td");
+  td2.style.textAlign = "right";
+  td2.textContent = isMoney ? "₹" + Number(value).toLocaleString("en-IN") : value;
+
+  row.appendChild(td1);
+  row.appendChild(td2);
+  tbody.appendChild(row);
+}
+
+  // Basic Info
+  addRow("நூலகம்", data.libraryName);
+  addRow("UTR எண்", data.utr);
+
+  if (data.date) {
+    const d = new Date(data.date);
+    const day = String(d.getDate()).padStart(2,'0');
+    const month = String(d.getMonth()+1).padStart(2,'0');
+    const year = d.getFullYear();
+    addRow("தேதி", `${day}-${month}-${year}`);
+  }
+
+  // 🔵 Income Heading
+ addHeading("வரவு விவரங்கள் (₹)", "income");
+
+  addRow("காப்புத்தொகை", data.deposit, true);
+  addRow("சந்தா", data.subscription, true);
+  addRow("காலதாமதக் கட்டணம்", data.lateFee, true);
+  addRow("நூல் விலைப் பிடித்தம்", data.bookFine, true);
+  addRow("பழைய பத்திரிக்கை விற்பனை", data.oldPaperSale, true);
+  addRow("பழைய நூல்கள் விற்பனை", data.oldBookSale, true);
+  addRow("புரவலர்", data.patron, true);
+  addRow("பெரும்புரவலர்", data.chiefPatron, true);
+  addRow("கொடையாளர்", data.donor, true);
+  addRow("இதர வரவுகள்", data.otherIncome, true);
+
+  // 💰 Total Highlight
+  const totalValue = data.totalAmount || data.total;
+  if (totalValue && Number(totalValue) > 0) {
+    addRow("மொத்த வரவு", totalValue, true, true);
+  }
+
+  // 🟢 Usage Heading
+ addHeading("நூலகப் புள்ளி விவர்ம்", "usage");
+
+  addRow("வாசகர் வருகை", data.visitors);
+  addRow("நூலிரவல்", data.issues);
+  addRow("நூல்கள் பயன்பாடு", data.usage);
+
+  document.getElementById("receiptPreview").style.display = "block";
+  document.getElementById("receiptForm").style.display = "none";
+
+  document.getElementById('receiptMsg').style.display = 'none';
+  document.getElementById('receiptError').style.display = 'none';
+}
+// ரத்து செய்யும் போது மீண்டும் படிவத்திற்கு திரும்ப
+function cancelReceiptSubmit(btn) {
+
+  startLoading(btn);    // 🔄 spinner ON
+
+  setTimeout(() => {
+    stopLoading(btn);   // ⛔ spinner OFF
+
+    document.getElementById('receiptPreview').style.display = 'none';
+    document.getElementById('receiptForm').style.display = 'block';
+
+    const utrInput = document.getElementById('utrNumber');
+    utrInput.focus();
+    utrInput.select();
+  }, 300);   // UX delay
+}
+
+// உறுதி செய்து submit செய்யும் function
+function confirmAndSubmitReceipt(btn) {
+
+  startLoading(btn);          // 🔄 spinner ON
+  btn.disabled = true;
+
+  const data = window.pendingReceiptData;
+
+  google.script.run
+    .withSuccessHandler(res => {
+      stopLoading(btn);       // ✅ spinner OFF
+      btn.disabled = false;
+
+      document.getElementById('receiptPreview').style.display = 'none';
+      document.getElementById('receiptForm').style.display = 'block';
+
+      if (res.success) {
+        let summary = `வரிசை: ${res.row}<br>மொத்த வரவு: ₹${res.total || calculateTotal()}<br>`;
+        summary += res.action === "updated"
+          ? "வெற்றிகரமாக <strong>புதுப்பிக்கப்பட்டது</strong>!"
+          : "வெற்றிகரமாக <strong>பதிவு செய்யப்பட்டது</strong>!";
+
+        document.getElementById('receiptMsg').innerHTML = summary;
+        document.getElementById('receiptMsg').style.display = 'block';
+
+        setTimeout(() => {
+          document.getElementById('receiptForm').reset();
+          calculateTotal();
+          document.getElementById('receiptMsg').style.display = 'none';
+        }, 6000);
+
+      } else {
+        document.getElementById('receiptError').textContent =
+          res.message || "பதிவு தோல்வி";
+        document.getElementById('receiptError').style.display = 'block';
+        document.getElementById('utrNumber').focus();
+      }
+    })
+    .withFailureHandler(err => {
+      stopLoading(btn);       // ❌ error-ல கூட OFF
+      btn.disabled = false;
+
+      document.getElementById('receiptError').textContent =
+        "சர்வர் பிழை: " + err.message;
+      document.getElementById('receiptError').style.display = 'block';
+    })
+    .saveOrUpdateReceipt(data);
+}
+// மாற்றப்பட்ட submitReceipt function
+function submitReceipt() {
+  const mode = document.getElementById("receiptModeSelect").value;
+  if (!mode) {
+  alert("⚠️ பதிவு வகையை தேர்வு செய்யவும்");
+  return;
+}
+  // 🔐 1. Bank Validation Check (FIRST)
+  if (mode === "income" && bankAmount <= 0) {
+  alert("முதலில் Bank Validation செய்யவும்.");
+  return;
+}
+  const utr = document.getElementById('utrNumber').value.trim();
+  const date = document.getElementById('paymentDate').value;
+  const visitors = parseInt(document.getElementById('visitors').value) || 0;
+  const issues   = parseInt(document.getElementById('issues').value)   || 0;
+  const usage    = parseInt(document.getElementById('usage').value)    || 0;
+
+  const msgDiv   = document.getElementById('receiptMsg');
+  const errorDiv = document.getElementById('receiptError');
+
+  msgDiv.style.display = 'none';
+  errorDiv.style.display = 'none';
+
+// 🔐 Fresh Calculation Before Submit
+let totalEntered = 0;
+
+incomeFields.forEach(id => {
+  totalEntered += parseFloat(document.getElementById(id).value) || 0;
+});
+
+const currentRemaining = bankAmount - totalEntered;
+
+if (mode === "income" && currentRemaining !== 0) {
+  alert("❌ வங்கியில் செலுத்திய தொகை பதிவு தவறாக உள்ளது!");
+  return;
+}
+  // Validation (முன்பு போலவே)
+ if (mode === "income" && !/^\d{11,12}$/.test(utr)) {
+  errorDiv.textContent = "UTR எண் 11 அல்லது 12 இலக்க எண்ணாக இருக்க வேண்டும்";
+  errorDiv.style.display = 'block';
+  document.getElementById('utrNumber').focus();
+  return;
+}
+
+  if (mode === "income" && !date) {
+  errorDiv.textContent = "தேதியை தேர்ந்தெடுக்கவும்";
+  errorDiv.style.display = 'block';
+  return;
+}
+
+  if (visitors <= 0 || issues <= 0 || usage <= 0) {
+    errorDiv.textContent = "வாசகர் வருகை, நூலிரவல், நூல்கள் பயன்பாடு ஆகியவை 0-ஐ விட அதிகமாக இருக்க வேண்டும்";
+    errorDiv.style.display = 'block';
+    return;
+  }
+
+  // தரவை தயார் செய்
+  const data = {
+    loginEmail: window.selectedEmail,
+    libraryName: selectedLib,
+    libraryType: document.getElementById('typeSelect').value,
+    utr: utr,
+    date: date,
+    deposit: parseInt(document.getElementById('deposit').value) || 0,
+    subscription: parseInt(document.getElementById('subscription').value) || 0,
+    lateFee: parseInt(document.getElementById('lateFee').value) || 0,
+    bookFine: parseInt(document.getElementById('bookFine').value) || 0,
+    oldPaperSale: parseInt(document.getElementById('oldPaperSale').value) || 0,
+    oldBookSale: parseInt(document.getElementById('oldBookSale').value) || 0,
+    patron: parseInt(document.getElementById('patron').value) || 0,
+    chiefPatron: parseInt(document.getElementById('chiefPatron').value) || 0,
+    donor: parseInt(document.getElementById('donor').value) || 0,
+    otherIncome: parseInt(document.getElementById('otherIncome').value) || 0,
+    visitors: visitors,
+    issues: issues,
+    usage: usage,
+    totalAmount: parseInt(document.getElementById('totalAmount').value) || 0
+  };
+if(mode === "usage"){
+
+data.deposit = 0;
+data.subscription = 0;
+data.lateFee = 0;
+data.bookFine = 0;
+data.oldPaperSale = 0;
+data.oldBookSale = 0;
+data.patron = 0;
+data.chiefPatron = 0;
+data.donor = 0;
+data.otherIncome = 0;
+
+}
+  // Preview-க்கு தயார்
+  window.pendingReceiptData = data;   // உறுதிப்படுத்தலுக்கு சேமி
+  showReceiptPreview(data);
+}
+// go() செயல்பாட்டில் stage5-ஐ கையாள
+function go(n, title){
+  show(n);
+
+  if(n === 5){
+    document.getElementById('libForReceipt').textContent = selectedLib;
+    document.getElementById('receiptMsg').style.display = 'none';
+    document.getElementById('receiptError').style.display = 'none';
+    calculateTotal(); // மொத்தத்தை ஆரம்பத்தில் காட்ட
+  }
+   
+
+  if(n === 4){
+
+    // ✅ 1. நடப்பு மாதம் / வருடம்
+    const today = new Date();
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const yyyy = today.getFullYear();
+    const currentMonthYear = `${mm}/${yyyy}`;
+
+    // ✅ 2. Top input-ல் set
+    document.getElementById('monthYear').value = currentMonthYear;
+
+    // ✅ 3. Warning text
+    document.getElementById('existingWarning').textContent =
+      "⚠️ இந்த மாதத்திற்கு (" + currentMonthYear +
+      ") ஏற்கனவே பதிவு இருந்தால் Edit செய்து மீண்டும் பதிவு செய்யலாம்.";
+    document.getElementById('existingWarning').style.display = 'block';
+
+    document.getElementById('newsPaperSection').innerHTML =
+      '<p style="text-align:center;color:#888;">நாளிதழ் பட்டியல் ஏற்றப்படுகிறது...</p>';
+
+    // ✅ 4. இந்த நூலகத்திற்கான Active நாளிதழ்களை முதலில் ஏற்றவும்
+    google.script.run.withSuccessHandler(activeList => {
+      activeNewspapers = activeList || [];
+
+      // ✅ 5. பிறகு ஏற்கனவே பதிவான தரவு உள்ளதா எனச் சரிபார்க்கவும்
+      google.script.run.withSuccessHandler(res => {
+        if(res.success){
+          existingRowIndex = res.rowIndex;
+          renderNewspaperInputs(activeNewspapers, res.data || {});
+          fillFormWithData(res.data);
+        } else {
+          existingRowIndex = null;
+          renderNewspaperInputs(activeNewspapers, {});
+          document.querySelectorAll('#contingentForm input').forEach(i => {
+            if (i.id !== 'monthYear') i.value = 0;
+          });
+        }
+        showSubStage('4A');
+        document.getElementById('contingentErrorTop').style.display = 'none';
+      }).getExistingContingentData(selectedLib, currentMonthYear);
+
+    }).getActiveNewspapersForLibrary(selectedLib);
+  }
+
+  if(n === 3){
+    document.getElementById('finalLib').textContent = selectedLib;
+  }
+
+  if(n === 6){
+    // 🛠 Admin Mode: நாளிதழ் மேலாண்மை திரையை ஏற்று
+    loadNewspaperAdminScreen();
+  }
+}
+function backToType() {
+  // Login / state clear
+  selectedLib = "";
+  selectedEmails = [];
+  selectedEmail = "";
+  window.selectedEmail = "";
+
+  // Message reset
+  document.getElementById('emailBox').innerHTML = "";
+  document.getElementById('msg').textContent = "";
+
+  // Type selection page காட்டு
+  show(0);   // 🔥 stage0 = Library Type Selection
+}
+function openReceiptAcknowledgement(btn) {
+  startLoading(btn);
+
+  const libraryName = document.getElementById("finalLib").innerText.trim();
+  const loginEmail  = window.selectedEmail;
+
+  if (!libraryName || !loginEmail) {
+    stopLoading(btn);
+    alert("நூலக பெயர் அல்லது மின்னஞ்சல் கிடைக்கவில்லை");
+    return;
+  }
+
+  // 🔥 Drive folder-ல் இருந்து இந்த நூலகத்திற்கான அனைத்து மாத ஒப்புதல் PDF-களையும் தேடு
+  google.script.run
+    .withSuccessHandler(res => {
+      stopLoading(btn);
+
+      if (!res.success) {
+        const card = document.getElementById("mailSuccessCard");
+        card.innerHTML = `❌ ${res.message}`;
+        card.style.display = "block";
+        return;
+      }
+
+      showMonthPickerModal(res.months, loginEmail, {
+        submitFn: "shareReceiptAcknowledgementByFileId",
+        successLabel: "நூலக வரவு ஒப்புதல்"
+      });
+    })
+    .withFailureHandler(err => {
+      stopLoading(btn);
+      alert("Server பிழை: " + err.message);
+    })
+    .getAvailableMonthsForLibraryAcknowledgement(libraryName);
+}
+function showButtonSpinner() {
+  const btn = document.getElementById("nextBtn");
+  btn.disabled = true;
+  btn.style.opacity = "0.8";
+  btn.style.cursor = "not-allowed";
+
+  btn.innerHTML = `
+    <span class="btn-spinner"></span>
+    <span style="margin-left:10px;">ஏற்றப்படுகிறது...</span>
+  `;
+}
+
+function hideButtonSpinner() {
+  const btn = document.getElementById("nextBtn");
+  btn.disabled = false;
+  btn.style.opacity = "1";
+  btn.style.cursor = "pointer";
+  btn.innerHTML = "அடுத்து →";
+}
+
+function validateAndNextFrom4B() {
+  const partnerName   = document.getElementById('partnerNameTamil').value.trim();
+  const partnerDays   = parseInt(document.getElementById('partnerDays').value) || 0;
+  const staffName     = document.getElementById('staffNameTamil').value.trim();
+  const staffDays     = parseInt(document.getElementById('staffDays').value) || 0;
+  const partTimeName  = document.getElementById('partTimeStaffName').value.trim();
+  const partTimeDays  = parseInt(document.getElementById('partTimeStaffDays').value) || 0;
+
+  const errorDiv = document.getElementById('stage4BError');
+  let errors = [];
+
+  if (partnerDays > 0 && !partnerName) {
+    errors.push("கூட்டுநர் பெயரை (தமிழில்) பதிவு செய்யவும்");
+  }
+  if (staffDays > 0 && !staffName) {
+    errors.push("தினக்கூலி நூலகப் பணியாளர் பெயரை (தமிழில்) பதிவு செய்யவும்");
+  }
+  if (partTimeDays > 0 && !partTimeName) {
+    errors.push("பகுதி நேர நூலகப் பணியாளர் பெயரை பதிவு செய்யவும்");
+  }
+
+  if (errors.length > 0) {
+    errorDiv.textContent = errors.join("\n");
+    errorDiv.style.display = 'block';
+    window.scrollTo(0, document.getElementById('stage4B').offsetTop - 80); // பிழைக்கு scroll
+    return;
+  }
+
+errorDiv.style.display = 'none';
+
+const type = document.getElementById("typeSelect").value;
+
+if(type === "பகுதி நேர நூலகம்"){
+  // பகுதி நேர நூலகம் → உடனே preview காட்டு (stage4F-ஐ தாண்டி செல்லாமல்)
+  showContingentPreview();
+} else {
+  nextStage(4, '4C');
+}
+
+}
+// முதலில் ஒருமுறை மட்டும் இயங்க வேண்டியது (இதை window.onload அல்லது script இறுதியில் வைக்கவும்)
+document.addEventListener('DOMContentLoaded', function() {
+    const rentInput = document.getElementById('rentOwnerName');
+    if (rentInput) {
+        rentInput.addEventListener('input', function() {
+            if (this.value.trim() !== '') {
+                this.style.borderColor = '';           // இயல்பு நிறத்துக்கு திரும்ப
+                this.style.boxShadow = 'none';         // optional
+            }
+        });
+    }
+});
+
+// அடுத்து → பட்டனுக்கு தொடர்புடைய function
+function validateAndNextFrom4C() {
+    const rentOwnerName = document.getElementById('rentOwnerName').value.trim();
+    const rentAmount    = parseInt(document.getElementById('rentAmount').value) || 0;
+
+    const errorDiv = document.getElementById('stage4CError');
+    if (errorDiv) {
+        errorDiv.style.display = 'none';
+        errorDiv.textContent = '';
+    }
+
+    const ownerInput = document.getElementById('rentOwnerName');
+    let hasError = false;
+    let errorMessage = '';
+
+    // முக்கிய சரிபார்ப்பு
+    if (rentAmount > 0 && !rentOwnerName) {
+        hasError = true;
+        errorMessage = "வாடகைத் தொகை உள்ளிடப்பட்டுள்ளது. கட்டிட உரிமையாளர் பெயரை பதிவு செய்யவும்.";
+        
+        // காட்சி feedback
+        if (ownerInput) {
+            ownerInput.style.borderColor = '#e74c3c';
+            ownerInput.style.boxShadow = '0 0 0 3px rgba(231, 76, 60, 0.2)';
+            ownerInput.focus();
+        }
+    }
+
+    if (hasError) {
+        if (errorDiv) {
+            errorDiv.textContent = errorMessage;
+            errorDiv.style.display = 'block';
+        } else {
+            alert(errorMessage);  // error div இல்லையெனில் fallback
+        }
+
+        // scroll to error (optional)
+        if (document.getElementById('stage4C')) {
+            window.scrollTo({
+                top: document.getElementById('stage4C').offsetTop - 120,
+                behavior: 'smooth'
+            });
+        }
+        
+        return;  // அடுத்த ஸ்டேஜ் செல்ல வேண்டாம்
+    }
+
+    // பிழை இல்லை → அடுத்து செல்லலாம்
+    if (ownerInput) {
+        ownerInput.style.borderColor = '';      // reset border
+        ownerInput.style.boxShadow = 'none';
+    }
+    
+    nextStage(4, '4D');
+}
+function validateAndNextFrom4D() {
+    const fields = {
+        busPurpose:   document.getElementById('busPurpose'),
+        busDate:      document.getElementById('busDate'),
+        busAmount:    document.getElementById('busAmount'),
+        travelPurpose: document.getElementById('travelPurpose'),
+        travelDate:   document.getElementById('travelDate'),
+        travelAmount: document.getElementById('travelAmount')
+    };
+
+    if (!fields.busAmount || !fields.travelAmount) return;
+
+    const busPurposeVal   = fields.busPurpose.value.trim();
+    const busDateVal      = fields.busDate.value.trim();
+    const busAmountVal    = parseInt(fields.busAmount.value) || 0;
+
+    const travelPurposeVal = fields.travelPurpose.value.trim();
+    const travelDateVal    = fields.travelDate.value.trim();
+    const travelAmountVal  = parseInt(fields.travelAmount.value) || 0;
+
+    const errorDiv = document.getElementById('stage4DError');
+    if (errorDiv) {
+        errorDiv.style.display = 'none';
+        errorDiv.textContent = '';
+    }
+
+    let errors = [];
+
+    // ──────────────── பேருந்து கட்டணம் ────────────────
+    if (busPurposeVal !== "") {  // purpose தேர்ந்தெடுக்கப்பட்டிருந்தால்
+        if (!busDateVal) {
+            errors.push("பேருந்து கட்டணத்திற்கான நோக்கம் தேர்ந்தெடுக்கப்பட்டுள்ளது. 'கோரும் நாள்' தேதியைத் தேர்ந்தெடுக்கவும்.");
+            fields.busDate.style.borderColor = '#e74c3c';
+        }
+        if (busAmountVal <= 0) {
+            errors.push("பேருந்து கட்டணத்திற்கான நோக்கம் தேர்ந்தெடுக்கப்பட்டுள்ளது. கட்டணத் தொகையை உள்ளிடவும் (₹).");
+            fields.busAmount.style.borderColor = '#e74c3c';
+        }
+    }
+
+    if (busAmountVal > 0) {  // தொகை உள்ளிடப்பட்டிருந்தால்
+        if (!busPurposeVal) {
+            errors.push("பேருந்து கட்டணம் உள்ளிடப்பட்டுள்ளது. 'என்ன வகைக்காக' என்பதைத் தேர்ந்தெடுக்கவும்.");
+            fields.busPurpose.style.borderColor = '#e74c3c';
+        }
+        if (!busDateVal) {
+            errors.push("பேருந்து கட்டணம் உள்ளிடப்பட்டுள்ளது. 'கோரும் நாள்' தேதியைத் தேர்ந்தெடுக்கவும்.");
+            fields.busDate.style.borderColor = '#e74c3c';
+        }
+    }
+
+    // ──────────────── போக்குவரத்து கட்டணம் ────────────────
+    if (travelPurposeVal !== "") {
+        if (!travelDateVal) {
+            errors.push("போக்குவரத்து கட்டணத்திற்கான நோக்கம் தேர்ந்தெடுக்கப்பட்டுள்ளது. 'கோரும் நாள்' தேதியைத் தேர்ந்தெடுக்கவும்.");
+            fields.travelDate.style.borderColor = '#e74c3c';
+        }
+        if (travelAmountVal <= 0) {
+            errors.push("போக்குவரத்து கட்டணத்திற்கான நோக்கம் தேர்ந்தெடுக்கப்பட்டுள்ளது. கட்டணத் தொகையை உள்ளிடவும் (₹).");
+            fields.travelAmount.style.borderColor = '#e74c3c';
+        }
+    }
+
+    if (travelAmountVal > 0) {
+        if (!travelPurposeVal) {
+            errors.push("போக்குவரத்து கட்டணம் உள்ளிடப்பட்டுள்ளது. 'என்ன வகைக்காக' என்பதைத் தேர்ந்தெடுக்கவும்.");
+            fields.travelPurpose.style.borderColor = '#e74c3c';
+        }
+        if (!travelDateVal) {
+            errors.push("போக்குவரத்து கட்டணம் உள்ளிடப்பட்டுள்ளது. 'கோரும் நாள்' தேதியைத் தேர்ந்தெடுக்கவும்.");
+            fields.travelDate.style.borderColor = '#e74c3c';
+        }
+    }
+
+    // பிழைகள் இருந்தால்
+    if (errors.length > 0) {
+        if (errorDiv) {
+            errorDiv.textContent = errors.join("\n");
+            errorDiv.style.display = 'block';
+
+            const stage4D = document.getElementById('stage4D');
+            if (stage4D) {
+                window.scrollTo({
+                    top: stage4D.offsetTop - 140,
+                    behavior: 'smooth'
+                });
+            }
+        } else {
+            alert(errors.join("\n"));
+        }
+        return;
+    }
+
+    // எல்லாம் சரியாக இருந்தால் border reset
+    [fields.busPurpose, fields.busDate, fields.busAmount,
+     fields.travelPurpose, fields.travelDate, fields.travelAmount]
+        .forEach(el => {
+            if (el) {
+                el.style.borderColor = '';
+                el.style.boxShadow = 'none';
+            }
+        });
+
+    nextStage(4, '4E');
+}
+function validateAndNextFrom4E() {
+    const fields = {
+        registerItem:    document.getElementById('registerItem'),
+        registerAmount:  document.getElementById('registerAmount'),
+        stationeryItem:  document.getElementById('stationeryItem'),
+        stationeryAmount: document.getElementById('stationeryAmount'),
+        electricalItem:  document.getElementById('electricalItem'),
+        electricalAmount: document.getElementById('electricalAmount'),
+        consumerItem:    document.getElementById('consumerItem'),
+        consumerAmount:  document.getElementById('consumerAmount')
+    };
+
+    // அவசியமான புலங்கள் இல்லையெனில் function-ஐ நிறுத்து (defensive)
+    if (!fields.registerAmount || !fields.consumerAmount) return;
+
+    const registerItemVal    = fields.registerItem.value.trim();
+    const registerAmountVal  = parseInt(fields.registerAmount.value) || 0;
+    
+    const stationeryItemVal  = fields.stationeryItem.value.trim();
+    const stationeryAmountVal = parseInt(fields.stationeryAmount.value) || 0;
+    
+    const electricalItemVal  = fields.electricalItem.value.trim();
+    const electricalAmountVal = parseInt(fields.electricalAmount.value) || 0;
+    
+    const consumerItemVal    = fields.consumerItem.value.trim();
+    const consumerAmountVal  = parseInt(fields.consumerAmount.value) || 0;
+
+    const errorDiv = document.getElementById('stage4EError');
+    if (errorDiv) {
+        errorDiv.style.display = 'none';
+        errorDiv.textContent = '';
+    }
+
+    let errors = [];
+
+    // பதிவேடு
+    if (registerAmountVal > 0 && !registerItemVal) {
+        errors.push("பதிவேடு தொகை உள்ளிடப்பட்டுள்ளது. 'வாங்கிய பதிவேடு (விவரம்)' பூர்த்தி செய்யவும்.");
+        fields.registerItem.style.borderColor = '#e74c3c';
+        fields.registerItem.style.boxShadow = '0 0 0 3px rgba(231,76,60,0.2)';
+    }
+
+    // எழுதுபொருள்
+    if (stationeryAmountVal > 0 && !stationeryItemVal) {
+        errors.push("எழுதுபொருள் தொகை உள்ளிடப்பட்டுள்ளது. 'வாங்கிய எழுதுபொருள் (விவரம்)' பூர்த்தி செய்யவும்.");
+        fields.stationeryItem.style.borderColor = '#e74c3c';
+        fields.stationeryItem.style.boxShadow = '0 0 0 3px rgba(231,76,60,0.2)';
+    }
+
+    // மின்சாதனம்
+    if (electricalAmountVal > 0 && !electricalItemVal) {
+        errors.push("மின்சாதன தொகை உள்ளிடப்பட்டுள்ளது. 'வாங்கிய மின்சாதனம் (விவரம்)' பூர்த்தி செய்யவும்.");
+        fields.electricalItem.style.borderColor = '#e74c3c';
+        fields.electricalItem.style.boxShadow = '0 0 0 3px rgba(231,76,60,0.2)';
+    }
+
+    // நுகர்பொருள்
+    if (consumerAmountVal > 0 && !consumerItemVal) {
+        errors.push("நுகர்பொருள் தொகை உள்ளிடப்பட்டுள்ளது. 'வாங்கிய நுகர்பொருள் (விவரம்)' பூர்த்தி செய்யவும்.");
+        fields.consumerItem.style.borderColor = '#e74c3c';
+        fields.consumerItem.style.boxShadow = '0 0 0 3px rgba(231,76,60,0.2)';
+    }
+
+    // பிழை இருந்தால்
+    if (errors.length > 0) {
+        if (errorDiv) {
+            errorDiv.textContent = errors.join("\n");
+            errorDiv.style.display = 'block';
+            
+            const stage4E = document.getElementById('stage4E');
+            if (stage4E) {
+                window.scrollTo({
+                    top: stage4E.offsetTop - 140,
+                    behavior: 'smooth'
+                });
+            }
+        } else {
+            alert(errors.join("\n"));
+        }
+        return;
+    }
+
+    // எல்லாம் சரி → border reset செய்யலாம் (optional)
+    [
+        fields.registerItem, fields.stationeryItem,
+        fields.electricalItem, fields.consumerItem
+    ].forEach(el => {
+        if (el) {
+            el.style.borderColor = '';
+            el.style.boxShadow = 'none';
+        }
+    });
+
+    nextStage(4, '4F');
+}
+document.addEventListener('DOMContentLoaded', function() {
+    const descFields = [
+        'rentOwnerName',
+        'registerItem',
+        'stationeryItem',
+        'electricalItem',
+        'consumerItem',
+        'otherExpense1Desc',
+        'otherExpense2Desc',
+        'partnerNameTamil',     // stage4B
+        'staffNameTamil',
+        'partTimeStaffName'
+    ];
+
+    descFields.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.addEventListener('input', function() {
+                if (this.value.trim() !== '') {
+                    this.style.borderColor = '';
+                    this.style.boxShadow = 'none';
+                }
+            });
+        }
+    });
+});
+function validateAndSubmitContingent() {
+    // புலங்களை எடுத்துக்கொள்ளுதல்
+    const otherDesc1 = document.getElementById('otherExpense1Desc').value.trim();
+    const otherAmt1  = parseInt(document.getElementById('otherExpense1Amount').value) || 0;
+    
+    const otherDesc2 = document.getElementById('otherExpense2Desc').value.trim();
+    const otherAmt2  = parseInt(document.getElementById('otherExpense2Amount').value) || 0;
+
+    const errorDiv = document.getElementById('stage4FError');
+    if (errorDiv) {
+        errorDiv.style.display = 'none';
+        errorDiv.textContent = '';
+    }
+
+    let errors = [];
+
+    // பிற செலவு 1 சரிபார்ப்பு
+    if (otherAmt1 > 0 && !otherDesc1) {
+        errors.push("பிற செலவினம் - 1 தொகை உள்ளிடப்பட்டுள்ளது. 'பிற செலவினம் என்ன?' என்ற விவரத்தை பூர்த்தி செய்யவும்.");
+        document.getElementById('otherExpense1Desc').style.borderColor = '#e74c3c';
+        document.getElementById('otherExpense1Desc').style.boxShadow = '0 0 0 3px rgba(231,76,60,0.25)';
+    }
+
+    // பிற செலவு 2 சரிபார்ப்பு
+    if (otherAmt2 > 0 && !otherDesc2) {
+        errors.push("பிற செலவினம் - 2 தொகை உள்ளிடப்பட்டுள்ளது. 'பிற செலவினம் என்ன?' என்ற விவரத்தை பூர்த்தி செய்யவும்.");
+        document.getElementById('otherExpense2Desc').style.borderColor = '#e74c3c';
+        document.getElementById('otherExpense2Desc').style.boxShadow = '0 0 0 3px rgba(231,76,60,0.25)';
+    }
+
+    // பிழை இருந்தால்
+    if (errors.length > 0) {
+        if (errorDiv) {
+            errorDiv.textContent = errors.join("\n");
+            errorDiv.style.display = 'block';
+            
+            // பிழைக்கு scroll
+            const stage4F = document.getElementById('stage4F');
+            if (stage4F) {
+                window.scrollTo({
+                    top: stage4F.offsetTop - 140,
+                    behavior: 'smooth'
+                });
+            }
+        } else {
+            alert(errors.join("\n"));
+        }
+        return;  // ← மிக முக்கியம்: பிழை இருந்தால் submit செய்யாதே
+    }
+
+    // எல்லாம் சரி → border-களை reset செய்து submit செய்
+    ['otherExpense1Desc', 'otherExpense2Desc'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.style.borderColor = '';
+            el.style.boxShadow = 'none';
+        }
+    });
+
+    // உங்கள் அசல் submit function-ஐ அழை
+    submitContingent();
+}
+function startLoading(btn) {
+  btn.dataset.originalText = btn.innerHTML;
+  btn.classList.add("loading");
+  btn.innerHTML = '<span class="btn-spinner"></span> அனுப்புகிறது...';
+}
+
+function stopLoading(btn) {
+  btn.classList.remove("loading");
+  btn.innerHTML = btn.dataset.originalText;
+}
+function openYearlyReceiptAbstract(btn) {
+  startLoading(btn);
+
+  const libraryName = document.getElementById("finalLib").innerText.trim();
+  const loginEmail  = window.selectedEmail;
+
+  if (!libraryName || !loginEmail) {
+    stopLoading(btn);
+    alert("நூலக பெயர் அல்லது மின்னஞ்சல் கிடைக்கவில்லை");
+    return;
+  }
+
+  google.script.run
+  .withSuccessHandler(res => {
+    stopLoading(btn);
+
+    const card = document.getElementById("mailSuccessCard");
+
+    if (res.success) {
+      card.innerHTML = `
+        ✅ <strong>ஆண்டு வரவு சுருக்கம்</strong> — லிங்க் தயார்
+
+        ${res.url || res.originalUrl ? `
+        <div style="margin-top:8px;">
+          🔗 <a href="${res.url || res.originalUrl}"
+               target="_blank"
+               style="color:#1d4ed8; font-weight:700; text-decoration:underline;">
+            PDF திறக்க
+          </a>
+        </div>` : ``}
+      `;
+      card.style.display = "block";
+
+      // 🔥 bring card into view
+      card.scrollIntoView({ behavior: "smooth", block: "center" });
+
+      // ⏳ auto-hide நீக்கப்பட்டது — queued message தவறிப் போகாமல் இருக்க
+
+    } else {
+      card.innerHTML = `❌ ${res.message}`;
+      card.style.display = "block";
+    }
+  })
+  .withFailureHandler(err => {
+    stopLoading(btn);
+    alert("❌ Server பிழை: " + err.message);
+  })
+  .sendYearlyReceiptAbstract(loginEmail, libraryName);
+  }
+
+function openYearlyExpenseAbstract(btn) {
+  startLoading(btn);
+
+  const libraryName = document.getElementById("finalLib").innerText.trim();
+  const loginEmail  = window.selectedEmail;
+
+  if (!libraryName || !loginEmail) {
+    stopLoading(btn);
+    alert("நூலக பெயர் அல்லது மின்னஞ்சல் கிடைக்கவில்லை");
+    return;
+  }
+
+ google.script.run
+  .withSuccessHandler(res => {
+    stopLoading(btn);
+
+    const card = document.getElementById("mailSuccessCard");
+
+    if (res.success) {
+      card.innerHTML = `
+        ✅ <strong>ஆண்டு செலவின சுருக்கம்</strong> — லிங்க் தயார்
+
+        ${res.url || res.originalUrl ? `
+        <div style="margin-top:8px;">
+          🔗 <a href="${res.url || res.originalUrl}"
+               target="_blank"
+               style="color:#1d4ed8; font-weight:700; text-decoration:underline;">
+            PDF திறக்க
+          </a>
+        </div>` : ``}
+      `;
+      card.style.display = "block";
+
+      // 🔥 bring into view
+      card.scrollIntoView({ behavior: "smooth", block: "center" });
+
+      // ⏳ auto-hide நீக்கப்பட்டது — queued message தவறிப் போகாமல் இருக்க
+
+    } else {
+      card.innerHTML = `❌ ${res.message}`;
+      card.style.display = "block";
+    }
+  })
+  .withFailureHandler(err => {
+    stopLoading(btn);
+    alert("❌ Server பிழை: " + err.message);
+  })
+  .sendYearlyExpenseAbstract(loginEmail, libraryName);
+}
+function checkBankPayment() {
+  // முதலில் card-ஐ மறைக்கவும்
+  document.getElementById("bankPreviewCard").style.display = "none";
+
+  const utr = document.getElementById("utrNumber").value.trim();
+  if (!utr || !/^\d{11,12}$/.test(utr)) {
+    alert("சரியான 11 அல்லது 12 இலக்க UTR எண்ணை உள்ளிடவும்");
+    return;
+  }
+
+  const btn = event.target;
+  btn.disabled = true;
+  btn.textContent = "Checking...";
+
+  google.script.run
+    .withSuccessHandler(function(res) {
+      btn.disabled = false;
+      btn.textContent = "🔍 Click here and Validate Your Payment with Bank Statement";
+
+      const card = document.getElementById("bankPreviewCard");
+
+      if (!res.success) {
+        // Error case – simple red message (இப்போதும் innerHTML மாற்றலாம்)
+        card.innerHTML = `
+          <div style="border:2px solid #dc2626; background:#fee2e2; color:#991b1b; padding:15px; border-radius:10px; font-weight:700; text-align:center;">
+            ${res.message}
+          </div>
+        `;
+        card.style.display = "block";
+        return;
+      }
+
+      // ==================== SUCCESS CASE ====================
+      // முக்கியம்: முன்பு error ஆனால் இப்போது success → card-ஐ முழு original structure-க்கு திரும்ப கொண்டு வருகிறோம்
+      card.innerHTML = `
+        <h4 style="text-align:center; color:#1e40af; margin-top:0;">🏦 Bank Statement Verification</h4>
+        <p style="text-align:center; font-size:16px; font-weight:600;">
+          நீங்கள் செலுத்திய தொகை ரூ.
+          <span id="bankAmountDisplay" style="color:#16a34a; font-size:20px; font-weight:800;"></span>
+        </p>
+        <p style="text-align:center; font-size:15px; font-weight:600; margin-top:5px;">
+          செலுத்திய தேதி :
+          <span id="bankDateDisplay" style="color:#2563eb; font-size:17px; font-weight:800;"></span>
+        </p>
+        <div style="text-align:center; margin-top:20px;">
+          <button type="button" onclick="confirmBankAmount()" style="background:#16a34a; color:white; padding:10px 25px; border:none; border-radius:8px; margin-right:15px; cursor:pointer;">✅ சரி</button>
+          <button type="button" onclick="rejectBankAmount()" style="background:#ef4444; color:white; padding:10px 25px; border:none; border-radius:8px; cursor:pointer;">❌ தவறு</button>
+        </div>
+      `;
+
+      // இப்போது elements இருப்பதால் values set செய்யலாம்
+      document.getElementById("bankAmountDisplay").textContent = 
+        res.amount.toLocaleString("en-IN", { minimumFractionDigits: 2 });
+
+      const displayDate = new Date(res.date).toLocaleDateString("en-GB");
+      document.getElementById("bankDateDisplay").textContent = displayDate;
+
+      bankAmount = res.amount;
+      remainingAmount = res.amount;
+
+      document.getElementById("paymentDate").value = res.date;
+      document.getElementById("paymentDate").readOnly = true;
+      document.getElementById("paymentDate").style.background = "#f1f5f9";
+
+      card.style.display = "block";
+    })
+    .withFailureHandler(function(err) {
+      btn.disabled = false;
+      btn.textContent = "🔍 Click here and Validate Your Payment with Bank Statement";
+      alert("Server Error: " + err.message);
+    })
+    .validatePaymentWithBank(utr);
+}
+function setReceiptMode(mode){
+
+  const bankSection = document.getElementById("bankSection");
+  const incomeSection = document.getElementById("incomeSection");
+
+  if(mode === "income"){
+
+    if(bankSection) bankSection.style.display = "block";
+    if(incomeSection) incomeSection.style.display = "block";
+
+  }
+
+  if(mode === "usage"){
+
+    if(bankSection) bankSection.style.display = "none";
+    if(incomeSection) incomeSection.style.display = "none";
+
+  }
+
+}
+function confirmBankAmount() {
+
+  document.getElementById("bankPreviewCard").style.display = "none";
+
+  setTimeout(function(){
+
+    alert("Bank தொகை உறுதிப்படுத்தப்பட்டது. இப்போது வரவு விவரங்களை பதிவு செய்யலாம்.");
+
+  },200);
+
+}
+ 
+function rejectBankAmount() {
+
+  bankAmount = 0;
+  remainingAmount = 0;
+
+  document.getElementById("bankPreviewCard").style.display = "none";
+  document.getElementById("paymentDate").value = "";
+
+  alert("தகவல் தவறாக உள்ளது. தயவுசெய்து UTR எண்ணை சரிபார்க்கவும்.");
+}
+
+function calculateRemainingAmount() {
+
+  if (bankAmount <= 0) return;
+
+  let totalEntered = 0;
+
+  incomeFields.forEach(id => {
+    totalEntered += parseFloat(document.getElementById(id).value) || 0;
+  });
+
+  remainingAmount = bankAmount - totalEntered;
+
+  const card = document.getElementById("remainingCard");
+  const span = document.getElementById("remainingAmountDisplay");
+
+  card.style.display = "block";
+
+  // 🔴 Over Entry
+  if (remainingAmount < 0) {
+    span.textContent = "0.00";
+    card.innerHTML = `
+      <div style="color:#b91c1c; font-weight:800;">
+        ❌ நீங்கள் செலுத்திய தொகையை விட அதிகமாக பதிவு செய்துள்ளீர்கள்!
+      </div>`;
+    return;
+  }
+
+  // 🟢 Normal Remaining
+  if (remainingAmount > 0) {
+    card.innerHTML = `
+      மீதமுள்ள தொகை ரூ.
+      <span id="remainingAmountDisplay"
+            style="color:#15803d; font-size:18px;">
+        ${remainingAmount.toFixed(2)}
+      </span>`;
+  }
+
+  // ✅ Fully Used
+  if (remainingAmount === 0) {
+    card.innerHTML = `
+      <div style="color:#b91c1c; font-weight:800;">
+        ✅ நீங்கள் செலுத்திய தொகைக்கு உண்டான பதிவுகளை செய்துவிட்டீர்கள்.<br>
+             </div>`;
+  }
+}
+
+function showContingentPreview() {
+  let previewHtml = "";
+  let totalExpense = 0;
+
+  // 1. நாளிதழ்கள் (Stage 4A) — dynamic active list-ல் இருந்து படிக்கிறோம்
+  //    (முன்பு hardcoded 13 IDs பயன்படுத்தப்பட்டது, ஆனா actual input IDs "np_" prefix-உடன் இருந்ததால்
+  //     document.getElementById() எப்போதும் null திருப்பி, function crash ஆனது. இப்போது சரி செய்யப்பட்டுள்ளது.)
+  let newsHtml = "";
+  (activeNewspapers || []).forEach(item => {
+    const el = document.getElementById("np_" + item.key);
+    if (!el) return;                     // safety: element இல்லைன்னா skip
+    let val = parseFloat(el.value) || 0;
+    if (val > 0) {
+      newsHtml += `<div class="preview-item"><span>${item.name}:</span> <b>₹${val.toFixed(2)}</b></div>`;
+      totalExpense += val;
+    }
+  });
+  if (newsHtml) previewHtml += `<h4 style="color:#1e40af; border-bottom:1px solid #1e40af; margin-bottom:5px;">📰 நாளிதழ்கள்</h4>` + newsHtml;
+
+  // 2. தினக்கூலி விவரங்கள் (Stage 4B) - பெருக்குதல் லாஜிக்
+  let pDays = parseFloat(document.getElementById("partnerDays").value) || 0;
+  let sDays = parseFloat(document.getElementById("staffDays").value) || 0;
+  let ptDays = parseFloat(document.getElementById("partTimeStaffDays").value) || 0;
+
+  let pTotal = pDays * 75;
+  let sTotal = sDays * 300;
+  let ptTotal = ptDays * 100;
+
+  let laborHtml = "";
+  if (pDays > 0) laborHtml += `<div class="preview-item"><span>தினக்கூலி கூட்டுநர் (${pDays} நாட்கள் x 75):</span> <b>₹${pTotal.toFixed(2)}</b></div>`;
+  if (sDays > 0) laborHtml += `<div class="preview-item"><span>தினக்கூலி நூலகர் (${sDays} நாட்கள் x 300):</span> <b>₹${sTotal.toFixed(2)}</b></div>`;
+  if (ptDays > 0) laborHtml += `<div class="preview-item"><span>பகுதிநேர நூலக தினக்கூலி பணியாளர் (${ptDays} நாட்கள் x 100):</span> <b>₹${ptTotal.toFixed(2)}</b></div>`;
+  
+  if (laborHtml) {
+    previewHtml += `<h4 style="color:#065f46; border-bottom:1px solid #065f46; margin-top:15px; margin-bottom:5px;">👩‍💻 தினக்கூலி</h4>` + laborHtml;
+    totalExpense += (pTotal + sTotal + ptTotal);
+  }
+
+  // 3. இதர செலவுகள் (Stage 4C, 4D, 4E, 4F)
+  const otherCosts = [
+    { id: "electricityBill", label: "மின்சார கட்டணம்" },
+    { id: "rentAmount", label: "வாடகைத் தொகை" },
+    { id: "phoneWifiAmount", label: "வைஃபை / தொலைபேசி" },
+    { id: "waterTax", label: "குடிநீர் வரி" },
+    { id: "photocopyAmount", label: "நகல் எடுத்த செலவினம்" },
+    { id: "busAmount", label: "பேருந்து கட்டணம்" },
+    { id: "travelAmount", label: "போக்குவரத்துக் கட்டணம்" },
+    { id: "postalAmount", label: "அஞ்சல் செலவு" },
+    { id: "registerAmount", label: "பதிவேடுகள்" },
+    { id: "stationeryAmount", label: "எழுதுபொருட்கள்" },
+    { id: "electricalAmount", label: "மின்சாதனப் பொருட்கள்" },
+    { id: "consumerAmount", label: "நுகர்பொருட்கள்" },
+    { id: "otherExpense1Amount", label: "பிற செலவினம் 1" },
+    { id: "otherExpense2Amount", label: "பிற செலவினம் 2" }
+  ];
+
+  let extraHtml = "";
+  otherCosts.forEach(item => {
+    let val = parseFloat(document.getElementById(item.id).value) || 0;
+    if (val > 0) {
+      extraHtml += `<div class="preview-item"><span>${item.label}:</span> <b>₹${val.toFixed(2)}</b></div>`;
+      totalExpense += val;
+    }
+  });
+  if (extraHtml) previewHtml += `<h4 style="color:#991b1b; border-bottom:1px solid #991b1b; margin-top:15px; margin-bottom:5px;">💰 இதர செலவுகள்</h4>` + extraHtml;
+
+  // Preview Card-ல் தகவல்களைக் காட்டுதல்
+  document.getElementById("previewContent").innerHTML = previewHtml;
+  document.getElementById("previewTotalDisplay").innerHTML = "மொத்தச் செலவு (Total): ₹" + totalExpense.toLocaleString('en-IN', {minimumFractionDigits: 2});
+  
+  // கார்டைக் காட்டு
+  document.getElementById("contingentPreviewOverlay").style.display = "block";
+}
+
+function closePreview() {
+  document.getElementById("contingentPreviewOverlay").style.display = "none";
+}
+
+function submitFromPreview() {
+  closePreview();
+  validateAndSubmitContingent(); 
+}
+
+function handleModeChange(select){
+
+  const value = select.value;
+
+  setReceiptMode(value);
+
+  if(value){
+    select.classList.remove("blinkSelect");
+  }
+
+}
+function openPrevYearReceiptExpense(btn) {
+
+  const libraryName = document.getElementById("finalLib").innerText.trim();
+  const loginEmail  = window.selectedEmail;
+
+  if (!libraryName || !loginEmail) {
+    alert("நூலக பெயர் அல்லது மின்னஞ்சல் கிடைக்கவில்லை");
+    return;
+  }
+
+  // 🔽 ஆண்டு தேர்வு modal-ஐ திறக்கும்
+  document.getElementById("prevYearSelect").value = "";
+  document.getElementById("yearSelectModal").style.display = "flex";
+}
+
+function closePrevYearModal() {
+  document.getElementById("yearSelectModal").style.display = "none";
+}
+
+function confirmPrevYearReceiptExpense(btn) {
+
+  const yearOption = document.getElementById("prevYearSelect").value;
+
+  if (!yearOption) {
+    alert("ஆண்டைத் தேர்வு செய்யவும்");
+    return;
+  }
+
+  const libraryName = document.getElementById("finalLib").innerText.trim();
+  const loginEmail  = window.selectedEmail;
+
+  if (!libraryName || !loginEmail) {
+    alert("நூலக பெயர் அல்லது மின்னஞ்சல் கிடைக்கவில்லை");
+    return;
+  }
+
+  startLoading(btn);
+
+  google.script.run
+  .withSuccessHandler(res => {
+
+    stopLoading(btn);
+    closePrevYearModal();
+
+    const card = document.getElementById("mailSuccessCard");
+
+    if (res.success) {
+
+      card.innerHTML = `
+  <div style="
+    padding:14px;
+    border-radius:10px;
+    background:#f8fafc;
+    border:1px solid #e2e8f0;
+    text-align:center;
+  ">
+
+  <div style="font-weight:800;font-size:17px;color:#065f46;">
+    📑 கடந்த ஆண்டு (${res.yearLabel}) வரவு & செலவு (தணிக்கைப் படிவம்) — லிங்க் தயார்
+  </div>
+
+  <div style="margin-top:12px; display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+
+    ${res.receipt ? `
+    <a href="${res.receipt}" target="_blank"
+      style="
+        display:inline-flex;
+        align-items:center;
+        gap:6px;
+        padding:8px 12px;
+        background:#2563eb;
+        color:white;
+        border-radius:8px;
+        text-decoration:none;
+        font-weight:700;
+      ">
+      🧾 Receipt PDF
+    </a>` : ``}
+
+    ${res.expense ? `
+    <a href="${res.expense}" target="_blank"
+      style="
+        display:inline-flex;
+        align-items:center;
+        gap:6px;
+        padding:8px 12px;
+        background:#7c3aed;
+        color:white;
+        border-radius:8px;
+        text-decoration:none;
+        font-weight:700;
+      ">
+      💸 Expense PDF
+    </a>` : ``}
+
+  </div>
+
+  </div>
+`;
+
+      card.style.display = "block";
+
+      card.scrollIntoView({ behavior: "smooth", block: "center" });
+
+      // ⏳ auto-hide நீக்கப்பட்டது — queued message தவறிப் போகாமல் இருக்க
+
+    } else {
+
+      card.innerHTML = `❌ ${res.message}`;
+      card.style.display = "block";
+
+    }
+
+  })
+  .withFailureHandler(err => {
+
+    stopLoading(btn);
+    closePrevYearModal();
+    alert("❌ Server பிழை: " + err.message);
+
+  })
+  .openPrevYearReceiptExpense(libraryName, loginEmail, yearOption);
+
+}
+
+/**
+ * பயனர் உள்ளிடும் விலையைச் சரிபார்க்கும் function
+ * inputElement - தற்போது விலை உள்ளிடப்படும் பெட்டி
+ * paperKey - சீட்டில் (Sheet) உள்ள செய்தித்தாளின் பெயர்
+ */
+function checkNewsPaperPrice(inputElement, paperKey) {
+  let enteredPrice = parseFloat(inputElement.value) || 0;
+  let maxPrice = newsPaperMaxRates[paperKey];
+  let label = inputElement.previousElementSibling; // input-க்கு முன்னால் உள்ள label-ஐ எடுக்கும்
+
+  if (maxPrice !== undefined && enteredPrice > maxPrice) {
+    // 1. எச்சரிக்கை செய்தி
+    alert("எச்சரிக்கை: " + paperKey + " அதிகபட்ச விலை ரூ. " + maxPrice + " மட்டுமே!");
+    
+    // 2. லேபிளை சிவப்பாக பிளிங்க் செய்ய வைத்தல்
+    if (label) label.classList.add('error-blink');
+    
+    // 3. பட்டனை முடக்குதல்
+    toggleNextButton(false);
+  } else {
+    // சரியாக இருந்தால் பிளிங்க் அனிமேஷனை நீக்குதல்
+    if (label) label.classList.remove('error-blink');
+    
+    // அனைத்து பெட்டிகளும் சரியாக இருக்கிறதா எனச் சரிபார்த்து பட்டனைச் செயல்படுத்துதல்
+    checkAllPrices();
+  }
+}
+
+// "அடுத்து" பட்டனை கட்டுப்படுத்தும் function
+// "அடுத்து" பட்டனை கட்டுப்படுத்தும் function
+function toggleNextButton(isValid) {
+  // இரண்டு பட்டன்களையும் ஒரே நேரத்தில் கட்டுப்படுத்துகிறோம்
+  const btn1 = document.getElementById("nextBtn4B");      // நாளிதழ் பட்டன்
+  const btn2 = document.getElementById("nextBtnFrom4B");  // பணி நாட்கள் பட்டன்
+
+  [btn1, btn2].forEach(btn => {
+    if (btn) {
+      btn.disabled = !isValid;
+      btn.style.backgroundColor = isValid ? "#28a745" : "#cccccc";
+      btn.style.cursor = isValid ? "pointer" : "not-allowed";
+    }
+  });
+}
+
+// அனைத்து செய்தித்தாள் விலைகளையும் சரிபார்க்கும் function
+function checkAllPrices() {
+  // oninput உள்ள அனைத்து input பெட்டிகளையும் எடுக்கிறது (நாளிதழ் + பணி நாட்கள்)
+  let inputs = document.querySelectorAll("input[oninput]");
+  let allValid = true;
+
+  inputs.forEach(input => {
+    let label = input.previousElementSibling;
+    
+    // ஏதேனும் ஒரு லேபிள் சிவப்பாக பிளிங்க் ஆகிக்கொண்டிருந்தால் (error-blink வகுப்பு இருந்தால்)
+    // அதன் அர்த்தம் ஏதோ ஒரு பெட்டியில் தவறு இருக்கிறது என்று பொருள்.
+    if (label && label.classList.contains('error-blink')) {
+      allValid = false;
+    }
+  });
+
+  // பட்டனைச் செயல்படுத்தவா அல்லது முடக்கவா என்று முடிவு செய்கிறது
+  toggleNextButton(allValid);
+}
+
+// paperKey இப்போது internal field key (எ.கா. 'dailyThanthi', 'paper14') — காட்சிப் பெயருக்கு newsPaperDisplayNames பயன்படும்
+function checkNewsPaperPrice(inputElement, paperKey) {
+  let enteredPrice = parseFloat(inputElement.value) || 0;
+  let maxPrice = newsPaperMaxRates[paperKey];
+  let displayName = newsPaperDisplayNames[paperKey] || paperKey;
+  let label = inputElement.previousElementSibling;
+
+  if (maxPrice !== undefined && enteredPrice > maxPrice) {
+    alert("எச்சரிக்கை: " + displayName + " அதிகபட்ச விலை ரூ. " + maxPrice + " மட்டுமே!");
+    if (label) label.classList.add('error-blink');
+  } else {
+    if (label) label.classList.remove('error-blink');
+  }
+  
+  // பட்டன் நிலையைச் சரிபார்க்க இதை அழைக்கிறோம்
+  checkAllPrices();
+}
+
+// அனைத்து பெட்டிகளிலும் விலை சரியாக உள்ளதா எனச் சரிபார்க்க
+function checkAllPrices() {
+  let inputs = document.querySelectorAll("input[oninput*='checkNewsPaperPrice']");
+  let allValid = true;
+
+  inputs.forEach(input => {
+    let val = parseFloat(input.value) || 0;
+    // id-ல் இருந்து அல்லது function அழைப்பில் இருந்து பெயரை எடுக்கலாம்
+    // இங்கே லேபிள் பிளிங்க் ஆகிறதா என்பதை வைத்து எளிதாகச் சரிபார்க்கிறோம்
+    let label = input.previousElementSibling;
+    if (label && label.classList.contains('error-blink')) {
+      allValid = false;
+    }
+  });
+
+  toggleNextButton(allValid);
+}
+
+function validateWorkingDays(inputElement) {
+  let val = inputElement.value;
+  
+  // பயனர் இன்னும் எதையும் டைப் செய்யவில்லை என்றால் அப்படியே விட்டுவிடவும்
+  // மேலும் பட்டனை முடக்காமல் விடுவிக்கவும் (Optional)
+  if (val === "" || val === null) {
+    if (inputElement.previousElementSibling) {
+      inputElement.previousElementSibling.classList.remove('error-blink');
+    }
+    checkAllPrices();
+    return;
+  }
+
+  let enteredDays = parseInt(val) || 0;
+  
+  // 0 அல்லது அதற்கும் குறைவாக இருந்தால் செக் செய்யத் தேவையில்லை
+  if (enteredDays < 0) return; 
+
+  let label = inputElement.previousElementSibling;
+  let id = inputElement.id;
+
+  // பாதுகாப்பிற்காக எண்களாக மாற்றுதல்
+  let totalWD = parseInt(dayLimits.totalWD) || 0;
+  let leave = parseInt(dayLimits.leave) || 0;
+  let netPartnerLimit = totalWD - leave;
+  
+  // கூட்டுநர் என்றால் நிகர நாட்களையும், பணியாளர் என்றால் மொத்த நாட்களையும் லிமிட்டாக கொள்ளுதல்
+  // --- staff limit calculation ---
+let staffLimit = parseInt(dayLimits.staff) || 0;
+
+// 👇 Special condition (ONLY staffDays)
+if (id === 'staffDays' && selectedLib === "கி13.சின்னாளபட்டி") {
+  staffLimit = staffLimit * 2;
+}
+
+// --- final max limit ---
+
+
+let maxLimit = (id === 'partnerDays') 
+  ? netPartnerLimit 
+  : staffLimit;
+
+  if (enteredDays > maxLimit) {
+    let errorMsg = "";
+    if (id === 'partnerDays') {
+      errorMsg = workingPeriodText + " ஆகிய தேதிகளுக்கு இடைப்பட்ட மொத்த பணி நாட்கள் " + totalWD + 
+                 " மற்றும் நீங்கள் எடுத்த விடுப்பு நாட்கள் " + leave + 
+                 ". எனவே நிகர பணி நாட்கள் " + netPartnerLimit + 
+                 " மட்டுமே. இதற்கு மட்டுமே ஊதியம் கோர இயலும்.";
+    } else {
+      errorMsg = workingPeriodText + " ஆகிய தேதிகளுக்கு இடைப்பட்ட பணி நாட்கள் " + maxLimit + 
+                 " மட்டுமே.";
+    }
+
+    alert(errorMsg);
+    
+    // ❌ தவறு இருந்தால்: லேபிளை பிளிங்க் செய்து, பட்டனை முடக்கு (Gray color)
+    if (label) label.classList.add('error-blink');
+    toggleNextButton(false); 
+    
+  } else {
+    // ✅ சரியாக இருந்தால்: பிளிங்க் அனிமேஷனை நீக்கிவிட்டு, 
+    // மற்ற அனைத்து பெட்டிகளையும் சரிபார்த்து பட்டனைச் செயல்படுத்து (Green color)
+    if (label) label.classList.remove('error-blink');
+    checkAllPrices(); 
+  }
+}
+// --- பணி நாட்களை சர்வரிலிருந்து எடுக்கும் பங்க்ஷன் ---
+function fetchWorkingDays() {
+  let libName = selectedLib; // இது லாகின் செய்யும்போது சேமிக்கப்பட்ட நூலகப் பெயர்
+  
+  google.script.run.withSuccessHandler(function(res) {
+    dayLimits.partner = res.partnerLimit;
+    dayLimits.staff = res.staffLimit;
+    dayLimits.leave = res.leaveTaken;
+    dayLimits.totalWD = res.totalWD;
+    workingPeriodText = res.period;
+    console.log("பணி நாட்கள் விவரம் பெறப்பட்டது:", dayLimits);
+  }).getWorkingDaysCount(libName);
+}
+
+function handleContingentClick() {
+  let today = new Date();
+  let day = today.getDate(); // இன்றைய தேதியை எடுக்கும்
+
+  // ✅ Admin Mode-ல் இருந்தால் தேதி கட்டுப்பாடு இல்லாமல் எப்போது வேண்டுமானாலும் பதிவு செய்யலாம்
+  if (isAdminMode) {
+    go(4, 'சில்லறை செலவினப் பட்டியல்');
+    return;
+  }
+
+  // தேதி 16-க்குக் குறைவாக இருந்தால் எச்சரிக்கை செய் (Admin அல்லாதவர்களுக்கு மட்டும்)
+  if (day < 16) {
+    alert("சில்லறை செலவினப் பட்டியல் 16 ம் தேதி முதல் மட்டுமே பதிவு செய்ய இயலும்.");
+  } else {
+    // 16-ம் தேதி அல்லது அதற்கு மேல் இருந்தால் வழக்கம்போல அடுத்த பக்கத்திற்குச் செல்லும்
+    go(4, 'சில்லறை செலவினப் பட்டியல்');
+  }
+}
+
+
+function handleLibraryTypeUI(){
+
+  const type = document.getElementById("typeSelect").value;
+
+  const newsBlock = document.getElementById("newsPaperSection");
+  const labourBlock = document.getElementById("labourSection");
+  const partTimeBlock = document.getElementById("partTimeStaffSection");
+  const otherExpenses = document.getElementById("otherExpensesSection");
+
+  if(type === "பகுதி நேர நூலகம்"){
+
+    if(newsBlock) newsBlock.style.display = "block";
+    if(labourBlock) labourBlock.style.display = "none";
+    if(partTimeBlock) partTimeBlock.style.display = "block";
+    if(otherExpenses) otherExpenses.style.display = "none";
+
+  }else{
+
+    if(newsBlock) newsBlock.style.display = "block";
+    if(labourBlock) labourBlock.style.display = "block";
+    if(partTimeBlock) partTimeBlock.style.display = "none";
+    if(otherExpenses) otherExpenses.style.display = "block";
+
+  }
+
+}
+
+function loadRentDetailsIfApplicable() {
+  const libraryName = document.getElementById("finalLib").innerText.trim();
+  if (!libraryName) return;
+
+  const rentOwnerInput = document.getElementById("rentOwnerName");
+  const rentAmountInput = document.getElementById("rentAmount");
+
+  if (!rentOwnerInput || !rentAmountInput) return;
+
+  google.script.run
+    .withSuccessHandler(function(res) {
+      if (res.success && res.ownerName) {
+        // கட்டிட உரிமையாளர் + வாடகை உள்ள நூலகம்
+        
+        rentOwnerInput.value = res.ownerName;
+        rentAmountInput.value = res.rentAmount;
+
+        // Read-only & disable செய்
+        rentOwnerInput.readOnly = true;
+        rentAmountInput.readOnly = true;
+        
+        // UI-ஐ தெளிவுபடுத்த (optional ஆனால் நல்லது)
+        rentOwnerInput.style.backgroundColor = "#f0f9ff";
+        rentAmountInput.style.backgroundColor = "#f0f9ff";
+        rentOwnerInput.style.borderColor = "#93c5fd";
+        rentAmountInput.style.borderColor = "#93c5fd";
+
+        // Label-ஐ மாற்றலாம் (optional)
+        const ownerLabel = rentOwnerInput.previousElementSibling;
+        if (ownerLabel) {
+          ownerLabel.textContent = "கட்டிட உரிமையாளர் பெயர் (தானாக நிரப்பப்பட்டது)";
+        }
+      } 
+      else {
+        // வாடகை இல்லாத நூலகம் → disable செய்
+        rentOwnerInput.disabled = true;
+        rentAmountInput.disabled = true;
+        
+        rentOwnerInput.placeholder = "இந்த நூலகத்திற்கு வாடகை இல்லை";
+        rentAmountInput.value = "0";
+        
+        // optional: மறைக்கவும் விரும்பினால்
+        // document.getElementById("rentSection").style.display = "none";
+      }
+    })
+    .withFailureHandler(function(err) {
+      console.error("Rent details load error:", err);
+      // fallback: disable செய்து விடலாம்
+      rentOwnerInput.disabled = true;
+      rentAmountInput.disabled = true;
+    })
+    .getRentDetailsForLibrary(libraryName);
+}
+
+/**
+ * தினக்கூலி பணியாளர் புலங்களை அனுமதி அடிப்படையில் கட்டுப்படுத்துகிறது
+ */
+function controlDailyWageStaffFields() {
+  const libraryName = document.getElementById("finalLib")?.innerText?.trim();
+  if (!libraryName) return;
+
+  const nameInput   = document.getElementById("staffNameTamil");
+  const daysInput   = document.getElementById("staffDays");
+  
+  if (!nameInput || !daysInput) return;
+
+  // முதலில் reset செய்யலாம் (safety)
+  nameInput.disabled = false;
+  daysInput.disabled = false;
+  nameInput.readOnly = false;
+  daysInput.readOnly = false;
+  nameInput.placeholder = "பெயர் (Text)";
+  daysInput.value = "0";
+
+  google.script.run
+    .withSuccessHandler(function(res) {
+      if (!res.success) {
+        console.error("தினக்கூலி அனுமதி சரிபார்ப்பில் பிழை:", res.message);
+        disableDailyWageFields(nameInput, daysInput);
+        return;
+      }
+
+      if (res.allowed) {
+        // அனுமதி உள்ளது → editable ஆக வை
+        nameInput.disabled = false;
+        daysInput.disabled = false;
+        nameInput.readOnly = false;
+        daysInput.readOnly = false;
+        nameInput.placeholder = "பெயர் (தமிழில்)";
+        
+        // optional: label மாற்றம்
+        updateLabel("staffNameTamil", "தினக்கூலி நூலகப் பணியாளர் பெயர் (தமிழில்)");
+      } else {
+        // அனுமதி இல்லை → disable + message
+        disableDailyWageFields(nameInput, daysInput);
+      }
+    })
+    .withFailureHandler(function(err) {
+      console.error("Server error:", err);
+      disableDailyWageFields(nameInput, daysInput);
+    })
+    .isDailyWagePermissionAllowed(libraryName);
+}
+
+/**
+ * தினக்கூலி புலங்களை disable செய்து செய்தி காட்டும் helper
+ */
+function disableDailyWageFields(nameInput, daysInput) {
+  nameInput.disabled = true;
+  daysInput.disabled = true;
+  nameInput.readOnly = true;
+  daysInput.readOnly = true;
+  nameInput.value = "";
+  daysInput.value = "0";
+  nameInput.placeholder = "இந்த நூலகத்திற்கு தினக்கூலி அனுமதி இல்லை";
+
+  // optional: label-ஐ மாற்றி தெளிவுபடுத்தலாம்
+  updateLabel("staffNameTamil", "தினக்கூலி நூலகப் பணியாளர் (அனுமதி இல்லை)");
+}
+
+/**
+ * Label உரையை மாற்றும் உதவி function
+ */
+function updateLabel(inputId, newText) {
+  const input = document.getElementById(inputId);
+  if (input && input.previousElementSibling && input.previousElementSibling.tagName === "LABEL") {
+    input.previousElementSibling.textContent = newText;
+  }
+}
+
+// Admin Mode-ல் Login flow இல்லாமல் நேரடியாக வந்திருந்தால் stage0-க்கும்,
+// சாதாரணமாக Login செய்து வந்திருந்தால் stage3 (முகப்புப் பக்கம்)-க்கும் திரும்பும்
+function adminBackFromNews() {
+  if (selectedLib) {
+    show(3);
+  } else {
+    show(0);
+  }
+}
+
+// ======================================================================
+// 🛠 ADMIN MODE: நாளிதழ் மேலாண்மை (STAGE 6) — ?admin URL மூலம் மட்டுமே
+// ======================================================================
+
+// Slot எண் -> {slot, name, maxRate} (Master List Admin திரையில் edit செய்ய)
+let adminNewsMasterList = [];
+
+function loadNewspaperAdminScreen() {
+  // Section A: Master List
+  document.getElementById('newsMasterListDiv').innerHTML =
+    '<p style="text-align:center;color:#888;">ஏற்றப்படுகிறது...</p>';
+  document.getElementById('newsMasterSaveMsg').style.display = 'none';
+
+  google.script.run.withSuccessHandler(list => {
+    adminNewsMasterList = list || [];
+    renderNewsMasterListUI(adminNewsMasterList);
+  }).getNewspaperAdminMasterList();
+
+  // Section B: Library dropdown
+  const sel = document.getElementById('adminLibrarySelect');
+  sel.innerHTML = '<option value="">-- நூலகத்தைத் தேர்வு செய்க --</option>';
+  document.getElementById('libraryNewsCheckListDiv').innerHTML =
+    '<p style="text-align:center;color:#888;">மேலே ஒரு நூலகத்தைத் தேர்ந்தெடுக்கவும்.</p>';
+  document.getElementById('saveLibraryMapBtn').style.display = 'none';
+  document.getElementById('libraryMapSaveMsg').style.display = 'none';
+
+  google.script.run.withSuccessHandler(names => {
+    (names || []).forEach(n => {
+      const opt = document.createElement('option');
+      opt.value = n;
+      opt.textContent = n;
+      sel.appendChild(opt);
+    });
+  }).getAllLibraryNamesForAdmin();
+}
+
+function renderNewsMasterListUI(list) {
+  const container = document.getElementById('newsMasterListDiv');
+  let html = '<div style="display:grid;grid-template-columns:40px 1fr 90px;gap:8px;align-items:center;margin-bottom:6px;font-weight:700;font-size:13px;color:#555;">' +
+             '<span>Slot</span><span>நாளிதழ் பெயர்</span><span>அதி.விலை</span></div>';
+
+  for (let slot = 1; slot <= 18; slot++) {
+    const item = list.find(r => r.slot === slot) || { slot: slot, name: '', maxRate: 0 };
+    html += '<div style="display:grid;grid-template-columns:40px 1fr 90px;gap:8px;align-items:center;margin-bottom:8px;">' +
+            '<span style="font-weight:700;text-align:center;">' + slot + '</span>' +
+            '<input type="text" id="adm_name_' + slot + '" value="' + (item.name || '').replace(/"/g,'&quot;') + '" placeholder="காலி slot" style="padding:8px;">' +
+            '<input type="number" id="adm_rate_' + slot + '" value="' + (item.maxRate || 0) + '" min="0" style="padding:8px;">' +
+            '</div>';
+  }
+  container.innerHTML = html;
+}
+
+function saveNewspaperMasterListUI() {
+  const rows = [];
+  for (let slot = 1; slot <= 18; slot++) {
+    const nameEl = document.getElementById('adm_name_' + slot);
+    const rateEl = document.getElementById('adm_rate_' + slot);
+    if (!nameEl || !rateEl) continue;
+    rows.push({
+      slot: slot,
+      name: nameEl.value.trim(),
+      maxRate: parseFloat(rateEl.value) || 0
+    });
+  }
+
+  const msg = document.getElementById('newsMasterSaveMsg');
+  msg.style.display = 'none';
+
+  google.script.run
+    .withSuccessHandler(res => {
+      if (res && res.success) {
+        msg.textContent = "✅ Master List Save ஆனது!";
+        msg.className = 'success';
+      } else {
+        msg.textContent = "❌ " + (res && res.message ? res.message : "Save ஆகவில்லை");
+        msg.className = 'error';
+      }
+      msg.style.display = 'block';
+    })
+    .withFailureHandler(err => {
+      msg.textContent = "❌ சர்வர் பிழை: " + err.message;
+      msg.className = 'error';
+      msg.style.display = 'block';
+    })
+    .saveNewspaperMasterList(rows);
+}
+
+function loadLibraryNewspaperMapUI() {
+  const libName = document.getElementById('adminLibrarySelect').value;
+  const div = document.getElementById('libraryNewsCheckListDiv');
+  const saveBtn = document.getElementById('saveLibraryMapBtn');
+  document.getElementById('libraryMapSaveMsg').style.display = 'none';
+
+  if (!libName) {
+    div.innerHTML = '<p style="text-align:center;color:#888;">மேலே ஒரு நூலகத்தைத் தேர்ந்தெடுக்கவும்.</p>';
+    saveBtn.style.display = 'none';
+    return;
+  }
+
+  div.innerHTML = '<p style="text-align:center;color:#888;">ஏற்றப்படுகிறது...</p>';
+
+  google.script.run.withSuccessHandler(mapRes => {
+    if (!mapRes || !mapRes.success) {
+      div.innerHTML = '<p style="color:#e74a3b;">❌ ' + (mapRes && mapRes.message ? mapRes.message : 'தரவு கிடைக்கவில்லை') + '</p>';
+      saveBtn.style.display = 'none';
+      return;
+    }
+
+    let html = '';
+    for (let slot = 1; slot <= 18; slot++) {
+      const masterItem = adminNewsMasterList.find(r => r.slot === slot);
+      const label = masterItem && masterItem.name ? masterItem.name : ('Slot ' + slot + ' (காலி)');
+      const checked = mapRes.map[slot] ? 'checked' : '';
+      const disabledAttr = (masterItem && masterItem.name) ? '' : 'disabled';
+      html += '<label style="display:flex;align-items:center;gap:10px;font-weight:600;margin-top:10px;">' +
+              '<input type="checkbox" id="lib_slot_' + slot + '" ' + checked + ' ' + disabledAttr +
+              ' style="width:auto;transform:scale(1.4);"> ' + label + '</label>';
+    }
+    div.innerHTML = html;
+    saveBtn.style.display = 'block';
+  }).getLibraryNewspaperMapForLibrary(libName);
+}
+
+function saveLibraryNewspaperMapUI() {
+  const libName = document.getElementById('adminLibrarySelect').value;
+  if (!libName) return;
+
+  const activeSlots = [];
+  for (let slot = 1; slot <= 18; slot++) {
+    const cb = document.getElementById('lib_slot_' + slot);
+    activeSlots.push(!!(cb && cb.checked));
+  }
+
+  const msg = document.getElementById('libraryMapSaveMsg');
+  msg.style.display = 'none';
+
+  google.script.run
+    .withSuccessHandler(res => {
+      if (res && res.success) {
+        msg.textContent = "✅ \"" + libName + "\" நூலகத்திற்கு Save ஆனது!";
+        msg.className = 'success';
+      } else {
+        msg.textContent = "❌ " + (res && res.message ? res.message : "Save ஆகவில்லை");
+        msg.className = 'error';
+      }
+      msg.style.display = 'block';
+    })
+    .withFailureHandler(err => {
+      msg.textContent = "❌ சர்வர் பிழை: " + err.message;
+      msg.className = 'error';
+      msg.style.display = 'block';
+    })
+    .saveLibraryNewspaperMap(libName, activeSlots);
+}
+
+</script>
+</body>
+</html>

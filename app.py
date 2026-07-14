@@ -18,12 +18,15 @@ from flask import Flask, render_template, request, jsonify, redirect
 
 import sheets_service as svc
 import pdf_service as pdf
+import pettycash_service as pc
 
 app = Flask(__name__)
+
 
 @app.route("/")
 def home():
     return redirect("/leave")
+
 
 # ------------------------------------------------------------
 # function name (frontend அழைக்கும் பெயர்) -> Python callable
@@ -43,6 +46,18 @@ DISPATCH = {
     "sendELMLApplicationEmail":  lambda args: pdf.send_elml_application_email(*args),
 }
 
+# ------------------------------------------------------------
+# சில்லறை செலவினம் (Petty Cash) — Phase 1
+# ------------------------------------------------------------
+PETTYCASH_DISPATCH = {
+    "getLibraryTypes":              lambda args: pc.get_library_types(),
+    "getLibrariesByType":           lambda args: pc.get_libraries_by_type(*args),
+    "getEmailsForLibrary":          lambda args: pc.get_emails_for_library(*args),
+    "getExistingContingentData":    lambda args: pc.get_existing_contingent_data(*args),
+    "submitOrUpdateContingent":     lambda args: pc.submit_or_update_contingent(*args),
+    "getAvailableMonthsForLibrary": lambda args: pc.get_available_months_for_library(*args),
+}
+
 
 @app.route("/leave")
 @app.route("/leave/")
@@ -55,6 +70,32 @@ def leave_api(fn_name):
     handler = DISPATCH.get(fn_name)
     if handler is None:
         return jsonify({"__gasError__": f"Unknown function: {fn_name}"}), 200
+
+    body = request.get_json(silent=True) or {}
+    args = body.get("args", [])
+
+    try:
+        result = handler(args)
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({"__gasError__": str(e)}), 200
+
+
+# ------------------------------------------------------------
+# சில்லறை செலவினம் routes
+# ------------------------------------------------------------
+@app.route("/pettycash")
+@app.route("/pettycash/")
+def pettycash_index():
+    is_admin = "admin" in request.args
+    return render_template("pettycash_index.html", is_admin=is_admin)
+
+
+@app.route("/pettycash/api/<fn_name>", methods=["POST"])
+def pettycash_api(fn_name):
+    handler = PETTYCASH_DISPATCH.get(fn_name)
+    if handler is None:
+        return jsonify({"__gasError__": f"Unknown function: {fn_name} (Phase 1-ல் இன்னும் சேர்க்கப்படவில்லை)"}), 200
 
     body = request.get_json(silent=True) or {}
     args = body.get("args", [])
