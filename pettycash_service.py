@@ -694,7 +694,8 @@ def save_or_update_receipt(data):
 # செய்து, HTML அட்டவணையாக உருவாக்கி PDF-ஆக Drive-ல் சேமிக்கிறோம்
 # (GAS-ல் SpreadsheetApp export URL trick பயன்படுத்தப்பட்டது — service
 # account context-ல் அது சிக்கலானது என்பதால், pdf_service.py-ல் ஏற்கனவே
-# இருக்கும் அதே xhtml2pdf HTML→PDF வழியை பயன்படுத்துகிறோம்).
+# இருக்கும் அதே HTML→PDF வழியை (WeasyPrint — தமிழ் Indic shaping
+# சரியாக வருவதற்காக) பயன்படுத்துகிறோம்).
 
 def _current_fiscal_year_label():
     """ஏப்ரல்-மார்ச் அரசு நிதியாண்டு அடிப்படையில் 'நடப்பு ஆண்டு' label
@@ -760,16 +761,14 @@ def _yearly_abstract_html(library_name, subtitle, header, out_rows, landscape=Tr
     month_w = 9.0 if n_amount_cols <= 12 else 6.0
     amount_w = (100 - sno_w - month_w) / n_amount_cols if n_amount_cols else 0
 
-    # முக்கியமான fix: xhtml2pdf, <colgroup><col width> -ஐ நம்பமுடியாத
-    # அளவுக்கு handle பண்ணுது — ஒரு column-ல் இருக்கும் எல்லா cell-களும்
-    # காலியா (empty string) இருந்தால், table-layout:fixed இருந்தும் அந்த
-    # column-ஐ width இல்லாமல் சுருக்கிவிடுது (இதனால் தான் columns ஒன்றன்
-    # மேல் ஒன்று மேலெழுதி வந்தது). இதை தவிர்க்க:
-    #   1. width-ஐ <colgroup> வழியாக மட்டும் இல்லாமல் ஒவ்வொரு <th>/<td>-லும்
-    #      நேரடியா style="width:...%" ஆக போடுகிறோம்.
-    #   2. வெறும் காலியாக (0/''/None) இருக்கும் cell-ல் "" போடாமல்
-    #      "&nbsp;"-ஐ போடுகிறோம், அதனால் cell content ஒரு போதும்
-    #      முழுக்க காலியாக இராது, column collapse ஆகாது.
+    # குறிப்பு: முன்பு xhtml2pdf பயன்படுத்தியபோது <colgroup><col width>-ஐ
+    # நம்பமுடியாமல், ஒரு column-ல் எல்லா cell-களும் காலியாக இருந்தால்
+    # column collapse ஆகும் bug இருந்தது. WeasyPrint-க்கு மாறிய பின்பும்
+    # (defensive-ஆக, extra robust-ஆக இருக்க) அதே அணுகுமுறையை
+    # தொடர்கிறோம் — width-ஐ ஒவ்வொரு <th>/<td>-லும் நேரடியா
+    # style="width:...%" ஆக போடுகிறோம், மற்றும் காலியான (0/''/None)
+    # cell-ல் "&nbsp;" போடுகிறோம் (column filtering-க்குப் பின் மீதமுள்ள
+    # columns தெளிவாக, சமமான அகலத்தில் வர).
     def _w(i):
         if i == 0:
             return sno_w

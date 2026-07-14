@@ -17,24 +17,40 @@ frontend-ல் "PDF திறக்கவும்" link ஏற்கனவே 
 import os
 import time
 import uuid
+import pathlib
 from io import BytesIO
-from xhtml2pdf import pisa
+from weasyprint import HTML as _WeasyHTML
 
 # ------------------------------------------------------------
-# Tamil font embedding — xhtml2pdf/reportlab-க்கு தமிழ் Unicode
-# glyphs கிடையாது என்பதால், font-family: 'Noto Sans Tamil' என்று
-# CSS-ல் மட்டும் குறிப்பிட்டால் ■■■ (missing-glyph boxes) தான் PDF-ல்
-# வரும். இதை சரிசெய்ய, static/fonts/-ல் இருக்கும் Noto Sans Tamil
-# TTF-ஐ @font-face மூலம் நேரடியாக embed செய்கிறோம் (absolute path —
-# gunicorn எந்த working directory-ல் இருந்தாலும் சரியாக வேலை செய்ய).
+# Tamil font embedding
+# ------------------------------------------------------------
+# முன்பு xhtml2pdf/reportlab பயன்படுத்தினோம் — அதன் text-rendering
+# engine-க்கு Indic complex-script shaping (தமிழ் உயிர்மெய் குறியீடுகள்
+# எழுத்துடன் சரியாக இணைவது, எழுத்துக்கள் சரியான வரிசையில் இருப்பது
+# போன்றவை) தெரியாது. இதனால் NotoSansTamil font embed ஆகியிருந்தும்,
+# எழுத்துருக்கள் தவறான வரிசையில்/பிரிந்த நிலையில் "கேவலமாக" (garbled)
+# வந்தது.
+#
+# WeasyPrint, Pango/HarfBuzz shaping pipeline-ஐ பயன்படுத்துவதால்
+# தமிழ் உயிர்மெய் எழுத்துக்கள் சரியாக shape ஆகி வருகிறது. எனவே PDF
+# உருவாக்கம் முழுவதும் (விடுப்பு விண்ணப்பங்கள் + ஆண்டு வரவு/செலவு
+# சுருக்கங்கள்) WeasyPrint-க்கு மாற்றப்பட்டுள்ளது.
+#
+# @font-face src-க்கு WeasyPrint-க்கு file:// URI தேவை (வெறும்
+# filesystem path கொடுத்தால் சில சூழல்களில் resolve ஆகாது) —
+# gunicorn எந்த working directory-ல் இருந்தாலும் சரியாக வேலை செய்ய
+# absolute path-ஐ pathlib.Path.as_uri()-ஆல் file:// URI ஆக மாற்றுகிறோம்.
 # ------------------------------------------------------------
 _FONTS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "static", "fonts")
 _FONT_REGULAR = os.path.join(_FONTS_DIR, "NotoSansTamil-Regular.ttf")
 _FONT_BOLD = os.path.join(_FONTS_DIR, "NotoSansTamil-Bold.ttf")
 
+_FONT_REGULAR_URI = pathlib.Path(_FONT_REGULAR).as_uri()
+_FONT_BOLD_URI = pathlib.Path(_FONT_BOLD).as_uri()
+
 TAMIL_FONT_FACE_CSS = f"""
-  @font-face {{ font-family: 'NotoTamil'; src: url('{_FONT_REGULAR}'); }}
-  @font-face {{ font-family: 'NotoTamil'; font-weight: bold; src: url('{_FONT_BOLD}'); }}
+  @font-face {{ font-family: 'NotoTamil'; src: url('{_FONT_REGULAR_URI}'); }}
+  @font-face {{ font-family: 'NotoTamil'; font-weight: bold; src: url('{_FONT_BOLD_URI}'); }}
 """
 
 # ------------------------------------------------------------
@@ -211,11 +227,14 @@ def build_elml_application_html(p):
 
 
 def _html_to_pdf_bytes(html_content):
-    out = BytesIO()
-    result = pisa.CreatePDF(src=html_content, dest=out, encoding="utf-8")
-    if result.err:
-        raise RuntimeError("PDF உருவாக்கத்தில் பிழை")
-    return out.getvalue()
+    """WeasyPrint மூலம் HTML-ஐ PDF bytes ஆக மாற்றுகிறது (தமிழ் Indic
+    shaping சரியாக வருவதற்காக xhtml2pdf-க்கு பதிலாக இதை பயன்படுத்துகிறோம்)."""
+    try:
+        out = BytesIO()
+        _WeasyHTML(string=html_content, base_url=_FONTS_DIR).write_pdf(out)
+        return out.getvalue()
+    except Exception as e:
+        raise RuntimeError(f"PDF உருவாக்கத்தில் பிழை: {e}")
 
 
 def send_leave_application_email(params):
