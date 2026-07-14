@@ -14,12 +14,16 @@ project-ல் இணைக்கப்படும் ஒரு blueprint-ஆ�
 ------------------------------------------------------------
 """
 
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, redirect
 
 import sheets_service as svc
 import pdf_service as pdf
 
 app = Flask(__name__)
+
+@app.route("/")
+def home():
+    return redirect("/leave")
 
 # ------------------------------------------------------------
 # function name (frontend அழைக்கும் பெயர்) -> Python callable
