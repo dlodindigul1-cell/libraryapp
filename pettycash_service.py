@@ -12,7 +12,7 @@ GAS Code.gs-ல் இருந்த functions-ன் Python port:
 
 import os
 import re
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import gspread
 from googleapiclient.discovery import build
@@ -522,13 +522,41 @@ def _get_bank_sheet():
     return get_client().open_by_key(BANK_SHEET_ID).worksheet(BANK_SHEET_NAME)
 
 
+def _sheet_serial_to_date(value):
+    """Google Sheets date serial number (days since 1899-12-30) -> datetime.
+    value ஒரு string date-ஆ இருந்தாலும் handle பண்ணும்."""
+    if value in (None, ""):
+        return None
+    # Sheets serial number (எண்ணா இருந்தா)
+    if isinstance(value, (int, float)):
+        try:
+            return datetime(1899, 12, 30) + timedelta(days=float(value))
+        except (OverflowError, ValueError):
+            return None
+    # String date — பல formats முயற்சி
+    raw = str(value).strip()
+    # numeric string (serial number text ஆக வந்தாலும்)
+    try:
+        serial = float(raw)
+        return datetime(1899, 12, 30) + timedelta(days=serial)
+    except ValueError:
+        pass
+    for fmt in ("%d/%m/%Y", "%Y-%m-%d", "%m/%d/%Y", "%d-%m-%Y", "%d/%m/%Y %H:%M:%S"):
+        try:
+            return datetime.strptime(raw, fmt)
+        except ValueError:
+            continue
+    return None
+
+
 def validate_payment_with_bank(utr_number):
     if not utr_number:
         return {"success": False, "message": "UTR எண் கொடுக்கப்படவில்லை"}
     try:
         sh = _get_bank_sheet()
         # B,C,D,E columns (Date, UTR, Amount, UsedLibrary) row 2 onwards
-        rows = sh.get("B2:E")
+        # UNFORMATTED_VALUE — தேதி Sheets serial number-ஆக துல்லியமா கிடைக்கும்
+        rows = sh.get("B2:E", value_render_option="UNFORMATTED_VALUE")
         clean_utr = _s(utr_number)
 
         today = datetime.now()
@@ -546,13 +574,7 @@ def validate_payment_with_bank(utr_number):
             if utr != clean_utr:
                 continue
 
-            txn_date = None
-            for fmt in ("%d/%m/%Y", "%Y-%m-%d", "%m/%d/%Y"):
-                try:
-                    txn_date = datetime.strptime(str(date_raw), fmt)
-                    break
-                except ValueError:
-                    continue
+            txn_date = _sheet_serial_to_date(date_raw)
 
             if txn_date is not None:
                 txn_month, txn_year = txn_date.month - 1, txn_date.year
@@ -564,9 +586,12 @@ def validate_payment_with_bank(utr_number):
                 return {"success": False,
                         "message": f"❌ {used_library} இந்த UTR எண்ணை பயன்படுத்தியுள்ளார். சரிபார்க்கவும் அல்லது அலுவலகத்தை தொடர்பு கொள்ளவும்."}
 
+            if txn_date is None:
+                return {"success": False, "message": "இந்த UTR-ன் தேதியை படிக்க முடியவில்லை. Bank sheet-ல் Date column format-ஐ சரிபார்க்கவும்."}
+
             return {
                 "success": True,
-                "date": txn_date.strftime("%Y-%m-%d") if txn_date else _s(date_raw),
+                "date": txn_date.strftime("%Y-%m-%d"),   # HTML date input-க்கு கட்டாயம் இந்த format தேவை
                 "amount": float(amt) if amt not in ("", None) else 0,
                 "row": idx + 2,
             }
