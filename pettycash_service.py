@@ -30,6 +30,14 @@ CONTINGENT_SHEET_NAME    = os.environ.get("CONTINGENT_SHEET_NAME", "contingent")
 
 APPROVAL_PDF_FOLDER_ID   = os.environ.get("APPROVAL_PDF_FOLDER_ID", "")
 
+RECEIPTS_SHEET_ID        = os.environ.get("RECEIPTS_SHEET_ID", "")
+RECEIPTS_SHEET_NAME      = os.environ.get("RECEIPTS_SHEET_NAME", "Form responses 1")
+
+BANK_SHEET_ID             = os.environ.get("BANK_SHEET_ID", "")
+BANK_SHEET_NAME           = os.environ.get("BANK_SHEET_NAME", "FOR MOBILE APP")
+
+ACK_PDF_FOLDER_ID         = os.environ.get("ACK_PDF_FOLDER_ID", "")
+
 _client = None
 _drive = None
 
@@ -359,3 +367,282 @@ def get_available_months_for_library(library_name):
         return {"success": True, "months": result}
     except Exception as e:
         return {"success": False, "message": f"Server பிழை: {e}"}
+
+
+# ------------------------------------------------------------
+# shareApprovedExpenseMailByFileId / shareReceiptAcknowledgementByFileId
+# இரண்டுமே ஒரே logic (Drive file-ஐ "anyone with link" ஆக்கி,
+# loginEmail-க்கும் தனியா viewer access கொடுக்க முயற்சி) —
+# ஒரே helper function-ஐ பகிர்ந்துகொள்கிறோம்.
+# ------------------------------------------------------------
+def _share_drive_file(login_email, file_id):
+    if not file_id or not login_email:
+        return {"success": False, "message": "கோப்பு ID அல்லது மின்னஞ்சல் கிடைக்கவில்லை"}
+    try:
+        drive = get_drive()
+        drive.permissions().create(
+            fileId=file_id, body={"role": "reader", "type": "anyone"}
+        ).execute()
+        try:
+            drive.permissions().create(
+                fileId=file_id,
+                body={"role": "reader", "type": "user", "emailAddress": login_email},
+                sendNotificationEmail=False,
+            ).execute()
+        except Exception:
+            pass  # GAS-ல் safeAddViewer_ மாதிரியே — தோல்வியானாலும் தொடரும்
+
+        meta = drive.files().get(fileId=file_id, fields="webViewLink").execute()
+        return {
+            "success": True,
+            "message": "லிங்க் தயார் — கீழே கிளிக் செய்து PDF-ஐ பார்க்கலாம்",
+            "fileId": file_id,
+            "originalUrl": meta.get("webViewLink"),
+            "url": meta.get("webViewLink"),
+        }
+    except Exception as e:
+        return {"success": False, "message": f"Server பிழை: {e}"}
+
+
+def share_approved_expense_mail_by_file_id(login_email, file_id):
+    return _share_drive_file(login_email, file_id)
+
+
+def share_receipt_acknowledgement_by_file_id(login_email, file_id):
+    return _share_drive_file(login_email, file_id)
+
+
+# ------------------------------------------------------------
+# getAvailableMonthsForLibraryAcknowledgement
+# கோப்பு பெயர்: "Acknowledgement_<code>.<libraryName>_<mm-yyyy>.pdf"
+# ------------------------------------------------------------
+def get_available_months_for_library_acknowledgement(library_name):
+    try:
+        if not library_name:
+            return {"success": False, "message": "நூலக பெயர் கிடைக்கவில்லை"}
+        if not ACK_PDF_FOLDER_ID:
+            return {"success": False, "message": "ACK_PDF_FOLDER_ID configured இல்லை"}
+
+        target_name = _normalize_library_name(library_name)
+        drive = get_drive()
+
+        result = []
+        page_token = None
+        query = f"'{ACK_PDF_FOLDER_ID}' in parents and mimeType='application/pdf' and trashed=false"
+        while True:
+            resp = drive.files().list(
+                q=query, fields="nextPageToken, files(id, name)",
+                pageToken=page_token, pageSize=1000
+            ).execute()
+            for f in resp.get("files", []):
+                file_name = f["name"]
+                base_name = re.sub(r"\.pdf$", "", file_name, flags=re.IGNORECASE)
+                first_us = base_name.find("_")
+                last_us = base_name.rfind("_")
+                if first_us == -1 or last_us == -1 or first_us == last_us:
+                    continue
+                middle = base_name[first_us + 1:last_us]
+                raw_month_year = base_name[last_us + 1:].strip()
+                name_part = _normalize_library_name(middle)
+                if name_part == target_name:
+                    result.append({
+                        "fileId": f["id"],
+                        "fileName": file_name,
+                        "monthYear": raw_month_year.replace("-", "/"),
+                    })
+            page_token = resp.get("nextPageToken")
+            if not page_token:
+                break
+
+        def sort_key(item):
+            parts = (item["monthYear"] or "0/0").split("/")
+            try:
+                m, y = int(parts[0]), int(parts[1])
+            except (ValueError, IndexError):
+                m, y = 0, 0
+            return (-y, -m)
+
+        result.sort(key=sort_key)
+
+        if not result:
+            return {"success": False, "message": "இந்த நூலகத்திற்கு வரவு ஒப்புதல் PDF கிடைக்கவில்லை"}
+        return {"success": True, "months": result}
+    except Exception as e:
+        return {"success": False, "message": f"Server பிழை: {e}"}
+
+
+# ------------------------------------------------------------
+# RECEIPTS (வரவினங்கள்) — RECEIPTS_SHEET_ID / "Form responses 1"
+# Columns: F(5)=UTR, G(6)=Date, H..Q(7-16)=amounts, R(17)=Total,
+#          S(18)=Visitors, T(19)=Issues, U(20)=Usage
+# ------------------------------------------------------------
+RECEIPT_AMOUNT_KEYS = [
+    "deposit", "subscription", "lateFee", "bookFine", "oldPaperSale",
+    "oldBookSale", "patron", "chiefPatron", "donor", "otherIncome",
+]
+
+
+def _get_receipts_sheet():
+    return get_client().open_by_key(RECEIPTS_SHEET_ID).worksheet(RECEIPTS_SHEET_NAME)
+
+
+def get_existing_receipt_by_utr(utr):
+    try:
+        sh = _get_receipts_sheet()
+        data = sh.get_all_values()
+        clean_utr = _s(utr)
+        for i in range(1, len(data)):
+            row = data[i]
+            row_utr = _s(row[5]) if len(row) > 5 else ""
+            if row_utr == clean_utr:
+                def num(idx):
+                    try:
+                        return float(row[idx]) if len(row) > idx and row[idx] not in ("", None) else 0
+                    except ValueError:
+                        return 0
+                return {
+                    "success": True,
+                    "rowIndex": i + 1,
+                    "data": {
+                        "utr": row_utr,
+                        "date": row[6] if len(row) > 6 else "",
+                        "deposit": num(7), "subscription": num(8), "lateFee": num(9),
+                        "bookFine": num(10), "oldPaperSale": num(11), "oldBookSale": num(12),
+                        "patron": num(13), "chiefPatron": num(14), "donor": num(15),
+                        "otherIncome": num(16), "total": num(17),
+                        "visitors": num(18), "issues": num(19), "usage": num(20),
+                    },
+                }
+        return {"success": False}
+    except Exception as e:
+        return {"success": False, "message": str(e)}
+
+
+def _get_bank_sheet():
+    return get_client().open_by_key(BANK_SHEET_ID).worksheet(BANK_SHEET_NAME)
+
+
+def validate_payment_with_bank(utr_number):
+    if not utr_number:
+        return {"success": False, "message": "UTR எண் கொடுக்கப்படவில்லை"}
+    try:
+        sh = _get_bank_sheet()
+        # B,C,D,E columns (Date, UTR, Amount, UsedLibrary) row 2 onwards
+        rows = sh.get("B2:E")
+        clean_utr = _s(utr_number)
+
+        today = datetime.now()
+        current_month, current_year = today.month - 1, today.year  # 0-based like JS
+        last_month, last_month_year = current_month - 1, current_year
+        if last_month < 0:
+            last_month, last_month_year = 11, current_year - 1
+
+        for idx, row in enumerate(rows):
+            date_raw = row[0] if len(row) > 0 else ""
+            utr = _s(row[1]) if len(row) > 1 else ""
+            amt = row[2] if len(row) > 2 else 0
+            used_library = _s(row[3]) if len(row) > 3 else ""
+
+            if utr != clean_utr:
+                continue
+
+            txn_date = None
+            for fmt in ("%d/%m/%Y", "%Y-%m-%d", "%m/%d/%Y"):
+                try:
+                    txn_date = datetime.strptime(str(date_raw), fmt)
+                    break
+                except ValueError:
+                    continue
+
+            if txn_date is not None:
+                txn_month, txn_year = txn_date.month - 1, txn_date.year
+                if (txn_year < last_month_year) or (txn_year == last_month_year and txn_month < last_month):
+                    return {"success": False,
+                            "message": "⚠️ இன்னும் அலுவலகத்தால் கடந்த மாத வங்கி அறிக்கை பதிவேற்றம் செய்யப்படவில்லை தயவு செய்து காத்திருக்கவும்"}
+
+            if used_library:
+                return {"success": False,
+                        "message": f"❌ {used_library} இந்த UTR எண்ணை பயன்படுத்தியுள்ளார். சரிபார்க்கவும் அல்லது அலுவலகத்தை தொடர்பு கொள்ளவும்."}
+
+            return {
+                "success": True,
+                "date": txn_date.strftime("%Y-%m-%d") if txn_date else _s(date_raw),
+                "amount": float(amt) if amt not in ("", None) else 0,
+                "row": idx + 2,
+            }
+
+        return {"success": False, "message": "இந்த UTR Bank Sheet-ல் இல்லை"}
+    except Exception as e:
+        return {"success": False, "message": f"Server பிழை: {e}"}
+
+
+def lock_utr_to_library(utr_number, data):
+    try:
+        sh = _get_bank_sheet()
+        rows = sh.get("C2:C")
+        clean_utr = _s(utr_number)
+        for idx, row in enumerate(rows):
+            utr = _s(row[0]) if row else ""
+            if utr == clean_utr:
+                row_num = idx + 2
+                values = [
+                    data.get("libraryName", ""),
+                    data.get("deposit", 0), data.get("subscription", 0), data.get("lateFee", 0),
+                    data.get("bookFine", 0), data.get("oldPaperSale", 0), data.get("oldBookSale", 0),
+                    data.get("patron", 0), data.get("chiefPatron", 0), data.get("donor", 0),
+                    data.get("otherIncome", 0), data.get("total", 0),
+                    data.get("visitors", 0), data.get("issues", 0), data.get("usage", 0),
+                ]
+                sh.update(f"E{row_num}:S{row_num}", [values], value_input_option="USER_ENTERED")
+                return {"success": True}
+        return {"success": False}
+    except Exception:
+        return {"success": False}
+
+
+def save_or_update_receipt(data):
+    try:
+        sh = _get_receipts_sheet()
+        timestamp = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+        utr = _s(data.get("utr"))
+
+        month_year = _s(data.get("monthYear"))
+        if not month_year:
+            now = datetime.now()
+            month_year = f"{now.month:02d}/{now.year}"
+        unique_key = f"{_s(data.get('libraryName'))}_{month_year}"
+        if not utr:
+            utr = unique_key
+
+        total = sum(float(data.get(k, 0) or 0) for k in RECEIPT_AMOUNT_KEYS)
+        data["total"] = total
+
+        row_data = [
+            timestamp, data.get("loginEmail", ""), data.get("libraryType", ""), "",
+            data.get("libraryName", ""), utr, data.get("date", ""),
+            data.get("deposit", 0), data.get("subscription", 0), data.get("lateFee", 0),
+            data.get("bookFine", 0), data.get("oldPaperSale", 0), data.get("oldBookSale", 0),
+            data.get("patron", 0), data.get("chiefPatron", 0), data.get("donor", 0),
+            data.get("otherIncome", 0), total,
+            data.get("visitors", 0), data.get("issues", 0), data.get("usage", 0),
+        ]
+
+        existing = get_existing_receipt_by_utr(utr) if utr else {"success": False}
+
+        if existing.get("success"):
+            row_index = existing["rowIndex"]
+            end_col = chr(ord("A") + len(row_data) - 1)
+            sh.update(f"A{row_index}:{end_col}{row_index}", [row_data], value_input_option="USER_ENTERED")
+            result_row = row_index
+            action = "updated"
+        else:
+            sh.append_row(row_data, value_input_option="USER_ENTERED")
+            result_row = len(sh.get_all_values())
+            action = "created"
+
+        if data.get("utr"):
+            lock_utr_to_library(data.get("utr"), data)
+
+        return {"success": True, "row": result_row, "action": action, "total": total}
+    except Exception as e:
+        return {"success": False, "message": str(e)}

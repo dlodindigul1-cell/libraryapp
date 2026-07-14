@@ -53,6 +53,16 @@ leave-app/
 | `SHEET_NAME_RH` | `RH DATES` *(வேற பெயரா இருந்தா மாத்துங்க)* |
 | `DRIVE_FOLDER_ID` | `1T_uEVBJgQdDIS_OgLkAWOpUKOhGrbk6K` |
 | `GOOGLE_SERVICE_ACCOUNT_JSON` | Step1-ல் download பண்ண .json file-ன் **முழு content-ஐயும்** ஒரே வரியா copy-paste பண்ணுங்க |
+| `LIBRARY_DATA_SPREAD_ID` | `105ZeqCzdvMMEL1751cocm1oDETd2Bf4wpSutTLzxwMs` |
+| `LIBRARY_DATA_SHEET_NAME` | `Sheet1` |
+| `CONTINGENT_SHEET_ID` | `1KbMsWozCFBD79RIBWxznolTl4atj3yyyRE9w3to0KPw` |
+| `CONTINGENT_SHEET_NAME` | `contingent` |
+| `APPROVAL_PDF_FOLDER_ID` | `1huearZRpZir7myDEq8RRfTmJu9z6KO0-` |
+| `RECEIPTS_SHEET_ID` | `1q-sYQ5Gi85L7KbTNKDAMlM636-c9_Ru383i2CuV258U` |
+| `RECEIPTS_SHEET_NAME` | `Form responses 1` |
+| `BANK_SHEET_ID` | `1ytHrmIcmmF60f4ZiV02lD3qSmoZ9BrstOtU6ylcccwg` |
+| `BANK_SHEET_NAME` | `FOR MOBILE APP` |
+| `ACK_PDF_FOLDER_ID` | `1rh9p0XC55Gx_nC2bg3Cr3FU9XsRSlMl3` |
 
 ⚠️ `GOOGLE_SERVICE_ACCOUNT_JSON`-ஐ Render dashboard-ல் "Environment"
 tab-ல் ஒரு secret variable-ஆ சேர்க்கணும் — code-ல் ஒருபோதும் hardcode

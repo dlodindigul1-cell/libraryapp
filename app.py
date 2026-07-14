@@ -56,6 +56,12 @@ PETTYCASH_DISPATCH = {
     "getExistingContingentData":    lambda args: pc.get_existing_contingent_data(*args),
     "submitOrUpdateContingent":     lambda args: pc.submit_or_update_contingent(*args),
     "getAvailableMonthsForLibrary": lambda args: pc.get_available_months_for_library(*args),
+    "shareApprovedExpenseMailByFileId":  lambda args: pc.share_approved_expense_mail_by_file_id(*args),
+    # --- நூலக வரவினங்கள் (Receipts) ---
+    "validatePaymentWithBank":                    lambda args: pc.validate_payment_with_bank(*args),
+    "saveOrUpdateReceipt":                        lambda args: pc.save_or_update_receipt(*args),
+    "getAvailableMonthsForLibraryAcknowledgement": lambda args: pc.get_available_months_for_library_acknowledgement(*args),
+    "shareReceiptAcknowledgementByFileId":         lambda args: pc.share_receipt_acknowledgement_by_file_id(*args),
 }
 
 
