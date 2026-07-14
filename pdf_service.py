@@ -14,10 +14,28 @@ frontend-ல் "PDF திறக்கவும்" link ஏற்கனவே 
 ------------------------------------------------------------
 """
 
+import os
 import time
 import uuid
 from io import BytesIO
 from xhtml2pdf import pisa
+
+# ------------------------------------------------------------
+# Tamil font embedding — xhtml2pdf/reportlab-க்கு தமிழ் Unicode
+# glyphs கிடையாது என்பதால், font-family: 'Noto Sans Tamil' என்று
+# CSS-ல் மட்டும் குறிப்பிட்டால் ■■■ (missing-glyph boxes) தான் PDF-ல்
+# வரும். இதை சரிசெய்ய, static/fonts/-ல் இருக்கும் Noto Sans Tamil
+# TTF-ஐ @font-face மூலம் நேரடியாக embed செய்கிறோம் (absolute path —
+# gunicorn எந்த working directory-ல் இருந்தாலும் சரியாக வேலை செய்ய).
+# ------------------------------------------------------------
+_FONTS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "static", "fonts")
+_FONT_REGULAR = os.path.join(_FONTS_DIR, "NotoSansTamil-Regular.ttf")
+_FONT_BOLD = os.path.join(_FONTS_DIR, "NotoSansTamil-Bold.ttf")
+
+TAMIL_FONT_FACE_CSS = f"""
+  @font-face {{ font-family: 'NotoTamil'; src: url('{_FONT_REGULAR}'); }}
+  @font-face {{ font-family: 'NotoTamil'; font-weight: bold; src: url('{_FONT_BOLD}'); }}
+"""
 
 # ------------------------------------------------------------
 # In-memory PDF cache (Drive-க்கு பதிலாக) — token -> (pdf_bytes, created_at)
@@ -71,8 +89,9 @@ def build_application_html(p, title):
 <head>
 <meta charset="UTF-8">
 <style>
+{TAMIL_FONT_FACE_CSS}
   @page {{ size: A4; margin: 20mm 18mm; }}
-  body {{ font-family: 'Noto Sans Tamil', 'Arial Unicode MS', sans-serif;
+  body {{ font-family: 'NotoTamil', 'Arial Unicode MS', sans-serif;
          margin: 0; padding: 0; font-size: 13px; color: #000; }}
   .container {{ width: 100%; border: 1.5px solid #000; padding: 20px 24px; box-sizing: border-box; }}
   .title-block {{ text-align: center; margin-bottom: 18px; }}
@@ -140,8 +159,9 @@ def build_elml_application_html(p):
 <html lang="ta">
 <head><meta charset="UTF-8">
 <style>
+{TAMIL_FONT_FACE_CSS}
   @page {{ size: A4 portrait; margin: 18mm 16mm; }}
-  body {{ font-family: "Noto Sans Tamil","Arial Unicode MS",sans-serif;
+  body {{ font-family: "NotoTamil","Arial Unicode MS",sans-serif;
          margin:0; padding:0; font-size:13px; color:#000; }}
   .wrap {{ width:100%; border:1.5px solid #000; padding:20px 24px; box-sizing:border-box; }}
   .ttl  {{ text-align:center; margin-bottom:16px; border-bottom:1px solid #000; padding-bottom:10px; }}

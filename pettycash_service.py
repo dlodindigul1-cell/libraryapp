@@ -21,7 +21,7 @@ from googleapiclient.discovery import build
 from googleapiclient.http import MediaIoBaseUpload
 
 from sheets_service import _get_credentials  # ஒரே Service Account, எல்லா sheets/drive-க்கும்
-from pdf_service import _html_to_pdf_bytes    # HTML → PDF (Yearly Abstract reports-க்கும் இதே பயன்படுத்துகிறோம்)
+from pdf_service import _html_to_pdf_bytes, TAMIL_FONT_FACE_CSS  # HTML → PDF, Tamil font embedding (Yearly Abstract reports-க்கும் இதே பயன்படுத்துகிறோம்)
 
 # ------------------------------------------------------------
 # Config (env vars)
@@ -733,20 +733,40 @@ def _yearly_abstract_html(library_name, subtitle, header, out_rows, landscape=Tr
 
     total_cells = "".join(f"<td>₹{t:,.0f}</td>" if t else "<td></td>" for t in totals)
 
+    # --- column widths: S.No குறுகலாக, Month சற்று அகலமாக, மீதி
+    # amount columns-ஆக equal-ஆக பிரிக்கப்படும் (table-layout:fixed
+    # இல்லாமல் Month column சரியில்லாத அகலத்தில் வந்தது இதனால் தான்) ---
+    sno_w = 3.5
+    month_w = 9.0
+    amount_w = (100 - sno_w - month_w) / n_amount_cols if n_amount_cols else 0
+    colgroup = (
+        f'<col style="width:{sno_w}%">'
+        f'<col style="width:{month_w}%">'
+        + "".join(f'<col style="width:{amount_w:.3f}%">' for _ in range(n_amount_cols))
+    )
+
+    # amount column எண்ணிக்கை அதிகமா இருந்தால் (செலவு அறிக்கை — 23 columns)
+    # header/body font-size சிறிதாக்கவும், அதிக columns-க்கும் table சரியாக பொருந்தும்
+    th_font = "7px" if n_amount_cols > 12 else "8.5px"
+    td_font = "7.5px" if n_amount_cols > 12 else "9px"
+
     return f"""<!DOCTYPE html>
 <html lang="ta"><head><meta charset="UTF-8"><style>
-  @page {{ {size_css} margin: 10mm; }}
-  body {{ font-family: 'Noto Sans Tamil', 'Arial Unicode MS', sans-serif; font-size: 9px; color:#000; }}
+{TAMIL_FONT_FACE_CSS}
+  @page {{ {size_css} margin: 8mm; }}
+  body {{ font-family: 'NotoTamil', 'Arial Unicode MS', sans-serif; font-size: {td_font}; color:#000; }}
   h1 {{ text-align:center; font-size:15px; margin:2px 0; }}
   h2 {{ text-align:center; font-size:12px; margin:2px 0 10px; }}
-  table {{ width:100%; border-collapse:collapse; }}
-  th, td {{ border:1px solid #000; padding:4px 3px; text-align:center; word-break:break-word; }}
-  th {{ background:#e0f2fe; font-weight:bold; }}
+  table {{ width:100%; table-layout:fixed; border-collapse:collapse; }}
+  th, td {{ border:1px solid #000; padding:3px 2px; text-align:center;
+           word-wrap:break-word; overflow-wrap:break-word; line-height:1.25; }}
+  th {{ background:#e0f2fe; font-weight:bold; font-size:{th_font}; }}
   tr.total td {{ font-weight:bold; background:#f3f4f6; }}
 </style></head><body>
   <h1>{_esc_html(library_name).upper()}</h1>
   <h2>{_esc_html(subtitle)}</h2>
   <table>
+    <colgroup>{colgroup}</colgroup>
     <thead><tr>{thead}</tr></thead>
     <tbody>
       {body_rows}
