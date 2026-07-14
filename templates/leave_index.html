@@ -1,0 +1,2161 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>நூலகர் விடுப்பு மேலாண்மை</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Tamil:wght@300;400;500;600;700&family=Noto+Serif+Tamil:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: #1a4f7a;
+    --primary-light: #2563a8;
+    --accent: #e85d26;
+    --bg: #f0f4f8;
+    --white: #ffffff;
+    --text: #1e293b;
+    --text-muted: #64748b;
+    --border: #cbd5e1;
+    --success: #166534;
+    --success-bg: #dcfce7;
+    --error: #991b1b;
+    --error-bg: #fee2e2;
+    --shadow: 0 4px 24px rgba(26,79,122,0.12);
+    --shadow-lg: 0 8px 40px rgba(26,79,122,0.18);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Noto Sans Tamil', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; max-width: 100vw; overflow-x: hidden; }
+
+  /* HEADER */
+  .header {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+    color: white; box-shadow: var(--shadow-lg); position: relative; overflow: hidden;
+  }
+  .header::before {
+    content: ''; position: absolute; top: -40px; right: -40px;
+    width: 200px; height: 200px; border-radius: 50%; background: rgba(255,255,255,0.06);
+  }
+  .header-inner {
+    max-width: 480px; margin: 0 auto; padding: 14px 12px 12px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .header-icon {
+    width: 40px; height: 40px; background: rgba(255,255,255,0.15);
+    border-radius: 10px; display: flex; align-items: center; justify-content: center;
+    font-size: 20px; flex-shrink: 0;
+  }
+  .header-title { font-family: 'Noto Serif Tamil', serif; font-size: 1.2rem; font-weight: 600; }
+  .header-sub { font-size: 0.82rem; opacity: 0.75; margin-top: 2px; }
+
+  /* MAIN */
+  .main-wrapper { max-width: 480px; margin: 0 auto; padding: 14px 10px; }
+
+  /* HOME GRID — ★ திருத்தம் 2: நிர்வாகம் பட்டன் இல்லை ★ */
+  .home-grid { display: flex; flex-direction: column; gap: 10px; margin-top: 8px; }
+
+  .action-btn {
+    background: var(--white); border-radius: 12px; box-shadow: var(--shadow);
+    padding: 13px 16px; display: flex; align-items: center; gap: 12px;
+    cursor: pointer; border: 2px solid transparent; transition: all 0.18s ease;
+    text-align: left; width: 100%; font-family: 'Noto Sans Tamil', sans-serif;
+  }
+  .action-btn:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+  .action-btn.leave-btn {
+    border-color: transparent;
+    background: linear-gradient(135deg, #1a4f7a 0%, #2563a8 100%);
+    color: white;
+  }
+  .action-btn.leave-btn:hover { background: linear-gradient(135deg, #15406a 0%, #1d52a0 100%); opacity:0.95; }
+  .action-btn.leave-btn .btn-title { color: white !important; }
+  .action-btn.leave-btn .btn-sub   { color: rgba(255,255,255,0.78) !important; }
+  .action-btn.leave-btn .btn-icon  { background: rgba(255,255,255,0.18) !important; }
+  .action-btn.leave-btn .btn-arrow { color: rgba(255,255,255,0.7) !important; }
+  /* இரண்டாவது பட்டன் — இதுவரை விவரங்கள் */
+  .action-btn.history-btn {
+    border-color: transparent;
+    background: linear-gradient(135deg, #166534 0%, #16a34a 100%);
+    color: white;
+  }
+  .action-btn.history-btn:hover { opacity:0.95; }
+  .action-btn.history-btn .btn-title { color: white !important; }
+  .action-btn.history-btn .btn-sub   { color: rgba(255,255,255,0.78) !important; }
+  .action-btn.history-btn .btn-icon  { background: rgba(255,255,255,0.18) !important; }
+  .action-btn.history-btn .btn-arrow { color: rgba(255,255,255,0.7) !important; }
+
+  .btn-icon {
+    width: 42px; height: 42px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.3rem; flex-shrink: 0;
+  }
+  .leave-btn .btn-icon { background: #eff6ff; }
+
+  .btn-content { flex: 1; min-width: 0; }
+  .btn-title { font-family: 'Noto Serif Tamil', serif; font-size: 1rem; font-weight: 700; margin-bottom: 2px; }
+  .leave-btn .btn-title { color: var(--primary-light); }
+  .btn-sub { font-size: 0.8rem; color: var(--text-muted); }
+
+  .btn-badge {
+    display: inline-flex; align-items: center; gap: 3px;
+    border-radius: 16px; padding: 3px 9px; font-size: 0.75rem; font-weight: 600; border: 1px solid;
+    flex-shrink: 0; white-space: nowrap;
+  }
+  .chip-blue { background:#eff6ff; color:var(--primary-light); border-color:#bfdbfe; }
+  .btn-arrow { font-size: 1rem; color: var(--text-muted); flex-shrink: 0; margin-left: 4px; }
+
+  .info-chip {
+    display: inline-flex; align-items: center; gap: 4px;
+    border-radius: 20px; padding: 4px 12px; font-size: 0.85rem; font-weight: 600; border: 1px solid;
+    max-width: 100%; word-break: break-word; white-space: normal;
+  }
+
+  /* TODAY LEAVE PANEL */
+  .today-panel {
+    background: var(--white); border-radius: 16px;
+    box-shadow: var(--shadow); overflow: hidden; margin-top: 12px;
+  }
+  .today-panel-header {
+    background: linear-gradient(135deg, #1a4f7a, #2563a8);
+    padding: 12px 16px; display: flex; align-items: center;
+    justify-content: space-between;
+  }
+  .today-panel-title {
+    color: white; font-family: "Noto Serif Tamil", serif;
+    font-size: 1rem; font-weight: 700;
+  }
+  .today-count-badge {
+    background: rgba(255,255,255,0.22); color: white;
+    border-radius: 20px; padding: 3px 11px;
+    font-size: 0.8rem; font-weight: 700;
+  }
+  .today-refresh-btn {
+    background: none; border: none; cursor: pointer;
+    color: rgba(255,255,255,0.85); font-size: 1rem;
+    padding: 4px 6px; transition: transform 0.35s;
+    line-height: 1;
+  }
+  .today-refresh-btn:hover { transform: rotate(180deg); }
+  .today-scroll-viewport { height: 260px; overflow: hidden; position: relative; }
+  .today-scroll-track { position: absolute; top: 0; left: 0; right: 0; padding: 6px 8px; transition: none; }
+  .leave-card {
+    padding: 10px 12px; margin: 5px 0; border-radius: 10px;
+    display: flex; align-items: center; gap: 10px;
+    box-shadow: 0 1px 5px rgba(0,0,0,0.07);
+  }
+  .leave-card-icon { width: 36px; height: 36px; border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 1.15rem; flex-shrink: 0; }
+  .leave-card-info { flex: 1; min-width: 0; }
+  .leave-card-name { font-weight: 700; font-size: 0.93rem; color: #1e293b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .leave-card-lib  { font-size: 0.77rem; color: #64748b; margin-top: 1px; }
+  .leave-card-badge { border-radius: 10px; padding: 4px 9px; font-size: 0.71rem; font-weight: 700; text-align: center; line-height: 1.55; white-space: nowrap; flex-shrink: 0; }
+  .today-empty { text-align: center; padding: 32px 16px; color: var(--text-muted); font-size: 0.9rem; }
+  .today-loading { text-align: center; padding: 24px; color: var(--text-muted); font-size: 0.85rem; }
+  .lt-P  { background:#eff6ff; } .lt-CL { background:#f0fdf4; }
+  .lt-RL { background:#fdf4ff; } .lt-EL { background:#fff7ed; }
+  .lt-ML { background:#fef2f2; }
+  .ic-P  { background:#dbeafe; } .ic-CL { background:#bbf7d0; }
+  .ic-RL { background:#f3e8ff; } .ic-EL { background:#fed7aa; }
+  .ic-ML { background:#fecaca; }
+  .bg-P  { background:#dbeafe; color:#1d4ed8; }
+  .bg-CL { background:#bbf7d0; color:#15803d; }
+  .bg-RL { background:#f3e8ff; color:#7e22ce; }
+  .bg-EL { background:#fed7aa; color:#c2410c; }
+  .bg-ML { background:#fecaca; color:#b91c1c; }
+
+  /* PANEL */
+  .panel { background: var(--white); border-radius: 18px; box-shadow: var(--shadow); overflow: hidden; display: none; }
+  .panel.active { display: block; animation: fadeUp 0.28s ease; }
+  @keyframes fadeUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+  .panel-header { padding: 14px 14px; display: flex; align-items: center; gap: 10px; border-bottom: 1.5px solid var(--border); }
+  .panel-header.blue { background: linear-gradient(135deg,#eff6ff,#dbeafe); }
+  .back-btn {
+    background: rgba(37,99,168,0.1); border: 1.5px solid #bfdbfe; cursor: pointer;
+    color: var(--primary); padding: 6px 12px; border-radius: 8px; transition: background 0.15s;
+    font-family: 'Noto Sans Tamil', sans-serif; font-size: 0.82rem; font-weight: 600;
+    display: flex; align-items: center; gap: 5px; white-space: nowrap; flex-shrink: 0;
+  }
+  .back-btn:hover { background: rgba(37,99,168,0.18); }
+  .panel-title { font-family:'Noto Serif Tamil',serif; font-size:1.15rem; font-weight:600; }
+  .blue .panel-title { color: var(--primary); }
+  .panel-body { padding: 16px 12px; }
+
+  /* FORM */
+  .form-group { margin-bottom: 18px; }
+  .form-label { display:block; font-size:0.97rem; font-weight:600; color:var(--primary); margin-bottom:6px; }
+  .form-label span { color: var(--accent); }
+  .form-input {
+    width: 100%; padding: 11px 13px; border: 2px solid var(--border); border-radius: 9px;
+    font-family:'Noto Sans Tamil',sans-serif; font-size:1rem; color:var(--text);
+    background: var(--white); transition: border-color 0.15s, box-shadow 0.15s; outline: none;
+    -webkit-appearance: none; appearance: none;
+  }
+  .form-input:focus { border-color:var(--primary-light); box-shadow:0 0 0 3px rgba(37,99,168,0.11); }
+
+  /* Permission section */
+  .perm-section { display:none; background:#f0f7ff; border:1.5px solid #bfdbfe; border-radius:11px; padding:14px 12px; margin-top:4px; animation:fadeUp 0.22s ease; }
+  .perm-section.show { display:block; }
+  .perm-label { font-size:0.92rem; font-weight:600; color:var(--primary); margin-bottom:9px; }
+  .date-row { display:grid; grid-template-columns:1fr; gap:12px; }
+  .divider {
+    display:flex; align-items:center; gap:10px; margin:16px 0 12px;
+    color:var(--text-muted); font-size:0.85rem; font-weight:600; letter-spacing:0.04em; text-transform:uppercase;
+  }
+  .divider::before,.divider::after { content:''; flex:1; height:1px; background:var(--border); }
+
+  /* ★ திருத்தம் 3: Dropdown styles ★ */
+  .emp-dropdown {
+    display:none; position:absolute; left:0; right:0; top:100%; z-index:200;
+    background:#fff; border:2px solid #bfdbfe; border-radius:10px;
+    box-shadow:0 8px 24px rgba(26,79,122,0.15); max-height:240px; overflow-y:auto; margin-top:2px;
+  }
+  .drop-item {
+    padding:11px 14px; cursor:pointer; font-size:0.94rem;
+    border-bottom:1px solid #e2e8f0; transition:background 0.12s;
+    display:flex; align-items:center; gap:8px;
+  }
+  .drop-item:last-child { border-bottom:none; }
+  .drop-item:hover, .drop-item.highlighted { background:#eff6ff; }
+  .drop-item .emp-id { background:var(--primary); color:white; border-radius:6px; padding:3px 8px; font-size:0.82rem; font-weight:700; flex-shrink:0; }
+  .drop-item .emp-name { font-weight:600; color:var(--text); }
+  .drop-item .emp-meta { font-size:0.83rem; color:var(--text-muted); margin-left:auto; }
+
+  .lookup-result {
+    background:#f8fafc; border:1.5px solid var(--border); border-radius:9px;
+    padding:10px 13px; font-size:0.92rem; color:var(--text-muted); margin-top:5px; display:none;
+  }
+  .lookup-result.show { display:block; }
+  .lookup-result strong { color:var(--text); }
+
+  .summary-wrap { margin-top:12px; min-height:28px; }
+
+  /* Alert */
+  .alert { padding:13px 14px; border-radius:10px; font-size:0.95rem; font-weight:600; margin-bottom:16px; display:none; align-items:center; gap:8px; }
+  .alert.show { display:flex; animation:fadeUp 0.25s ease; }
+  .alert.success { background:var(--success-bg); color:var(--success); border:1.5px solid #86efac; }
+  .alert.error { background:var(--error-bg); color:var(--error); border:1.5px solid #fca5a5; }
+  .alert.warning { background:#fffbeb; color:#92400e; border:1.5px solid #fcd34d; }
+
+  /* Submit */
+  .submit-btn {
+    width:100%; padding:14px; margin-top:10px;
+    background:linear-gradient(135deg,var(--primary),var(--primary-light));
+    color:white; border:none; border-radius:11px;
+    font-family:'Noto Sans Tamil',sans-serif; font-size:1.05rem; font-weight:700;
+    cursor:pointer; box-shadow:0 4px 14px rgba(26,79,122,0.28); transition:opacity 0.18s, transform 0.14s;
+  }
+  .submit-btn:hover { opacity:0.92; transform:translateY(-1px); }
+  .submit-btn:disabled { opacity:0.65; cursor:not-allowed; transform:none; }
+
+  .spinner { display:inline-block; width:16px; height:16px; border:3px solid rgba(255,255,255,0.35); border-top-color:white; border-radius:50%; animation:spin 0.65s linear infinite; vertical-align:middle; margin-right:7px; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+
+  /* ★ திருத்தம் 4: Success + கேள்வி panel ★ */
+  .success-panel {
+    display:none; background:#f0fdf4; border:2px solid #86efac;
+    border-radius:14px; padding:20px 16px; margin-bottom:16px; text-align:center;
+    animation:fadeUp 0.3s ease;
+  }
+  .success-panel.show { display:block; }
+  .success-icon { font-size:2.5rem; margin-bottom:8px; }
+  .success-title { font-family:'Noto Serif Tamil',serif; font-size:1.1rem; font-weight:700; color:#166534; margin-bottom:6px; }
+  .success-sub { font-size:0.88rem; color:#15803d; margin-bottom:18px; }
+  .choice-btns { display:flex; flex-direction:column; gap:10px; }
+  .choice-btn {
+    width:100%; padding:13px 16px; border-radius:11px; border:2px solid;
+    font-family:'Noto Sans Tamil',sans-serif; font-size:0.97rem; font-weight:700;
+    cursor:pointer; transition:all 0.16s; text-align:left; display:flex; align-items:center; gap:10px;
+  }
+  .choice-btn.mail-btn { background:#eff6ff; border-color:#bfdbfe; color:var(--primary); }
+  .choice-btn.mail-btn:hover { background:#dbeafe; }
+  .choice-btn.self-btn { background:#f8fafc; border-color:var(--border); color:var(--text-muted); }
+  .choice-btn.self-btn:hover { background:#f1f5f9; }
+  .choice-icon { font-size:1.4rem; }
+  .choice-text .choice-main { font-size:0.97rem; font-weight:700; }
+  .choice-text .choice-desc { font-size:0.78rem; margin-top:2px; opacity:0.75; }
+
+  /* ★ Application Form Panel ★ */
+  .app-form-panel { display:none; }
+  .app-form-panel.show { display:block; animation:fadeUp 0.25s ease; }
+  .app-section-title {
+    background:linear-gradient(135deg,#1a4f7a,#2563a8); color:white;
+    text-align:center; padding:12px 16px; border-radius:10px; margin-bottom:16px;
+    font-family:'Noto Serif Tamil',serif; font-size:0.95rem; font-weight:700; line-height:1.5;
+  }
+
+  /* Modal */
+  .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.42); display:none; align-items:center; justify-content:center; z-index:999; backdrop-filter:blur(3px); }
+  .modal-overlay.show { display:flex; animation:fadeUp 0.2s ease; }
+  .modal { background:var(--white); border-radius:18px; padding:26px 20px; width:min(340px, calc(100vw - 32px)); box-shadow:0 20px 60px rgba(0,0,0,0.18); text-align:center; }
+  .modal-icon { font-size:2.4rem; margin-bottom:10px; }
+  .modal-title { font-family:'Noto Serif Tamil',serif; font-size:1.05rem; font-weight:600; color:var(--primary); margin-bottom:5px; }
+  .modal-sub { font-size:0.85rem; color:var(--text-muted); margin-bottom:18px; line-height:1.6; }
+  .pwd-btn { width:100%; padding:11px; background:linear-gradient(135deg,#d97706,#b45309); color:white; border:none; border-radius:9px; font-family:'Noto Sans Tamil',sans-serif; font-size:0.93rem; font-weight:700; cursor:pointer; margin-bottom:9px; transition:opacity 0.18s; }
+  .pwd-btn:hover { opacity:0.9; }
+  .pwd-btn.primary-btn { background:linear-gradient(135deg,var(--primary),var(--primary-light)); }
+  .pwd-cancel { background:none; border:none; cursor:pointer; color:var(--text-muted); font-size:0.83rem; font-family:'Noto Sans Tamil',sans-serif; text-decoration:underline; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-inner">
+    <div class="header-icon">📚</div>
+    <div>
+      <div class="header-title">நூலகர் விடுப்பு மேலாண்மை</div>
+      <div class="header-sub">Library Leave Management System</div>
+    </div>
+  </div>
+</div>
+
+<div class="main-wrapper">
+
+  <!-- HOME -->
+  <div id="homeView">
+    <div class="home-grid">
+      <!-- 1. பணியாளர் விடுப்பு பதிவு -->
+      <button class="action-btn leave-btn" onclick="showLeave()">
+        <div class="btn-icon">📝</div>
+        <div class="btn-content">
+          <div class="btn-title">பணியாளர் விடுப்பு பதிவு</div>
+          <div class="btn-sub">விடுப்பு விண்ணப்பத்தை பதிவு செய்யவும்</div>
+        </div>
+        <span class="btn-arrow">›</span>
+      </button>
+      <!-- 2. இதுவரை எடுத்த விடுப்பு விவரங்கள் -->
+      <button class="action-btn history-btn" onclick="showHistoryPanel()">
+        <div class="btn-icon">📋</div>
+        <div class="btn-content">
+          <div class="btn-title">இதுவரை எடுத்த விடுப்பு விவரங்கள்</div>
+          <div class="btn-sub">பணியாளர் விடுப்பு சுருக்கம் காண்க</div>
+        </div>
+        <span class="btn-arrow">›</span>
+      </button>
+    </div>
+
+    <!-- 3. இன்று விடுப்பில் உள்ளவர்கள் -->
+    <div class="today-panel" id="todayPanel">
+      <div class="today-panel-header">
+        <span class="today-panel-title">📅 இன்று விடுப்பில் உள்ளவர்கள்</span>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span class="today-count-badge" id="todayCountBadge">ஏற்றுகிறது...</span>
+          <button class="today-refresh-btn" onclick="loadTodayLeave()" title="புதுப்பிக்கவும்">🔄</button>
+        </div>
+      </div>
+      <div class="today-scroll-viewport" id="todayViewport">
+        <div class="today-scroll-track" id="todayTrack">
+          <div class="today-loading">⏳ தகவல் ஏற்றுகிறது...</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- HISTORY PANEL -->
+  <div class="panel" id="historyPanel">
+    <div class="panel-header" style="background:linear-gradient(135deg,#f0fdf4,#dcfce7);">
+      <button class="back-btn" style="background:rgba(22,101,52,0.1);border-color:#86efac;color:#166534;" onclick="goHome()">🏠 முகப்புக்கு திரும்புக</button>
+      <span class="panel-title" style="color:#166534;">📋 இதுவரை எடுத்த விடுப்பு விவரங்கள்</span>
+    </div>
+    <div class="panel-body">
+      <!-- பணியாளர் தேர்வு — Hardcoded Dropdown (A-Z) -->
+      <div class="form-group" style="position:relative;">
+        <label class="form-label" style="color:#166534;">பணியாளர் பெயர் அல்லது எண் <span>*</span></label>
+        <select id="historyEmpSelect" class="form-input" onchange="onHistoryEmpSelect(this.value)">
+          <option value="">-- பணியாளரைத் தேர்வு செய்யவும் --</option>
+        </select>
+      </div>
+      <!-- விவரங்கள் பகுதி -->
+      <div id="historyContent" style="display:none;">
+        <div id="historyLoading" style="text-align:center;padding:16px;color:#64748b;font-size:0.88rem;display:none;">⏳ ஏற்றுகிறது...</div>
+        <div id="historyEmpty" style="text-align:center;padding:24px 16px;color:#64748b;font-size:0.9rem;display:none;">📭 இந்த பணியாளருக்கு விடுப்பு பதிவுகள் எதுவும் இல்லை.</div>
+        <div id="historyTable" style="display:none;">
+          <div style="font-size:0.85rem;font-weight:700;color:#166534;margin-bottom:10px;padding:8px 10px;background:#f0fdf4;border-radius:8px;" id="historyEmpLabel"></div>
+          <div style="overflow-x:auto;">
+          <table style="width:100%;border-collapse:collapse;font-size:0.84rem;">
+            <thead>
+              <tr style="background:linear-gradient(135deg,#166534,#16a34a);">
+                <th style="padding:9px 8px;text-align:left;color:white;font-weight:700;border-radius:6px 0 0 0;">தேதி</th>
+                <th style="padding:9px 8px;text-align:center;color:white;font-weight:700;">வகை</th>
+                <th style="padding:9px 8px;text-align:center;color:white;font-weight:700;">கால</th>
+                <th style="padding:9px 8px;text-align:right;color:white;font-weight:700;border-radius:0 6px 0 0;">நாட்கள்</th>
+              </tr>
+            </thead>
+            <tbody id="historyTableBody"></tbody>
+          </table>
+          </div>
+          <!-- Abstract Summary -->
+          <div id="historySummary" style="margin-top:14px;background:#f0fdf4;border:1.5px solid #86efac;border-radius:10px;padding:12px 14px;">
+            <div style="font-size:0.88rem;font-weight:700;color:#166534;margin-bottom:8px;">📊 விடுப்பு சுருக்கம் (Abstract)</div>
+            <div id="historySummaryContent" style="font-size:0.84rem;color:#334155;line-height:1.8;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LEAVE PANEL -->
+  <div class="panel" id="leavePanel">
+    <div class="panel-header blue">
+      <button class="back-btn" onclick="goHome()">🏠 முகப்புக்கு திரும்புக</button>
+      <span class="panel-title">📝 பணியாளர் விடுப்பு பதிவு</span>
+    </div>
+    <div class="panel-body">
+
+      <div class="alert" id="leaveAlert"></div>
+
+      <!-- ★ திருத்தம் 4: Success + கேள்விகள் panel ★ -->
+      <div class="success-panel" id="successPanel">
+        <div class="success-icon">✅</div>
+        <div class="success-title">உங்கள் விடுப்பு வெற்றிகரமாக பதிவு செய்யப்பட்டது!</div>
+        <div class="success-sub" id="successSubText">விடுப்பு பதிவு நிறைவடைந்தது.</div>
+        <div class="choice-btns" id="leaveChoiceBtns">
+          <button class="choice-btn mail-btn" onclick="handleChoice('mail')">
+            <span class="choice-icon">📧</span>
+            <div class="choice-text">
+              <div class="choice-main">உங்கள் விடுப்பு விண்ணப்பத்தை மெயிலில் பெற விரும்புகிறீர்களா?</div>
+              <div class="choice-desc">விண்ணப்பம் PDF ஆக உங்கள் மெயிலுக்கு அனுப்பப்படும்</div>
+            </div>
+          </button>
+          <button class="choice-btn self-btn" onclick="handleChoice('self')">
+            <span class="choice-icon">✍️</span>
+            <div class="choice-text">
+              <div class="choice-main">தாங்களே விண்ணப்பம் தயார் செய்து அலுவலகத்திற்கு அனுப்புகிறீர்களா?</div>
+              <div class="choice-desc">முகப்பு பக்கத்திற்கு திரும்புவீர்கள்</div>
+            </div>
+          </button>
+        </div>
+      </div>
+
+      <!-- ★ Application Form (மெயில் கேட்டால்) ★ -->
+      <div class="app-form-panel" id="appFormPanel">
+        <div class="app-section-title" id="appFormTitle">
+          தமிழ்நாடு அரசு பொது நூலகத்துறை<br>
+          மாவட்ட நூலக ஆணைக்குழு திண்டுக்கல்<br>
+          <span id="appFormLeaveTitle">தற்செயல் விடுப்பு விண்ணப்பம்</span>
+        </div>
+
+        <!-- 1. பெயர் — readonly -->
+        <div class="form-group">
+          <label class="form-label">1. உங்கள் பெயர்</label>
+          <input type="text" class="form-input" id="appEmpName" readonly style="background:#f8fafc;color:#64748b;">
+        </div>
+
+        <!-- 2. பதவி -->
+        <div class="form-group">
+          <label class="form-label">2. உங்கள் பதவி <span>*</span></label>
+          <select class="form-input" id="appDesignation">
+            <option value="">— பதவி தேர்வு செய்யவும் —</option>
+            <option>முதல் நிலை நூலகர்</option>
+            <option>கண்காணிப்பாளர்</option>
+            <option>உதவியாளர்</option>
+            <option>இருப்பு சரிபார்ப்பு அலுவலர்</option>
+            <option>இரண்டாம் நிலை நூலகர்</option>
+            <option>மூன்றாம் நிலை நூலகர்</option>
+            <option>பதிவறை எழுத்தர்</option>
+            <option>ஊர்ப்புற நூலகர்</option>
+          </select>
+        </div>
+
+        <!-- 3. பணியாற்றும் இடம் — readonly (Master Col B) -->
+        <div class="form-group">
+          <label class="form-label">3. பணியாற்றும் இடம்</label>
+          <input type="text" class="form-input" id="appWorkplace" readonly style="background:#f8fafc;color:#64748b;">
+        </div>
+
+        <!-- 4. மொத்த விடுப்பு நாட்கள் — readonly -->
+        <div class="form-group">
+          <label class="form-label">4. மொத்த விடுப்பு நாட்கள்</label>
+          <input type="text" class="form-input" id="appTotalLeave" readonly style="background:#f8fafc;color:#64748b;">
+        </div>
+
+        <!-- 5. இதுவரை எடுத்த விடுப்பு நாட்கள் — readonly (Sheet கணக்கீடு) -->
+        <div class="form-group">
+          <label class="form-label">5. இதுவரை எடுத்த விடுப்பு நாட்கள்</label>
+          <input type="text" class="form-input" id="appUsedLeave" readonly style="background:#f8fafc;color:#64748b;">
+        </div>
+
+        <!-- 6. மீதமுள்ள விடுப்பு நாட்கள் — readonly -->
+        <div class="form-group">
+          <label class="form-label">6. மீதமுள்ள விடுப்பு நாட்கள்</label>
+          <input type="text" class="form-input" id="appRemainLeave" readonly style="background:#f8fafc;color:#64748b;">
+        </div>
+
+        <!-- 7. தற்போது தேவைப்படும் விடுப்பு நாட்கள் — readonly (கிழமை தமிழில்) -->
+        <div class="form-group">
+          <label class="form-label">7. தற்போது தேவைப்படும் விடுப்பு நாட்கள்</label>
+          <input type="text" class="form-input" id="appCurrentDates" readonly style="background:#f8fafc;color:#64748b;">
+        </div>
+
+        <!-- 8. அனுமதி விடுப்பு நாட்கள் — Smart auto-detect -->
+        <div class="form-group">
+          <label class="form-label">8. அனுமதி விடுப்பு நாட்கள் <span>*</span></label>
+          <div id="permittedDaysBox" style="background:#f0f7ff;border:1.5px solid #bfdbfe;border-radius:9px;padding:11px 13px;font-size:0.93rem;color:#1a4f7a;font-weight:600;min-height:42px;">
+            <span id="permittedDaysText">— தேதி தேர்வு செய்தவுடன் தானாக காட்டும் —</span>
+          </div>
+          <!-- விடுமுறை இணைப்பு options (வியாழன் அல்லாத நாட்கள்) -->
+          <div id="permittedDaysOptions" style="display:none;margin-top:8px;">
+            <div style="font-size:0.83rem;color:#64748b;margin-bottom:6px;">இந்த விடுப்பிற்கு அனுமதி விடுப்பு நாட்கள் இல்லை. கீழே தேர்வு செய்யவும்:</div>
+            <div style="display:flex;flex-direction:column;gap:6px;">
+              <label style="display:flex;align-items:center;gap:8px;background:#fffbeb;border:1px solid #fcd34d;border-radius:8px;padding:9px 12px;cursor:pointer;font-size:0.88rem;">
+                <input type="radio" name="permOpt" value="none" onchange="setPermittedOption('none')"> அனுமதி விடுப்பு நாட்கள் இல்லை
+              </label>
+              <label style="display:flex;align-items:center;gap:8px;background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:9px 12px;cursor:pointer;font-size:0.88rem;">
+                <input type="radio" name="permOpt" value="holiday" onchange="setPermittedOption('holiday')"> அரசு விடுமுறை இணைப்பு
+              </label>
+            </div>
+          </div>
+          <!-- Hidden input for actual value -->
+          <input type="hidden" id="appPermittedDays" value="">
+        </div>
+
+        <!-- 9. விடுப்பிற்கான காரணம் — CL: user input, RL: RH DATES Col C auto-fill -->
+        <div class="form-group" id="appReasonGroup">
+          <label class="form-label" id="appReasonLabel">9. விடுப்பிற்கான காரணம் <span>*</span></label>
+          <textarea class="form-input" id="appReason" rows="2"
+            placeholder="விடுப்பிற்கான காரணம் உள்ளிடவும்..."
+            style="resize:vertical;"></textarea>
+        </div>
+
+        <!-- 10. விடுப்பின் போது முகவரி -->
+        <div class="form-group">
+          <label class="form-label">10. விடுப்பின் போது முகவரி <span>*</span></label>
+          <textarea class="form-input" id="appAddress" rows="3" placeholder="வரி 1&#10;வரி 2&#10;வரி 3" style="resize:vertical;"></textarea>
+        </div>
+
+        <div class="alert" id="appAlert"></div>
+
+        <button class="submit-btn" id="sendMailBtn" onclick="sendApplication()">
+          📄 PDF Share செய்யவும்
+        </button>
+
+        <!-- Share link box — PDF உருவானதும் காட்டும் -->
+        <div id="shareLinkBox" style="display:none; margin-top:14px; padding:14px 16px;
+          background:#f0fdf4; border:1.5px solid #86efac; border-radius:10px; text-align:center;">
+          <div style="font-size:0.88rem; color:#166534; font-weight:600; margin-bottom:8px;">
+            ✅ உங்கள் PDF தயார்! கீழே உள்ள link-ஐ திறந்து பதிவிறக்கவும்:
+          </div>
+          <a id="shareLinkUrl" href="#" target="_blank"
+            style="display:inline-block; background:#16a34a; color:#fff;
+            padding:9px 20px; border-radius:8px; font-size:0.9rem;
+            font-weight:700; text-decoration:none;">
+            📄 PDF திறக்கவும்
+          </a>
+          <div style="margin-top:10px;">
+            <button class="submit-btn" style="background:linear-gradient(135deg,#1a4f7a,#2563a8);padding:8px 18px;font-size:0.85rem;" onclick="goHome()">
+              🏠 முகப்புக்கு திரும்புக
+            </button>
+          </div>
+        </div>
+        <br><br>
+        <button class="submit-btn" style="background:linear-gradient(135deg,#64748b,#475569);" onclick="goHome()">
+          🏠 முகப்புக்கு திரும்புக
+        </button>
+      </div>
+
+      <!-- ★ EL/ML Application Form Panel ★ -->
+      <div class="app-form-panel" id="elmlFormPanel">
+        <div class="app-section-title" id="elmlFormTitle"
+          style="background:linear-gradient(135deg,#7e22ce,#9333ea);">
+          தமிழ்நாடு அரசு பொது நூலகத்துறை<br>
+          திண்டுக்கல் மாவட்ட நூலக ஆணைக்குழு<br>
+          <span id="elmlLeaveTitle">ஈட்டிய விடுப்பு விண்ணப்பம்</span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">1. விண்ணப்பதார் பெயர்</label>
+          <input type="text" class="form-input" id="elmlEmpName" readonly style="background:#f8fafc;color:#64748b;">
+        </div>
+        <div class="form-group">
+          <label class="form-label">2. பதவியின் பெயர் <span>*</span></label>
+          <select class="form-input" id="elmlDesignation">
+            <option value="">— பதவி தேர்வு செய்யவும் —</option>
+            <option>முதல் நிலை நூலகர்</option>
+            <option>இரண்டாம் நிலை நூலகர்</option>
+            <option>மூன்றாம் நிலை நூலகர்</option>
+            <option>பதிவறை எழுத்தர்</option>
+            <option>ஊர்ப்புற நூலகர்</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">3. பணிபுரியும் துறை/பிரிவு/அலுவலகம்</label>
+          <input type="text" class="form-input" id="elmlWorkplace" readonly style="background:#f8fafc;color:#64748b;">
+        </div>
+        <div class="form-group">
+          <label class="form-label">4. ஊதியம் <span>*</span></label>
+          <input type="text" class="form-input" id="elmlSalary" placeholder="எ.கா: 25000" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+          <div style="font-size:0.78rem;color:#64748b;margin-top:3px;">ரூ. prefix தானாகவே சேர்க்கப்படும்</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">5.(1) விண்ணப்பிக்கும் விடுப்பின் தன்மை <span>*</span></label>
+          <select class="form-input" id="elmlLeaveNature">
+            <option value="">— தேர்வு செய்யவும் —</option>
+            <option value="ஈட்டிய விடுப்பு">ஈட்டிய விடுப்பு</option>
+            <option value="மருத்துவ விடுப்பு">மருத்துவ விடுப்பு</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">5.(2) விடுப்பின் கால அளவு / விடுப்பில் செல்லும் நாள்</label>
+          <input type="text" class="form-input" id="elmlDateRange" readonly style="background:#f8fafc;color:#64748b;">
+        </div>
+        <div class="form-group">
+          <label class="form-label">6.(3) மருத்துவ சான்று இணைக்கப்பட்டுள்ளதா? <span>*</span></label>
+          <select class="form-input" id="elmlMedCert">
+            <option value="">— தேர்வு செய்யவும் —</option>
+            <option value="ஆம்">ஆம்</option>
+            <option value="இல்லை">இல்லை</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">7. விடுப்பில் செல்லக் காரணம் <span>*</span></label>
+          <textarea class="form-input" id="elmlReason" rows="2" placeholder="காரணம் உள்ளிடவும்..." style="resize:vertical;"></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">8. வார விடுமுறை / அரசு விடுமுறை முன்/பின் இணைப்பு உத்தேசிக்கப்பட்டுள்ளதா? <span>*</span></label>
+          <select class="form-input" id="elmlGovHoliday" onchange="toggleElmlGovDate(this.value)">
+            <option value="">— தேர்வு செய்யவும் —</option>
+            <option value="ஆம்">ஆம்</option>
+            <option value="இல்லை">இல்லை</option>
+          </select>
+          <div id="elmlGovDateWrap" style="display:none;margin-top:8px;">
+            <label class="form-label" style="font-size:0.85rem;">விடுமுறை தேதி:</label>
+            <input type="date" class="form-input" id="elmlGovDate">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">9. இதற்கு முன் விடுப்பு விண்ணப்பித்திருந்தால் கால அளவு மற்றும் தன்மை</label>
+          <input type="text" class="form-input" id="elmlPrevLeave" placeholder="இல்லை எனில் — என்று குறிப்பிடவும்">
+        </div>
+        <div class="form-group">
+          <label class="form-label">10. விடுப்பின் போது முகவரி <span>*</span></label>
+          <textarea class="form-input" id="elmlAddress" rows="3" placeholder="வரி 1&#10;வரி 2&#10;வரி 3" style="resize:vertical;"></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">11. தமிழ்நாடு விடுப்பு விதிகளின் விதி 5 கீழ் விதிமுறை 4ன்படி உறுதி மொழி இணைக்கப்பட்டுள்ளதா? <span>*</span></label>
+          <select class="form-input" id="elmlTamilRule">
+            <option value="">— தேர்வு செய்யவும் —</option>
+            <option value="ஆம்">ஆம்</option>
+            <option value="இல்லை">இல்லை</option>
+          </select>
+        </div>
+
+        <div class="alert" id="elmlAlert"></div>
+
+        <button class="submit-btn" id="elmlSendBtn" onclick="sendElmlApplication()"
+          style="background:linear-gradient(135deg,#7e22ce,#9333ea);">
+          📄 PDF Share செய்யவும்
+        </button>
+        <div id="elmlShareLinkBox" style="display:none;margin-top:14px;padding:14px 16px;
+          background:#f5f3ff;border:1.5px solid #c4b5fd;border-radius:10px;text-align:center;">
+          <div style="font-size:0.88rem;color:#7e22ce;font-weight:600;margin-bottom:8px;">
+            ✅ PDF தயார்! கீழே link-ஐ திறந்து பதிவிறக்கவும்:</div>
+          <a id="elmlShareLinkUrl" href="#" target="_blank"
+            style="display:inline-block;background:#7e22ce;color:#fff;padding:9px 20px;
+            border-radius:8px;font-size:0.9rem;font-weight:700;text-decoration:none;">
+            📄 PDF திறக்கவும்</a>
+        </div>
+        <br><br>
+        <button class="submit-btn" style="background:linear-gradient(135deg,#64748b,#475569);" onclick="goHome()">
+          🏠 முகப்புக்கு திரும்புக
+        </button>
+      </div>
+
+      <!-- விடுப்பு படிவம் (success panel மறைவாக இருக்கும்போது காட்டும்) -->
+      <div id="leaveFormSection">
+        <!-- Employee — Hardcoded Dropdown (A-Z) -->
+        <div class="form-group" style="position:relative;">
+          <label class="form-label">பணியாளர் பெயர் அல்லது நூலகர் எண் <span>*</span></label>
+          <select class="form-input" id="empSelect" onchange="onEmpSelect(this.value)">
+            <option value="">-- பணியாளரைத் தேர்வு செய்யவும் --</option>
+          </select>
+          <div class="lookup-result" id="lookupResult"></div>
+        </div>
+
+        <!-- Leave Type -->
+        <div class="form-group">
+          <label class="form-label">விடுப்பு வகை <span>*</span></label>
+          <select class="form-input" id="leaveTypeSelect" onchange="selectLeaveType(this.value)">
+            <option value="P">📝 அனுமதி விடுப்பு (P)</option>
+            <option value="CL">📅 தற்செயல் விடுப்பு (CL)</option>
+            <option value="RL">🕌 மத விடுப்பு (RL)</option>
+            <option value="EL">📆 ஈட்டிய விடுப்பு (EL)</option>
+            <option value="ML">🏥 மருத்துவ விடுப்பு (ML)</option>
+          </select>
+        </div>
+
+        <!-- Permission sub (P type) -->
+        <div class="perm-section show" id="permSection">
+          <div class="divider">அனுமதி விடுப்பு நேரம் தேர்வு</div>
+          <div class="date-row">
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">🌅 முன்பகல் (FN) — தொடங்கும் நேரம்</label>
+              <select class="form-input" id="fnSelect" onchange="selectTimeDrop('fn',this.value)">
+                <option value="">— தேர்வு செய்யவும் —</option>
+                <option value="8.00">காலை 8.00 மணி முதல் 9.00 மணி வரை</option>
+                <option value="9.00">காலை 9.00 மணி முதல் 10.00 மணி வரை</option>
+                <option value="10.00">காலை 10.00 மணி முதல் 11.00 மணி வரை</option>
+                <option value="2.00">மதியம் 2.00 மணி முதல் 3.00 மணி வரை</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">🌆 பிற்பகல் (AN) — முடியும் நேரம்</label>
+              <select class="form-input" id="anSelect" onchange="selectTimeDrop('an',this.value)">
+                <option value="">— தேர்வு செய்யவும் —</option>
+                <option value="4.00">மதியம் 4.00 மணி முதல்  5.00 மணி வரை</option>
+                <option value="5.00">மதியம் 5.00 மணி முதல்  6.00 மணி வரை</option>
+                <option value="5.30">மதியம் 5.30 மணி முதல்  6.30 மணி வரை</option>
+                <option value="6.00">மதியம் 6.00 மணி முதல்  7.00 மணி வரை</option>
+                <option value="7.00">இரவு 7.00 மணி முதல்  8.00 மணி வரை</option>
+              </select>
+            </div>
+          </div>
+          <div style="margin-top:8px;font-size:0.76rem;color:var(--text-muted);">
+            ⚠️ FN அல்லது AN — ஒன்றை மட்டும் தேர்வு செய்யவும்
+          </div>
+        </div>
+
+        <!-- CL Session -->
+        <div class="perm-section" id="clSection">
+          <div class="divider">தற்செயல் விடுப்பு — கால தேர்வு</div>
+          <select class="form-input" id="clSessionSelect" onchange="selectCLSession(this.value)">
+            <option value="">— கால தேர்வு செய்யவும் —</option>
+            <option value="FN">🌅 முற்பகல் (FN) — 0.5 நாள்</option>
+            <option value="AN">🌆 பிற்பகல் (AN) — 0.5 நாள்</option>
+            <option value="FULL">☀️ முழு நாள் (FULL) — 1.0 நாள்</option>
+          </select>
+        </div>
+
+        <!-- RL / EL / ML info -->
+        <div class="perm-section" id="fullDaySection">
+          <div class="divider" id="fullDayDividerLabel">விடுப்பு தகவல்</div>
+          <div style="display:flex;align-items:center;gap:10px;padding:6px 2px;">
+            <span style="font-size:1.5rem;">📋</span>
+            <div>
+              <div id="fullDayInfoText" style="font-size:0.92rem;font-weight:600;color:var(--primary);"></div>
+              <div style="font-size:0.76rem;color:var(--text-muted);margin-top:2px;">அரை நாள் விடுப்பு கிடையாது — முழு நாள் மட்டுமே</div>
+            </div>
+            <span class="info-chip chip-blue" style="margin-left:auto;">FULL | 1.0 நாள்</span>
+          </div>
+        </div>
+
+        <!-- Dates -->
+        <div class="divider" style="margin-top:20px;">தேதி தேர்வு</div>
+        <div class="date-row">
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label">தொடக்க தேதி <span>*</span></label>
+            <input type="date" class="form-input" id="fromDate" onchange="onFromDateChange()">
+          </div>
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label">முடிவு தேதி <span>*</span></label>
+            <input type="date" class="form-input" id="toDate" onchange="updateSummary()">
+          </div>
+        </div>
+
+        <div class="summary-wrap">
+          <span class="info-chip chip-blue" id="summaryChip" style="display:none;"></span>
+        </div>
+
+        <button class="submit-btn" id="submitBtn" onclick="submitLeave()">✅ சமர்ப்பிக்கவும்</button>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<!-- ★ Permission Warning Modal ★ -->
+<div class="modal-overlay" id="permWarningOverlay">
+  <div class="modal">
+    <div class="modal-icon">⚠️</div>
+    <div class="modal-title" style="color:#b45309;">அனுமதி விடுப்பு எச்சரிக்கை</div>
+    <div class="modal-sub" id="permWarningMsg" style="text-align:left;color:#78350f;"></div>
+    <button class="pwd-btn" onclick="permWarningConfirm(true)">✅ ஆம், தொடரவும்</button>
+    <br>
+    <button class="pwd-cancel" onclick="permWarningConfirm(false)">❌ ரத்து செய்</button>
+  </div>
+</div>
+
+<!-- ★ CL Limit Exceeded Modal ★ -->
+<div class="modal-overlay" id="clLimitOverlay">
+  <div class="modal">
+    <div class="modal-icon">🚫</div>
+    <div class="modal-title" style="color:#991b1b;">விடுப்பு வரம்பு மீறல்</div>
+    <div class="modal-sub" id="clLimitMsg" style="text-align:left;color:#7f1d1d;"></div>
+    <button class="pwd-btn primary-btn" onclick="document.getElementById('clLimitOverlay').classList.remove('show')">சரி, புரிந்தது</button>
+  </div>
+</div>
+
+<script src="{{ url_for('static', filename='gas-shim.js') }}"></script>
+<script>
+// ============================================================
+// மாறிகள்
+// ============================================================
+let selectedLeaveType = "P";
+let selectedSession   = null;
+let selectedFN        = null;
+let selectedAN        = null;
+let employeeData      = null;
+let allEmployees      = [];    // ★ திருத்தம் 3: முழு பணியாளர் பட்டியல்
+
+// ★ ஆங்கில பெயர்கள் முதலில் (A-Z), பின்னர் தமிழ் பெயர்கள் (தினக்கூலி etc.) (A-Z)
+function sortEmployeesByScript(list) {
+  function scriptRank(name) {
+    return /^[a-zA-Z]/.test(name) ? 0 : 1;
+  }
+  return (list || []).slice().sort(function (a, b) {
+    const ra = scriptRank(a.name), rb = scriptRank(b.name);
+    if (ra !== rb) return ra - rb;
+    return a.name.localeCompare(b.name, ra === 0 ? "en" : "ta");
+  });
+}
+let lastSubmittedRows = [];    // மெயில் அனுப்ப சேமிக்கவும்
+
+const LEAVE_META = {
+  P:  { label:"அனுமதி விடுப்பு",  sesMap:{FN:"முன்பகல் அனுமதி", AN:"பிற்பகல் அனுமதி", FULL:"முழு நாள் அனுமதி"}, icon:"🕐", lt:"lt-P",  ic:"ic-P",  bg:"bg-P"  },
+  CL: { label:"தற்செயல் விடுப்பு", sesMap:{FN:"முற்பகல் அரை நாள்", AN:"பிற்பகல் அரை நாள்", FULL:"முழு நாள்"}, icon:"📅", lt:"lt-CL", ic:"ic-CL", bg:"bg-CL" },
+  RL: { label:"மத விடுப்பு",       sesMap:{FULL:"முழு நாள்"},        icon:"🕌", lt:"lt-RL", ic:"ic-RL", bg:"bg-RL" },
+  EL: { label:"ஈட்டிய விடுப்பு",   sesMap:{FULL:"முழு நாள்"},        icon:"📆", lt:"lt-EL", ic:"ic-EL", bg:"bg-EL" },
+  ML: { label:"மருத்துவ விடுப்பு", sesMap:{FULL:"முழு நாள்"},        icon:"🏥", lt:"lt-ML", ic:"ic-ML", bg:"bg-ML" }
+};
+
+const TAMIL_DAYS = ["ஞாயிறு","திங்கள்","செவ்வாய்","புதன்","வியாழன்","வெள்ளி","சனி"];
+
+// ============================================================
+// இதுவரை எடுத்த விடுப்பு Dashboard — History Panel Functions
+// ============================================================
+
+// ★ showHistoryPanel() — history-btn click-ல் panel திறக்கும்
+// (goHome section-ல் define ஆகும் — இங்கே dropdown functions மட்டும்)
+
+// ── Dropdown: முழு பணியாளர் பட்டியலை A-Z வரிசையில் <select>-ல் நிரப்பவும் ──
+function populateHistorySelect(list) {
+  const sel = document.getElementById("historyEmpSelect");
+  if (!sel) return;
+
+  // ஆங்கில பெயர்கள் முதலில், தமிழ் பெயர்கள் அடுத்து — A-Z (backend-லேயே sort ஆகி வந்தாலும் இங்கும் உறுதி செய்யவும்)
+  const sorted = sortEmployeesByScript(list);
+
+  sel.innerHTML = '<option value="">-- பணியாளரைத் தேர்வு செய்யவும் --</option>';
+  sorted.forEach(function (emp) {
+    const opt = document.createElement("option");
+    opt.value = emp.id;
+    opt.textContent = emp.name + " (" + emp.id + ") — " + emp.library;
+    sel.appendChild(opt);
+  });
+}
+
+// ── Select-ல் ஒரு பணியாளரை தேர்வு செய்யும்போது ──
+function onHistoryEmpSelect(empId) {
+  if (!empId) return;
+  const emp = allEmployees.find(function (e) { return String(e.id) === String(empId); });
+  if (emp) loadEmployeeHistory(emp);
+}
+
+function loadEmployeeHistory(emp) {
+  const content = document.getElementById("historyContent");
+  if (content) content.style.display = "block";
+
+  document.getElementById("historyLoading").style.display = "block";
+  document.getElementById("historyEmpty").style.display   = "none";
+  document.getElementById("historyTable").style.display   = "none";
+
+  google.script.run
+    .withSuccessHandler(function(records) {
+      document.getElementById("historyLoading").style.display = "none";
+      if (!records || records.length === 0) {
+        document.getElementById("historyEmpty").style.display = "block";
+        return;
+      }
+      renderHistoryTable(emp, records);
+    })
+    .withFailureHandler(function() {
+      document.getElementById("historyLoading").style.display = "none";
+      document.getElementById("historyEmpty").style.display   = "block";
+    })
+    .getEmployeeLeaveHistory(String(emp.id));
+}
+
+function renderHistoryTable(emp, records) {
+  document.getElementById("historyTable").style.display = "block";
+  document.getElementById("historyEmpLabel").textContent =
+    "👤 " + emp.name + " (எண்: " + emp.id + ") — " + emp.library;
+
+  const tbody = document.getElementById("historyTableBody");
+  tbody.innerHTML = "";
+
+  // விடுப்பு வகை labels
+  const ltLabel = { CL:"தற்செயல் விடுப்பு", RL:"மத விடுப்பு", EL:"ஈட்டிய விடுப்பு",
+                    ML:"மருத்துவ விடுப்பு", P:"அனுமதி விடுப்பு" };
+  const sesLabel = { FN:"முற்பகல்", AN:"பிற்பகல்", FULL:"முழு நாள்" };
+  const ltBg    = { CL:"#bbf7d0;color:#15803d", RL:"#f3e8ff;color:#7e22ce",
+                    EL:"#fed7aa;color:#c2410c", ML:"#fecaca;color:#b91c1c", P:"#dbeafe;color:#1d4ed8" };
+
+  records.forEach(function(r, idx) {
+    const tr = document.createElement("tr");
+    tr.style.borderBottom = "0.5px solid #f1f5f9";
+    tr.style.background   = idx % 2 === 0 ? "#fff" : "#f8fafc";
+    const lt   = r.leaveType || "CL";
+    const bg   = ltBg[lt] || "background:#e2e8f0;color:#334155";
+    const dayTxt = r.days === 0.5 ? "½" : r.days === 1 ? "1" : String(r.days);
+    tr.innerHTML =
+      '<td style="padding:7px 6px;font-size:0.82rem;">' + r.date + '</td>' +
+      '<td style="padding:7px 6px;text-align:center;"><span style="background:' + bg +
+        ';border-radius:6px;padding:2px 7px;font-size:0.75rem;font-weight:700;">' +
+        (ltLabel[lt] || lt) + '</span></td>' +
+      '<td style="padding:7px 6px;text-align:center;font-size:0.78rem;color:#64748b;">' +
+        (sesLabel[r.session] || r.session) + '</td>' +
+      '<td style="padding:7px 6px;text-align:right;font-weight:700;font-size:0.85rem;color:#1a4f7a;">' +
+        dayTxt + '</td>';
+    tbody.appendChild(tr);
+  });
+
+  // ★ Abstract Summary
+  const summary = {};
+  records.forEach(function(r) {
+    const lt = r.leaveType || "CL";
+    if (!summary[lt]) summary[lt] = { entries: [], total: 0 };
+    summary[lt].entries.push({ date: r.date, session: r.session, days: r.days });
+    summary[lt].total += r.days;
+  });
+
+  let html = "";
+  Object.keys(summary).forEach(function(lt) {
+    const s = summary[lt];
+    const lbl = ltLabel[lt] || lt;
+    const bg  = ltBg[lt] || "#e2e8f0;color:#334155";
+    html += '<div style="margin-bottom:8px;">';
+    html += '<span style="background:' + bg + ';border-radius:6px;padding:2px 8px;font-size:0.78rem;font-weight:700;">' + lbl + '</span>';
+    html += '<ul style="margin:4px 0 0 16px;padding:0;">';
+    s.entries.forEach(function(e) {
+      const sesLbl = sesLabel[e.session] || e.session;
+      const dayLbl = e.days === 0.5 ? "அரை நாள்" : e.days === 1 ? "1 நாள்" : e.days + " நாட்கள்";
+      html += '<li style="font-size:0.8rem;color:#334155;">' + e.date + ' — ' + sesLbl + ' (' + dayLbl + ')</li>';
+    });
+    html += '</ul>';
+    const tot = s.total % 1 === 0 ? s.total : s.total.toFixed(1).replace(".",",");
+    html += '<div style="font-size:0.8rem;color:#1a4f7a;font-weight:700;margin-top:3px;margin-left:16px;">மொத்த ' + lbl + ': ' + tot + ' நாட்கள்</div>';
+    html += '</div>';
+  });
+  document.getElementById("historySummaryContent").innerHTML = html;
+}
+
+// ============================================================
+// ★ புதிய: அனுமதி விடுப்பு நாட்கள் — Smart auto-detect
+// வியாழன் → வெள்ளி (+ 2வது வியாழன் → 2வது சனி)
+// ============================================================
+function computePermittedDays(fromDateStr) {
+  if (!fromDateStr) return null;
+  const [y,m,d] = fromDateStr.split("-").map(Number);
+  const dt = new Date(y, m-1, d);
+  const dow = dt.getDay(); // 0=Sun,1=Mon,...,4=Thu,5=Fri,6=Sat
+
+  if (dow !== 4) { // வியாழன் அல்ல
+    return { type: "options" };
+  }
+
+  // வியாழன் — வெள்ளி தேதி
+  const fri = new Date(y, m-1, d+1);
+  const friStr = String(fri.getDate()).padStart(2,"0") + "/" +
+                 String(fri.getMonth()+1).padStart(2,"0") + "/" + fri.getFullYear();
+
+  // 2வது வியாழன்? — மாதத்தில் முதல் & 2வது வியாழன் கண்டுபிடி
+  let thuCount = 0, isSecondThu = false;
+  for (let dd = 1; dd <= d; dd++) {
+    const tmp = new Date(y, m-1, dd);
+    if (tmp.getDay() === 4) thuCount++;
+  }
+  if (thuCount === 2) isSecondThu = true;
+
+  let text = "வெள்ளி — " + friStr;
+  let value = "வெள்ளி — " + friStr;
+
+  if (isSecondThu) {
+    // 2வது சனி கண்டுபிடி
+    let satCount = 0, secondSat = null;
+    for (let dd = 1; dd <= 31; dd++) {
+      const tmp = new Date(y, m-1, dd);
+      if (tmp.getMonth() !== m-1) break;
+      if (tmp.getDay() === 6) {
+        satCount++;
+        if (satCount === 2) { secondSat = tmp; break; }
+      }
+    }
+    if (secondSat) {
+      const satStr = String(secondSat.getDate()).padStart(2,"0") + "/" +
+                     String(secondSat.getMonth()+1).padStart(2,"0") + "/" + secondSat.getFullYear();
+      text  = "வெள்ளி — " + friStr + " மற்றும் 2வது சனி — " + satStr;
+      value = text;
+    }
+  }
+  return { type: "thursday", text: text, value: value };
+}
+
+function updatePermittedDays() {
+  const from = document.getElementById("fromDate") ? document.getElementById("fromDate").value : "";
+  const box  = document.getElementById("permittedDaysBox");
+  const txt  = document.getElementById("permittedDaysText");
+  const opts = document.getElementById("permittedDaysOptions");
+  const hid  = document.getElementById("appPermittedDays");
+  if (!box || !from) return;
+
+  const result = computePermittedDays(from);
+  if (!result) return;
+
+  if (result.type === "thursday") {
+    txt.textContent = "✅ " + result.text;
+    box.style.background  = "#f0fdf4";
+    box.style.borderColor = "#86efac";
+    box.style.color       = "#166534";
+    opts.style.display = "none";
+    if (hid) hid.value = result.value;
+  } else {
+    txt.textContent = "இந்த நாளுக்கு நேரடி அனுமதி விடுப்பு நாட்கள் இல்லை";
+    box.style.background  = "#fffbeb";
+    box.style.borderColor = "#fcd34d";
+    box.style.color       = "#92400e";
+    opts.style.display = "block";
+    document.querySelectorAll("input[name='permOpt']").forEach(function(r) { r.checked = false; });
+    if (hid) hid.value = "";
+  }
+}
+
+function setPermittedOption(val) {
+  const hid = document.getElementById("appPermittedDays");
+  if (!hid) return;
+  if (val === "none")    hid.value = "அனுமதி விடுப்பு நாட்கள் இல்லை";
+  if (val === "holiday") hid.value = "அரசு விடுமுறை இணைப்பு";
+}
+
+// ============================================================
+// ★ புதிய: Duplicate Check before submit
+// ============================================================
+function checkDuplicateAndSubmit(btn, from, to) {
+  const empId = String(employeeData.id).trim();
+  const newSession = selectedSession || "FULL";
+
+  // from → to வரை அனைத்து தேதிகளையும் check செய்யவும்
+  const datesToCheck = [];
+  const f = new Date(from), t = new Date(to);
+  for (let d = new Date(f); d <= t; d.setDate(d.getDate() + 1)) {
+    const dd = String(d.getDate()).padStart(2,"0");
+    const mm = String(d.getMonth()+1).padStart(2,"0");
+    const yy = d.getFullYear();
+    datesToCheck.push(dd + "/" + mm + "/" + yy);
+  }
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>சரிபார்க்கிறது...';
+
+  // ஒவ்வொரு தேதியையும் வரிசையாக check செய்யும் recursive function
+  function checkNext(idx) {
+    if (idx >= datesToCheck.length) {
+      // எல்லாம் சரி — submit செய்யவும்
+      btn.disabled = false;
+      btn.innerHTML = "✅ சமர்ப்பிக்கவும்";
+      doSubmit(btn, from, to);
+      return;
+    }
+    const dateStr = datesToCheck[idx];
+    google.script.run
+      .withSuccessHandler(function(res) {
+        if (res && res.duplicate) {
+          btn.disabled = false;
+          btn.innerHTML = "✅ சமர்ப்பிக்கவும்";
+          showAlert("leaveAlert", "error", res.message.replace(/\n/g,"<br>"));
+          return;
+        }
+        checkNext(idx + 1);
+      })
+      .withFailureHandler(function() {
+        // check பிழை வந்தாலும் அடுத்த தேதிக்கு தொடரவும்
+        checkNext(idx + 1);
+      })
+      .checkDuplicateLeave(empId, dateStr, newSession);
+  }
+
+  checkNext(0);
+}
+
+// ============================================================
+// TODAY LEAVE
+// ============================================================
+let _scrollTimer = null, _scrollPaused = false, _scrollOffset = 0, _cardHeight = 0, _scrollSpeed = 0.6;
+
+function loadTodayLeave() {
+  const track = document.getElementById("todayTrack");
+  const badge = document.getElementById("todayCountBadge");
+  if (!track) return;
+  if (_scrollTimer) { cancelAnimationFrame(_scrollTimer); _scrollTimer = null; }
+  _scrollOffset = 0;
+  track.style.transform = "translateY(0px)";
+  track.innerHTML = '<div class="today-loading">⏳ தகவல் ஏற்றுகிறது...</div>';
+  badge.textContent = "...";
+  google.script.run
+    .withSuccessHandler(function(list) {
+      track.innerHTML = "";
+      if (!list || !list.length) {
+        badge.textContent = "0 பேர்";
+        track.innerHTML = '<div class="today-empty">🎉 இன்று அனைவரும் பணியில் உள்ளனர்!</div>';
+        return;
+      }
+      badge.textContent = list.length + " பேர்";
+      function makeCards(items) {
+        items.forEach(function(r) {
+          var meta = LEAVE_META[r.leaveType] || LEAVE_META["CL"];
+          var sesLbl = (meta.sesMap && meta.sesMap[r.session]) || r.session;
+          var card = document.createElement("div");
+          card.className = "leave-card " + meta.lt;
+          card.innerHTML =
+            '<div class="leave-card-icon ' + meta.ic + '">' + meta.icon + '</div>' +
+            '<div class="leave-card-info">' +
+              '<div class="leave-card-name">' + r.librarian + '</div>' +
+              '<div class="leave-card-lib">📚 ' + r.library + '</div>' +
+            '</div>' +
+            '<span class="leave-card-badge ' + meta.bg + '">' + meta.label + '<br>' + sesLbl + '</span>';
+          track.appendChild(card);
+        });
+      }
+      makeCards(list);
+      _cardHeight = track.scrollHeight;
+      var viewport = document.getElementById("todayViewport");
+      if (_cardHeight > viewport.clientHeight) {
+        makeCards(list);
+        startScroll(viewport);
+      }
+      viewport.addEventListener("touchstart", function() { _scrollPaused = true; }, { passive:true });
+      viewport.addEventListener("touchend",   function() { _scrollPaused = false; }, { passive:true });
+      viewport.addEventListener("mousedown",  function() { _scrollPaused = true; });
+      viewport.addEventListener("mouseup",    function() { _scrollPaused = false; });
+    })
+    .withFailureHandler(function() {
+      badge.textContent = "பிழை";
+      track.innerHTML = '<div class="today-empty">❌ தகவல் ஏற்ற முடியவில்லை</div>';
+    })
+    .getTodayLeaveStaff();
+}
+
+function startScroll(viewport) {
+  if (_scrollTimer) cancelAnimationFrame(_scrollTimer);
+  function step() {
+    if (!_scrollPaused) {
+      _scrollOffset += _scrollSpeed;
+      if (_scrollOffset >= _cardHeight) _scrollOffset = 0;
+      document.getElementById("todayTrack").style.transform = "translateY(-" + _scrollOffset + "px)";
+    }
+    _scrollTimer = requestAnimationFrame(step);
+  }
+  _scrollTimer = requestAnimationFrame(step);
+}
+
+// ============================================================
+// NAVIGATION
+// ============================================================
+function goHome() {
+  document.getElementById("homeView").style.display = "";
+  document.getElementById("leavePanel").classList.remove("active");
+  document.getElementById("historyPanel").classList.remove("active");
+}
+
+// ★ History Panel திறக்கும்
+function showHistoryPanel() {
+  document.getElementById("homeView").style.display = "none";
+  document.getElementById("historyPanel").classList.add("active");
+  // select reset
+  var sel = document.getElementById("historyEmpSelect");
+  if (sel) sel.value = "";
+  var hc = document.getElementById("historyContent");
+  if (hc) hc.style.display = "none";
+  var ht = document.getElementById("historyTable");
+  if (ht) ht.style.display = "none";
+  var he = document.getElementById("historyEmpty");
+  if (he) he.style.display = "none";
+  // பணியாளர் பட்டியலை ஏற்றி dropdown நிரப்பவும்
+  if (allEmployees.length > 0) {
+    populateHistorySelect(allEmployees);
+  } else {
+    google.script.run
+      .withSuccessHandler(function(list) {
+        allEmployees = list || [];
+        populateHistorySelect(allEmployees);
+      })
+      .withFailureHandler(function() {})
+      .getAllEmployees();
+  }
+}
+
+function showLeave() {
+  document.getElementById("homeView").style.display = "none";
+  document.getElementById("leavePanel").classList.add("active");
+  resetForm();
+  // ★ திருத்தம் 3: பணியாளர் பட்டியல் ஏற்றவும்
+  loadAllEmployees();
+}
+
+// ============================================================
+// ★ முழு பணியாளர் dropdown — Hardcoded <select> (A-Z)
+// ============================================================
+function loadAllEmployees() {
+  if (allEmployees.length > 0) {
+    populateEmpSelect(allEmployees);
+    return;
+  }
+  google.script.run
+    .withSuccessHandler(function(list) {
+      allEmployees = list || [];
+      populateEmpSelect(allEmployees);
+    })
+    .withFailureHandler(function() {
+      allEmployees = [];
+    })
+    .getAllEmployees();
+}
+
+// ── Select-ஐ A-Z வரிசையில் நிரப்பவும் ──
+function populateEmpSelect(list) {
+  const sel = document.getElementById("empSelect");
+  if (!sel) return;
+
+  const sorted = sortEmployeesByScript(list);
+
+  sel.innerHTML = '<option value="">-- பணியாளரைத் தேர்வு செய்யவும் --</option>';
+  sorted.forEach(function (emp) {
+    const opt = document.createElement("option");
+    opt.value = emp.id;
+    opt.textContent = emp.name + " (" + emp.id + ") — " + emp.library;
+    sel.appendChild(opt);
+  });
+}
+
+// ── Select-ல் ஒரு பணியாளரை தேர்வு செய்யும்போது ──
+function onEmpSelect(empId) {
+  if (!empId) {
+    employeeData = null;
+    document.getElementById("lookupResult").classList.remove("show");
+    return;
+  }
+  const emp = allEmployees.find(function (e) { return String(e.id) === String(empId); });
+  if (emp) selectEmployee(emp);
+}
+
+function selectEmployee(emp) {
+  employeeData = emp;
+  const res = document.getElementById("lookupResult");
+  res.innerHTML = "✅ <strong>" + emp.name + "</strong> &nbsp;|&nbsp; எண்: <strong>" + emp.id +
+    "</strong> &nbsp;|&nbsp; நூலகம்: " + emp.library + " &nbsp;|&nbsp; வகை: " + emp.type;
+  res.classList.add("show");
+}
+
+// ============================================================
+// LEAVE TYPE
+// ============================================================
+function selectLeaveType(val) {
+  selectedLeaveType = val;
+  selectedSession = selectedFN = selectedAN = null;
+  const permSec = document.getElementById("permSection");
+  const clSec   = document.getElementById("clSection");
+  const fullSec = document.getElementById("fullDaySection");
+  permSec.classList.remove("show");
+  clSec.classList.remove("show");
+  fullSec.classList.remove("show");
+  document.getElementById("clSessionSelect").value = "";
+  if (val === "P") {
+    permSec.classList.add("show");
+  } else if (val === "CL") {
+    clSec.classList.add("show");
+  } else if (val === "RL") {
+    document.getElementById("fullDayDividerLabel").textContent = "மத விடுப்பு (Restricted Holiday)";
+    document.getElementById("fullDayInfoText").textContent = "RL — மத விடுப்பு: முழு நாள் மட்டுமே பதிவாகும்";
+    selectedSession = "FULL"; fullSec.classList.add("show");
+  } else if (val === "EL") {
+    document.getElementById("fullDayDividerLabel").textContent = "ஈட்டிய விடுப்பு (Earned Leave)";
+    document.getElementById("fullDayInfoText").textContent = "EL — ஈட்டிய விடுப்பு: முழு நாள் மட்டுமே பதிவாகும்";
+    selectedSession = "FULL"; fullSec.classList.add("show");
+  } else if (val === "ML") {
+    document.getElementById("fullDayDividerLabel").textContent = "மருத்துவ விடுப்பு (Medical Leave)";
+    document.getElementById("fullDayInfoText").textContent = "ML — மருத்துவ விடுப்பு: முழு நாள் மட்டுமே பதிவாகும்";
+    selectedSession = "FULL"; fullSec.classList.add("show");
+  }
+  updateSummary();
+}
+
+function selectCLSession(val) { selectedSession = val || null; updateSummary(); }
+
+function selectTimeDrop(type, val) {
+  if (type === "fn") {
+    if (val) { document.getElementById("anSelect").value = ""; selectedAN = null; selectedFN = val; selectedSession = "FN"; }
+    else { selectedFN = null; selectedSession = null; }
+  } else {
+    if (val) { document.getElementById("fnSelect").value = ""; selectedFN = null; selectedAN = val; selectedSession = "AN"; }
+    else { selectedAN = null; selectedSession = null; }
+  }
+  updateSummary();
+}
+
+// ============================================================
+// DATE / SUMMARY
+// ============================================================
+window.addEventListener("DOMContentLoaded", () => {
+  loadTodayLeave();
+  const today = new Date().toISOString().split("T")[0];
+  document.getElementById("fromDate").value = today;
+  document.getElementById("toDate").value   = today;
+  updateSummary();
+  // ★ அனைத்து பணியாளர்களையும் முன்கூட்டியே ஏற்றவும்
+  google.script.run
+    .withSuccessHandler(function(list) { allEmployees = list || []; })
+    .getAllEmployees();
+});
+
+// ★ திருத்தம் 3: fromDate மாற்றினால் toDate-உம் அதே தேதிக்கு மாறும்
+function onFromDateChange() {
+  const fromVal = document.getElementById("fromDate").value;
+  const toVal   = document.getElementById("toDate").value;
+  // toDate-ஐ fromDate-க்கு sync செய்யவும் (toDate < fromDate ஆனால் மட்டும்)
+  if (!toVal || toVal < fromVal) {
+    document.getElementById("toDate").value = fromVal;
+  }
+  updateSummary();
+}
+
+function updateSummary() {
+  const from = document.getElementById("fromDate").value;
+  const to   = document.getElementById("toDate").value;
+  const chip = document.getElementById("summaryChip");
+  if (!from || !to) { chip.style.display = "none"; return; }
+  const days = calcDays(from, to);
+  let extra = "";
+  if (selectedLeaveType === "P") {
+    if (selectedSession === "FN") extra = " | FN " + selectedFN + " மணி";
+    else if (selectedSession === "AN") extra = " | AN " + selectedAN + " மணி முன்";
+    else extra = " | நேரம் தேர்வு செய்யவும்";
+  } else if (selectedLeaveType === "CL") {
+    if (selectedSession === "FN")   extra = " | முற்பகல் (FN) | 0.5 நாள்/நாள்";
+    else if (selectedSession === "AN")   extra = " | பிற்பகல் (AN) | 0.5 நாள்/நாள்";
+    else if (selectedSession === "FULL") extra = " | முழு நாள் (FULL) | 1.0 நாள்/நாள்";
+    else extra = " | கால தேர்வு செய்யவும்";
+  } else if (["RL","EL","ML"].includes(selectedLeaveType)) {
+    extra = " | முழு நாள் (FULL) | 1.0 நாள்/நாள்";
+  }
+  chip.textContent = selectedLeaveType + " | " + formatDisplay(from) + " → " + formatDisplay(to) + " | " + days + " நாள்" + extra;
+  chip.style.display = "inline-flex";
+}
+
+function calcDays(from, to) {
+  const f = new Date(from), t = new Date(to);
+  if (t < f) return 0;
+  return Math.round((t - f) / 86400000) + 1;
+}
+
+function formatDisplay(iso) {
+  const [y,m,d] = iso.split("-");
+  return d + "/" + m + "/" + y;
+}
+
+// ★ கிழமை தமிழில்
+function getDateWithDay(iso) {
+  const [y,m,d] = iso.split("-");
+  const dt = new Date(parseInt(y), parseInt(m)-1, parseInt(d));
+  return TAMIL_DAYS[dt.getDay()] + ", " + d + "/" + m + "/" + y;
+}
+
+// ============================================================
+// SUBMIT
+// ============================================================
+function submitLeave() {
+  const btn    = document.getElementById("submitBtn");
+  const empVal = document.getElementById("empSelect").value.trim();
+  const from   = document.getElementById("fromDate").value;
+  const to     = document.getElementById("toDate").value;
+
+  hideAlert();
+  if (!empVal)          { showAlert("leaveAlert","error","❌ பணியாளர் பெயர் தேர்வு செய்யவும்!"); return; }
+  if (!employeeData)    { showAlert("leaveAlert","error","❌ dropdown-இல் இருந்து பணியாளரை தேர்வு செய்யவும்!"); return; }
+  if (!from || !to)     { showAlert("leaveAlert","error","❌ தேதி தேர்வு செய்யவும்!"); return; }
+  if (new Date(to) < new Date(from)) { showAlert("leaveAlert","error","❌ முடிவு தேதி தொடக்க தேதிக்கு பிறகு இருக்க வேண்டும்!"); return; }
+  if (selectedLeaveType === "P" && !selectedSession)  { showAlert("leaveAlert","error","❌ FN அல்லது AN நேரம் தேர்வு செய்யவும்!"); return; }
+  if (selectedLeaveType === "CL" && !selectedSession) { showAlert("leaveAlert","error","❌ முற்பகல் / பிற்பகல் / முழு நாள் தேர்வு செய்யவும்!"); return; }
+
+  // ★ Duplicate Entry தவிர்க்க — பட்டன் அழுத்தியதும் உடனே Disable ஆகி "சரிபார்க்கிறது" காட்டவும்
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>சரிபார்க்கிறது...';
+
+  const empId = String(employeeData.id).trim();
+
+  // ★ திருத்தம் 5: CL / RL வரம்பு சரிபார்ப்பு
+  if (selectedLeaveType === "CL") {
+    google.script.run
+      .withSuccessHandler(function(res) {
+        const usedDays  = res ? res.used : 0;
+        const newDays   = calcDays(from, to) * (selectedSession === "FULL" ? 1 : 0.5);
+        const totalDays = usedDays + newDays;
+        if (totalDays > 12) {
+          btn.disabled = false;
+          btn.innerHTML = "✅ சமர்ப்பிக்கவும்";
+          showCLLimitModal("CL", usedDays, newDays, 12);
+          return;
+        }
+        checkDuplicateAndSubmit(btn, from, to);
+      })
+      .withFailureHandler(function() { checkDuplicateAndSubmit(btn, from, to); })
+      .getUsedLeave(empId, "CL");
+    return;
+  }
+
+  if (selectedLeaveType === "RL") {
+    // ★ பிரச்சனை 2 திருத்தம்: முதலில் RH check → பின்னர் வரம்பு → பின்னர் submit
+    const fromDisp = formatDisplay(from);
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span>RH பட்டியல் சரிபார்க்கிறது...';
+    google.script.run
+      .withSuccessHandler(function(rhRes) {
+        if (!rhRes || !rhRes.allowed) {
+          // ❌ RH list-ல் இல்லை — ENTRY-ல் பதிவு செய்யாமல் error காட்டு
+          btn.disabled = false;
+          btn.innerHTML = "✅ சமர்ப்பிக்கவும்";
+          showAlert("leaveAlert","error",
+            "🚫 <strong>" + fromDisp + "</strong> தேதிக்கு மத விடுப்பு அனுமதி வழங்கப்படவில்லை.<br>" +
+            "RH DATES பட்டியலில் இந்த தேதி இல்லை. வேறு தேதி தேர்வு செய்யவும்.");
+          return;
+        }
+        // ✅ RH அனுமதி உள்ளது — இப்போது வரம்பு சரிபார்ப்பு
+        google.script.run
+          .withSuccessHandler(function(res) {
+            btn.disabled = false;
+            btn.innerHTML = "✅ சமர்ப்பிக்கவும்";
+            const usedDays  = res ? res.used : 0;
+            const newDays   = calcDays(from, to);
+            const totalDays = usedDays + newDays;
+            if (totalDays > 3) {
+              showCLLimitModal("RL", usedDays, newDays, 3);
+              return;
+            }
+            // ✅ வரம்பு சரி — submit செய்யவும்
+            checkDuplicateAndSubmit(btn, from, to);
+          })
+          .withFailureHandler(function() {
+            btn.disabled = false;
+            btn.innerHTML = "✅ சமர்ப்பிக்கவும்";
+            checkDuplicateAndSubmit(btn, from, to);
+          })
+          .getUsedLeave(empId, "RL");
+      })
+      .withFailureHandler(function() {
+        btn.disabled = false;
+        btn.innerHTML = "✅ சமர்ப்பிக்கவும்";
+        showAlert("leaveAlert","error","❌ RH சரிபார்ப்பு தோல்வி. மீண்டும் முயற்சிக்கவும்.");
+      })
+      .checkRHDate(fromDisp);
+    return;
+  }
+
+  // Permission limit check
+  if (selectedLeaveType === "P") {
+    const periodKey = from.substring(0, 7);
+    google.script.run
+      .withSuccessHandler(function(check) {
+        if (!check) { continueSubmit(false, btn, from, to); return; }
+        if (check.exceeded) {
+          showPermissionWarning(check.count, function(ok) {
+            if (!ok) {
+              btn.disabled = false;
+              btn.innerHTML = "✅ சமர்ப்பிக்கவும்";
+              return;
+            }
+            continueSubmit(true, btn, from, to);
+          });
+          return;
+        }
+        continueSubmit(false, btn, from, to);
+      })
+      .withFailureHandler(function(err) {
+        btn.disabled = false;
+        btn.innerHTML = "✅ சமர்ப்பிக்கவும்";
+        showAlert("leaveAlert","error","❌ சரிபார்ப்பு பிழை: " + err.message);
+      })
+      .checkPermissionLimit(empId, periodKey);
+    return;
+  }
+
+  checkDuplicateAndSubmit(btn, from, to);
+}
+
+// ★ திருத்தம் 5: CL வரம்பு மீறல் modal
+function showCLLimitModal(type, used, newDays, maxDays) {
+  const typeLabel = type === "CL" ? "தற்செயல் விடுப்பு" : "மத விடுப்பு";
+  const msg =
+    "⚠️ <strong>" + typeLabel + " வரம்பு மீறப்பட்டுள்ளது!</strong><br><br>" +
+    "இதுவரை எடுத்த விடுப்பு நாட்கள்: <strong>" + used + "</strong><br>" +
+    "தற்போது கேட்கும் நாட்கள்: <strong>" + newDays + "</strong><br>" +
+    "மொத்தம்: <strong>" + (used + newDays) + " நாட்கள்</strong><br><br>" +
+    "அதிகபட்ச அனுமதிக்கப்பட்ட நாட்கள்: <strong>" + maxDays + "</strong><br><br>" +
+    "இதற்கு மேல் <strong>" + typeLabel + "</strong> எடுக்க முடியாது.";
+  document.getElementById("clLimitMsg").innerHTML = msg;
+  document.getElementById("clLimitOverlay").classList.add("show");
+}
+
+function doSubmit(btn, from, to) {
+  const rows = buildRows(from, to);
+  if (!rows.length) { showAlert("leaveAlert","error","❌ பதிவு தரவு உருவாக்க முடியவில்லை."); return; }
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>பதிவாகிறது...';
+  // உடனே submit — spinner காட்டி google.script.run-க்கு அனுப்பு
+  google.script.run
+    .withSuccessHandler(function(result) {
+      btn.disabled = false;
+      btn.innerHTML = "✅ சமர்ப்பிக்கவும்";
+      if (result && result.success) {
+        lastSubmittedRows = rows;
+        showSuccessPanel(rows);
+      } else {
+        showAlert("leaveAlert","error","❌ பதிவு தோல்வி: " + (result.error || "மீண்டும் முயற்சிக்கவும்"));
+      }
+    })
+    .withFailureHandler(function(err) {
+      btn.disabled = false;
+      btn.innerHTML = "✅ சமர்ப்பிக்கவும்";
+      showAlert("leaveAlert","error","❌ பிழை: " + err.message);
+    })
+    .addLeaveRows(rows);
+}
+
+// Success panel காட்டவும்
+function showSuccessPanel(rows) {
+  document.getElementById("leaveFormSection").style.display = "none";
+  const panel = document.getElementById("successPanel");
+  panel.classList.add("show");
+
+  const leaveLabel = LEAVE_META[selectedLeaveType]
+    ? LEAVE_META[selectedLeaveType].label
+    : selectedLeaveType;
+
+  // ★ திருத்தம் 1: P (அனுமதி விடுப்பு) — success மட்டும், கேள்வி / விண்ணப்பம் இல்லை
+  if (selectedLeaveType === "P") {
+    document.getElementById("successSubText").textContent =
+      "அனுமதி விடுப்பு வெற்றிகரமாக பதிவு செய்யப்பட்டது!";
+    document.getElementById("leaveChoiceBtns").style.display = "none";
+    return;
+  }
+
+  // ★ EL / ML — success + விண்ணப்பம் பட்டன்
+  if (selectedLeaveType === "EL" || selectedLeaveType === "ML") {
+    document.getElementById("successSubText").textContent =
+      leaveLabel + " வெற்றிகரமாக பதிவு செய்யப்பட்டது!";
+    document.getElementById("leaveChoiceBtns").style.display = "flex";
+    const selfBtn = document.querySelector(".self-btn .choice-main");
+    if (selfBtn) selfBtn.textContent = "விண்ணப்பம் தயார் செய்து அலுவலகத்திற்கு அனுப்புகிறேன்";
+    return;
+  }
+
+  // CL / RL — மெயில் கேள்வி
+  document.getElementById("successSubText").textContent =
+    leaveLabel + " பதிவு நிறைவடைந்தது!";
+  document.getElementById("leaveChoiceBtns").style.display = "flex";
+  const selfBtn2 = document.querySelector(".self-btn .choice-main");
+  if (selfBtn2) selfBtn2.textContent = "தாங்களே விண்ணப்பம் தயார் செய்து அலுவலகத்திற்கு அனுப்புகிறீர்களா?";
+}
+
+// கேள்வி தேர்வு
+function handleChoice(choice) {
+  if (choice === "self") {
+    goHome();
+    return;
+  }
+
+  // ★ திருத்தம் 3: RL — RH DATES சரிபார்ப்பு முதலில்
+  if (selectedLeaveType === "RL") {
+    const fromDate = document.getElementById("fromDate").value;
+    const fromDisp = formatDisplay(fromDate);
+    // RH check — checkRHDate(dd/mm/yyyy)
+    google.script.run
+      .withSuccessHandler(function(rhRes) {
+        if (!rhRes || !rhRes.allowed) {
+          // அனுமதி இல்லை — error காட்டி வெளியேறு
+          showAlert("leaveAlert","error",
+            "🚫 <strong>" + fromDisp + "</strong> தேதிக்கு மத விடுப்பு (RL) அனுமதி வழங்கப்படவில்லை.<br>" +
+            "RH DATES Sheet-ல் இந்த தேதி பட்டியலில் இல்லை.");
+          document.getElementById("successPanel").classList.remove("show");
+          document.getElementById("leaveFormSection").style.display = "";
+          return;
+        }
+        // ✅ அனுமதி உள்ளது — form திறந்து reason auto-fill
+        openAppFormForRLCL(rhRes.func || "");
+      })
+      .withFailureHandler(function() {
+        // Check fail ஆனாலும் தொடர அனுமதி
+        openAppFormForRLCL("");
+      })
+      .checkRHDate(fromDisp);
+    return;
+  }
+
+  // CL / EL / ML — நேரடியாக form திறக்கவும்
+  openAppFormForRLCL("");
+}
+
+// ── Application form திறக்கும் helper ──
+function openAppFormForRLCL(rlReason) {
+  document.getElementById("successPanel").classList.remove("show");
+
+  // ★ EL / ML → தனி EL/ML form panel
+  if (selectedLeaveType === "EL" || selectedLeaveType === "ML") {
+    openElmlForm();
+    return;
+  }
+
+  const appPanel = document.getElementById("appFormPanel");
+  appPanel.classList.add("show");
+
+  const emp = employeeData;
+  document.getElementById("appEmpName").value  = emp ? emp.name : "";
+  document.getElementById("appWorkplace").value = emp ? emp.library : "";
+
+  // விடுப்பு வகை தலைப்பு
+  const leaveTitle =
+    selectedLeaveType === "CL" ? "தற்செயல் விடுப்பு விண்ணப்பம்" :
+    selectedLeaveType === "RL" ? "மத/வரையறுக்கப்பட்ட விடுப்பு விண்ணப்பம்" :
+    selectedLeaveType === "EL" ? "ஈட்டிய விடுப்பு விண்ணப்பம்" :
+                                  "மருத்துவ விடுப்பு விண்ணப்பம்";
+  document.getElementById("appFormLeaveTitle").textContent = leaveTitle;
+
+  // ★ RL — காரணம் RH DATES Col C auto-fill (readonly)
+  const reasonEl = document.getElementById("appReason");
+  if (reasonEl) {
+    if (selectedLeaveType === "RL" && rlReason) {
+      reasonEl.value    = rlReason;
+      reasonEl.readOnly = true;
+      reasonEl.style.background = "#f8fafc";
+      reasonEl.style.color      = "#64748b";
+    } else {
+      reasonEl.value    = "";
+      reasonEl.readOnly = false;
+      reasonEl.style.background = "";
+      reasonEl.style.color      = "";
+    }
+  }
+
+  // மொத்த நாட்கள்
+  const totalLeave = (selectedLeaveType === "CL") ? 12 : (selectedLeaveType === "RL") ? 3 : 300;
+  document.getElementById("appTotalLeave").value = (selectedLeaveType === "EL" || selectedLeaveType === "ML")
+    ? "—" : totalLeave;
+
+  // இதுவரை எடுத்த நாட்கள்
+  const empId = emp ? String(emp.id).trim() : "";
+  document.getElementById("appUsedLeave").value  = "கணக்கிடுகிறது...";
+  document.getElementById("appRemainLeave").value = "...";
+
+  if (selectedLeaveType === "CL" || selectedLeaveType === "RL") {
+    google.script.run
+      .withSuccessHandler(function(res) {
+        const currentDays = lastSubmittedRows.reduce(function(acc, r) {
+          return acc + (parseFloat(r.F) || 0);
+        }, 0);
+        const usedEx  = (res ? res.used : 0) - currentDays;
+        const remain  = totalLeave - usedEx;
+        document.getElementById("appUsedLeave").value  = usedEx;
+        document.getElementById("appRemainLeave").value = remain > 0 ? remain : 0;
+      })
+      .withFailureHandler(function() {
+        document.getElementById("appUsedLeave").value  = "—";
+        document.getElementById("appRemainLeave").value = "—";
+      })
+      .getUsedLeave(empId, selectedLeaveType);
+  } else {
+    document.getElementById("appUsedLeave").value  = "—";
+    document.getElementById("appRemainLeave").value = "—";
+  }
+
+  // தற்போது தேவைப்படும் நாட்கள் — கிழமை தமிழில்
+  const from = document.getElementById("fromDate").value;
+  const to   = document.getElementById("toDate").value;
+  const datesList = [];
+  const f = new Date(from), t = new Date(to);
+  for (let d = new Date(f); d <= t; d.setDate(d.getDate()+1)) {
+    datesList.push(getDateWithDay(d.toISOString().split("T")[0]));
+  }
+  document.getElementById("appCurrentDates").value = datesList.join(", ");
+
+  updatePermittedDays();
+}
+
+// ★ Application — முதலில் மெயில் confirm காட்டவும்
+function sendApplication() {
+  const desg = document.getElementById("appDesignation").value;
+  const perm = document.getElementById("appPermittedDays").value;
+  const addr = document.getElementById("appAddress").value.trim();
+
+  const reason = document.getElementById("appReason") ? document.getElementById("appReason").value.trim() : "";
+  if (!desg)   { showAlert("appAlert","error","❌ பதவி தேர்வு செய்யவும்!"); return; }
+  if (!reason) { showAlert("appAlert","error","❌ விடுப்பிற்கான காரணம் உள்ளிடவும்!"); return; }
+  if (!perm)   { showAlert("appAlert","error","❌ அனுமதி விடுப்பு நாட்களை உள்ளிடவும்!"); return; }
+  if (!addr)   { showAlert("appAlert","error","❌ விடுப்பின் போது முகவரி உள்ளிடவும்!"); return; }
+
+  const emp = employeeData;
+  if (!emp) {
+    showAlert("appAlert","error","❌ பணியாளர் தகவல் கிடைக்கவில்லை");
+    return;
+  }
+
+  // மெயில் confirm modal காட்டவும்
+  const storedEmail = (emp.email || "").trim();
+
+  // Comma-separated மெயில்களை split செய்யவும்
+  const emailList = storedEmail
+    ? storedEmail.split(",").map(function(e){ return e.trim(); }).filter(function(e){ return e.length > 0; })
+    : [];
+
+  const infoEl    = document.getElementById("confirmEmailInfo");
+  const dropEl    = document.getElementById("confirmEmailDropdown");
+  const inputEl   = document.getElementById("confirmEmailInput");
+  const inputWrap = document.getElementById("confirmEmailInputWrap");
+
+  document.getElementById("confirmEmailError").textContent = "";
+
+  if (emailList.length > 1) {
+    // ★ பல மெயில் — Dropdown காட்டவும்
+    infoEl.innerHTML = "📋 இந்த பணியாளருக்கு <strong>" + emailList.length +
+      "</strong> மெயில் ஐடிகள் உள்ளன. ஒன்றை தேர்வு செய்யவும்:";
+    infoEl.style.color = "#1a4f7a";
+    infoEl.style.background = "#eff6ff";
+    infoEl.style.borderColor = "#bfdbfe";
+
+    // Dropdown options உருவாக்கவும்
+    dropEl.innerHTML = '<option value="">— மெயில் ஐடி தேர்வு செய்யவும் —</option>';
+    emailList.forEach(function(mail) {
+      const opt = document.createElement("option");
+      opt.value = mail;
+      opt.textContent = mail;
+      dropEl.appendChild(opt);
+    });
+    dropEl.style.display = "block";
+    inputWrap.style.display = "none";
+    inputEl.value = "";
+
+  } else if (emailList.length === 1) {
+    // ★ ஒரே ஒரு மெயில் — நேரடியாக காட்டவும்
+    infoEl.innerHTML = "📋 Master Sheet-ல் பதிவு: <strong>" + emailList[0] + "</strong><br>" +
+      "சரியாக இருந்தால் நேரடியாக கீழே உள்ள பட்டனை அழுத்தவும்.<br>" +
+      "தவறாக இருந்தால் கீழே திருத்தவும்.";
+    infoEl.style.color = "#166534";
+    infoEl.style.background = "#f0fdf4";
+    infoEl.style.borderColor = "#86efac";
+    dropEl.style.display = "none";
+    dropEl.value = "";
+    inputEl.value = emailList[0];
+    inputEl.placeholder = "தவறாக இருந்தால் இங்கே திருத்தவும்";
+    inputWrap.style.display = "block";
+
+  } else {
+    // ★ மெயில் இல்லை
+    infoEl.innerHTML = "⚠️ Master Sheet Col G-ல் மெயில் ஐடி பதிவு இல்லை.<br>கீழே மெயில் ஐடி உள்ளிடவும்.";
+    infoEl.style.color = "#b45309";
+    infoEl.style.background = "#fff7ed";
+    infoEl.style.borderColor = "#fed7aa";
+    dropEl.style.display = "none";
+    dropEl.value = "";
+    inputEl.value = "";
+    inputEl.placeholder = "மெயில் ஐடி உள்ளிடவும் (எ.கா: abc@gmail.com)";
+    inputWrap.style.display = "block";
+  }
+
+  document.getElementById("emailConfirmOverlay").classList.add("show");
+}
+
+// ★ மெயில் confirm பின் PDF share செய்யவும்
+function confirmAndShare() {
+  const dropEl  = document.getElementById("confirmEmailDropdown");
+  const inputEl = document.getElementById("confirmEmailInput");
+  const errEl   = document.getElementById("confirmEmailError");
+
+  // Dropdown காட்டப்பட்டிருந்தால் அதிலிருந்து எடுக்கவும்
+  let emailVal = "";
+  if (dropEl.style.display !== "none") {
+    emailVal = dropEl.value.trim();
+    if (!emailVal) {
+      errEl.textContent = "❌ மெயில் ஐடி தேர்வு செய்யவும்";
+      return;
+    }
+  } else {
+    emailVal = inputEl.value.trim();
+    if (!emailVal || !emailVal.includes("@")) {
+      errEl.textContent = "❌ சரியான மெயில் ஐடி உள்ளிடவும்";
+      return;
+    }
+  }
+  errEl.textContent = "";
+  document.getElementById("emailConfirmOverlay").classList.remove("show");
+
+  // ★ EL/ML-க்கு தனி function route செய்யவும்
+  const source = document.getElementById("emailConfirmOverlay").dataset.source || "";
+  if (source === "elml") {
+    document.getElementById("emailConfirmOverlay").dataset.source = "";
+    confirmAndShareElml(emailVal);
+    return;
+  }
+  document.getElementById("emailConfirmOverlay").dataset.source = "";
+
+  const btn  = document.getElementById("sendMailBtn");
+  const emp  = employeeData;
+  const from = document.getElementById("fromDate").value;
+  const to   = document.getElementById("toDate").value;
+  const datesList = [];
+  const f = new Date(from), t = new Date(to);
+  for (let d = new Date(f); d <= t; d.setDate(d.getDate()+1)) {
+    datesList.push(getDateWithDay(d.toISOString().split("T")[0]));
+  }
+
+  const today = new Date();
+  const applyDate = String(today.getDate()).padStart(2,"0") + "/" +
+                    String(today.getMonth()+1).padStart(2,"0") + "/" +
+                    today.getFullYear();
+
+  const params = {
+    empName:       emp.name,
+    empId:         String(emp.id),
+    designation:   document.getElementById("appDesignation").value,
+    workplace:     emp.library,
+    email:         emailVal,
+    leaveType:     selectedLeaveType,
+    totalLeave:    (selectedLeaveType === "CL") ? 12 : 3,
+    usedLeave:     document.getElementById("appUsedLeave").value,
+    remainLeave:   document.getElementById("appRemainLeave").value,
+    currentDays:   datesList.length,
+    currentDates:  datesList,
+    permittedDays: document.getElementById("appPermittedDays").value,
+    reason:        document.getElementById("appReason") ? document.getElementById("appReason").value.trim() : "",
+    address:       document.getElementById("appAddress").value.trim(),
+    applyDate:     applyDate
+  };
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>PDF உருவாக்குகிறது...';
+
+  google.script.run
+    .withSuccessHandler(function(res) {
+      btn.disabled = false;
+      btn.innerHTML = "📧 PDF Share செய்யவும்";
+      if (res && res.success) {
+        // Share link காட்டவும்
+        document.getElementById("shareLinkUrl").href  = res.shareUrl;
+        document.getElementById("shareLinkUrl").textContent = "📄 PDF திறக்கவும் / பதிவிறக்கவும்";
+        document.getElementById("shareLinkBox").style.display = "block";
+        showAlert("appAlert","success",
+          "✅ PDF வெற்றிகரமாக உருவாக்கப்பட்டது!<br>" +
+          "📧 PDF link உங்கள் மெயிலுக்கும் அனுப்பப்பட்டது. கீழே உள்ள link-ஐயும் பயன்படுத்தலாம்.");
+      } else {
+        showAlert("appAlert","error","❌ PDF உருவாக்கல் தோல்வி: " + (res.error || "மீண்டும் முயற்சிக்கவும்"));
+      }
+    })
+    .withFailureHandler(function(err) {
+      btn.disabled = false;
+      btn.innerHTML = "📧 PDF Share செய்யவும்";
+      showAlert("appAlert","error","❌ பிழை: " + err.message);
+    })
+    .sendLeaveApplicationEmail(params);
+}
+
+// ============================================================
+// continueSubmit (Permission exceeded → CL ஆக)
+// ============================================================
+function continueSubmit(exceeded, btn, from, to) {
+  if (exceeded) selectedSession = "AN";
+  checkDuplicateAndSubmit(btn, from, to);
+}
+
+// ============================================================
+// buildRows
+// ============================================================
+function buildRows(from, to) {
+  const rows = [];
+  const empId   = employeeData ? String(employeeData.id).trim() : "";
+  const empName = employeeData ? employeeData.name : "";
+  const libName = employeeData ? employeeData.library : "";
+  const libType = employeeData ? employeeData.type : "";
+  const fromD = new Date(from), toD = new Date(to);
+  let session, dayCount;
+
+  if (selectedLeaveType === "P") {
+    session = selectedSession;
+    dayCount = 0.5;
+  } else if (selectedLeaveType === "CL") {
+    session  = selectedSession;
+    dayCount = (selectedSession === "FULL") ? 1.0 : 0.5;
+  } else {
+    session  = "FULL";
+    dayCount = 1.0;
+  }
+
+  for (let d = new Date(fromD); d <= toD; d.setDate(d.getDate()+1)) {
+    const dateStr = formatDisplay(d.toISOString().split("T")[0]);
+    const period  = d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0");
+    rows.push({ A:empId, B:empName, C:dateStr, D:selectedLeaveType, E:session, F:dayCount, G:period, H:libName, I:libType });
+  }
+  return rows;
+}
+
+// ============================================================
+// ALERT
+// ============================================================
+function showAlert(id, type, msg) {
+  const el = document.getElementById(id);
+  el.className = "alert " + type + " show";
+  el.innerHTML = msg;
+  el.scrollIntoView({ behavior:"smooth", block:"nearest" });
+}
+function hideAlert() {
+  ["leaveAlert","appAlert","elmlAlert"].forEach(function(id) {
+    const el = document.getElementById(id);
+    if (el) { el.className = "alert"; el.innerHTML = ""; }
+  });
+}
+
+// ============================================================
+// Permission Warning Modal
+// ============================================================
+let _permWarningCallback = null;
+function showPermissionWarning(count, callback) {
+  _permWarningCallback = callback;
+  document.getElementById("permWarningMsg").innerHTML =
+    "இந்த மாதத்தில் <strong>" + count + "</strong> அனுமதி விடுப்பு(கள்) ஏற்கனவே பதிவாகியுள்ளது.<br><br>" +
+    "மூன்றாவது அனுமதி விடுப்பு:<br>" +
+    "• <strong>CL (தற்செயல் விடுப்பு) — அரை நாள் (AN 0.5)</strong> ஆக கணக்கிடப்படும்.<br><br>" +
+    "தொடர விரும்புகிறீர்களா?";
+  document.getElementById("permWarningOverlay").classList.add("show");
+}
+function permWarningConfirm(ok) {
+  document.getElementById("permWarningOverlay").classList.remove("show");
+  if (_permWarningCallback) { _permWarningCallback(ok); _permWarningCallback = null; }
+}
+
+// ============================================================
+// EL / ML Form Functions
+// ============================================================
+function openElmlForm() {
+  const panel = document.getElementById("elmlFormPanel");
+  if (panel) panel.classList.add("show");
+  const emp = employeeData;
+  document.getElementById("elmlEmpName").value  = emp ? emp.name : "";
+  document.getElementById("elmlWorkplace").value = emp ? emp.library : "";
+  const title = selectedLeaveType === "EL" ? "ஈட்டிய விடுப்பு விண்ணப்பம்" : "மருத்துவ விடுப்பு விண்ணப்பம்";
+  document.getElementById("elmlLeaveTitle").textContent = title;
+  // தேதி range
+  const from = document.getElementById("fromDate").value;
+  const to   = document.getElementById("toDate").value;
+  const datesList = [];
+  const f = new Date(from), t = new Date(to);
+  for (let d = new Date(f); d <= t; d.setDate(d.getDate()+1))
+    datesList.push(getDateWithDay(d.toISOString().split("T")[0]));
+  document.getElementById("elmlDateRange").value = datesList.join(", ");
+  // leaveNature auto
+  const ln = document.getElementById("elmlLeaveNature");
+  if (ln) ln.value = selectedLeaveType === "EL" ? "ஈட்டிய விடுப்பு" : "மருத்துவ விடுப்பு";
+}
+
+function toggleElmlGovDate(val) {
+  const wrap = document.getElementById("elmlGovDateWrap");
+  if (wrap) wrap.style.display = (val === "ஆம்") ? "block" : "none";
+}
+
+function sendElmlApplication() {
+  const desg = document.getElementById("elmlDesignation").value;
+  const sal  = document.getElementById("elmlSalary").value.trim();
+  const nat  = document.getElementById("elmlLeaveNature").value;
+  const med  = document.getElementById("elmlMedCert").value;
+  const rsn  = document.getElementById("elmlReason").value.trim();
+  const gov  = document.getElementById("elmlGovHoliday").value;
+  const addr = document.getElementById("elmlAddress").value.trim();
+  const rule = document.getElementById("elmlTamilRule").value;
+
+  if (!desg) { showAlert("elmlAlert","error","❌ பதவி தேர்வு செய்யவும்!"); return; }
+  if (!sal)  { showAlert("elmlAlert","error","❌ ஊதியம் உள்ளிடவும்!"); return; }
+  if (!nat)  { showAlert("elmlAlert","error","❌ விடுப்பின் தன்மை தேர்வு செய்யவும்!"); return; }
+  if (!med)  { showAlert("elmlAlert","error","❌ மருத்துவ சான்று தகவல் தேர்வு செய்யவும்!"); return; }
+  if (!rsn)  { showAlert("elmlAlert","error","❌ விடுப்பில் செல்லக் காரணம் உள்ளிடவும்!"); return; }
+  if (!gov)  { showAlert("elmlAlert","error","❌ விடுமுறை இணைப்பு தகவல் தேர்வு செய்யவும்!"); return; }
+  if (!addr) { showAlert("elmlAlert","error","❌ விடுப்பின் போது முகவரி உள்ளிடவும்!"); return; }
+  if (!rule) { showAlert("elmlAlert","error","❌ விதி உறுதி மொழி தேர்வு செய்யவும்!"); return; }
+
+  const emp = employeeData;
+  if (!emp) { showAlert("elmlAlert","error","❌ பணியாளர் தகவல் கிடைக்கவில்லை"); return; }
+
+  // ★ மெயில் confirm modal காட்டவும் (CL/RL போல்)
+  const storedEmail = (emp.email || "").trim();
+  const emailList = storedEmail
+    ? storedEmail.split(",").map(function(e){ return e.trim(); }).filter(function(e){ return e.length > 0; })
+    : [];
+
+  const infoEl    = document.getElementById("confirmEmailInfo");
+  const dropEl    = document.getElementById("confirmEmailDropdown");
+  const inputEl   = document.getElementById("confirmEmailInput");
+  const inputWrap = document.getElementById("confirmEmailInputWrap");
+
+  document.getElementById("confirmEmailError").textContent = "";
+
+  if (emailList.length > 1) {
+    infoEl.innerHTML = "📋 இந்த பணியாளருக்கு <strong>" + emailList.length +
+      "</strong> மெயில் ஐடிகள் உள்ளன. ஒன்றை தேர்வு செய்யவும்:";
+    infoEl.style.color = "#1a4f7a";
+    infoEl.style.background = "#eff6ff";
+    infoEl.style.borderColor = "#bfdbfe";
+    dropEl.innerHTML = '<option value="">— மெயில் ஐடி தேர்வு செய்யவும் —</option>';
+    emailList.forEach(function(mail) {
+      const opt = document.createElement("option");
+      opt.value = mail; opt.textContent = mail;
+      dropEl.appendChild(opt);
+    });
+    dropEl.style.display = "block";
+    inputWrap.style.display = "none";
+    inputEl.value = "";
+  } else if (emailList.length === 1) {
+    infoEl.innerHTML = "📋 Master Sheet-ல் பதிவு: <strong>" + emailList[0] + "</strong><br>" +
+      "சரியாக இருந்தால் நேரடியாக கீழே உள்ள பட்டனை அழுத்தவும்.<br>" +
+      "தவறாக இருந்தால் கீழே திருத்தவும்.";
+    infoEl.style.color = "#166534";
+    infoEl.style.background = "#f0fdf4";
+    infoEl.style.borderColor = "#86efac";
+    dropEl.style.display = "none";
+    dropEl.value = "";
+    inputEl.value = emailList[0];
+    inputEl.placeholder = "தவறாக இருந்தால் இங்கே திருத்தவும்";
+    inputWrap.style.display = "block";
+  } else {
+    infoEl.innerHTML = "⚠️ Master Sheet Col G-ல் மெயில் ஐடி பதிவு இல்லை.<br>கீழே மெயில் ஐடி உள்ளிடவும்.";
+    infoEl.style.color = "#b45309";
+    infoEl.style.background = "#fff7ed";
+    infoEl.style.borderColor = "#fed7aa";
+    dropEl.style.display = "none";
+    dropEl.value = "";
+    inputEl.value = "";
+    inputEl.placeholder = "மெயில் ஐடி உள்ளிடவும் (எ.கா: abc@gmail.com)";
+    inputWrap.style.display = "block";
+  }
+
+  // ★ Modal திறக்கும் — EL/ML என்று flag வைக்கவும்
+  document.getElementById("emailConfirmOverlay").dataset.source = "elml";
+  document.getElementById("emailConfirmOverlay").classList.add("show");
+}
+
+// ★ EL/ML — மெயில் confirm பின் PDF send செய்யவும்
+function confirmAndShareElml(emailVal) {
+  const btn  = document.getElementById("elmlSendBtn");
+  const emp  = employeeData;
+
+  const govDate = document.getElementById("elmlGovDate")
+    ? document.getElementById("elmlGovDate").value : "";
+  const govDateDisp = govDate ? formatDisplay(govDate) : "";
+
+  const today = new Date();
+  const applyDate = String(today.getDate()).padStart(2,"0") + "/" +
+                    String(today.getMonth()+1).padStart(2,"0") + "/" +
+                    today.getFullYear();
+
+  const params = {
+    empName:        emp.name,
+    empId:          String(emp.id),
+    designation:    document.getElementById("elmlDesignation").value,
+    workplace:      emp.library,
+    email:          emailVal,
+    leaveType:      selectedLeaveType,
+    salary:         document.getElementById("elmlSalary").value.trim(),
+    leaveNature:    document.getElementById("elmlLeaveNature").value,
+    leaveDateRange: document.getElementById("elmlDateRange").value,
+    medCert:        document.getElementById("elmlMedCert").value,
+    reason:         document.getElementById("elmlReason").value.trim(),
+    govHoliday:     document.getElementById("elmlGovHoliday").value,
+    govHolidayDate: govDateDisp,
+    prevLeave:      document.getElementById("elmlPrevLeave").value.trim(),
+    address:        document.getElementById("elmlAddress").value.trim(),
+    tamilRule:      document.getElementById("elmlTamilRule").value,
+    applyDate:      applyDate
+  };
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>PDF உருவாக்குகிறது...';
+
+  google.script.run
+    .withSuccessHandler(function(res) {
+      btn.disabled = false;
+      btn.innerHTML = "📄 PDF Share செய்யவும்";
+      if (res && res.success) {
+        document.getElementById("elmlShareLinkUrl").href = res.shareUrl;
+        document.getElementById("elmlShareLinkBox").style.display = "block";
+        showAlert("elmlAlert","success",
+          "✅ PDF வெற்றிகரமாக உருவாக்கப்பட்டது! PDF link உங்கள் மெயிலுக்கும் அனுப்பப்பட்டது.");
+      } else {
+        showAlert("elmlAlert","error","❌ PDF தோல்வி: " + (res.error || "மீண்டும் முயற்சிக்கவும்"));
+      }
+    })
+    .withFailureHandler(function(err) {
+      btn.disabled = false;
+      btn.innerHTML = "📄 PDF Share செய்யவும்";
+      showAlert("elmlAlert","error","❌ பிழை: " + err.message);
+    })
+    .sendELMLApplicationEmail(params);
+}
+
+// ============================================================
+// RESET
+// ============================================================
+function resetForm() {
+  document.getElementById("empSelect").value = "";
+  document.getElementById("lookupResult").classList.remove("show");
+  employeeData = null; lastSubmittedRows = [];
+  selectedLeaveType = "P"; selectedSession = selectedFN = selectedAN = null;
+  document.getElementById("leaveTypeSelect").value = "P";
+  document.getElementById("clSessionSelect").value = "";
+  document.getElementById("permSection").classList.add("show");
+  document.getElementById("clSection").classList.remove("show");
+  document.getElementById("fullDaySection").classList.remove("show");
+  document.getElementById("fnSelect").value = "";
+  document.getElementById("anSelect").value = "";
+  const today = new Date().toISOString().split("T")[0];
+  document.getElementById("fromDate").value = today;
+  document.getElementById("toDate").value   = today;
+  document.getElementById("summaryChip").style.display = "none";
+  document.getElementById("leaveFormSection").style.display = "";
+  document.getElementById("successPanel").classList.remove("show");
+  document.getElementById("appFormPanel").classList.remove("show");
+  document.getElementById("historyPanel").classList.remove("active");
+  const elmlP = document.getElementById("elmlFormPanel");
+  if (elmlP) elmlP.classList.remove("show");
+  const elmlSlb = document.getElementById("elmlShareLinkBox");
+  if (elmlSlb) elmlSlb.style.display = "none";
+  document.getElementById("leaveChoiceBtns").style.display = "flex";
+  document.getElementById("appDesignation").value = "";
+  document.getElementById("appPermittedDays").value = "";
+  document.getElementById("appAddress").value = "";
+  const slb = document.getElementById("shareLinkBox");
+  if (slb) slb.style.display = "none";
+  hideAlert();
+}
+</script>
+
+<!-- ★ மெயில் Confirm Modal ★ -->
+<div class="modal-overlay" id="emailConfirmOverlay">
+  <div class="modal">
+    <div class="modal-icon">📧</div>
+    <div class="modal-title">மெயில் ஐடி தேர்வு செய்யவும்</div>
+    <div id="confirmEmailInfo" style="font-size:0.85rem;background:#f0fdf4;
+      border:1px solid #86efac;border-radius:8px;padding:10px 12px;
+      margin-bottom:12px;line-height:1.7;"></div>
+
+    <!-- பல மெயில் இருந்தால் Dropdown -->
+    <select id="confirmEmailDropdown" class="pwd-input"
+      style="display:none;font-size:0.9rem;margin-bottom:10px;width:100%;padding:10px 12px;
+             border:1.5px solid #bfdbfe;border-radius:8px;background:#fff;">
+    </select>
+
+    <!-- ஒரு மெயில் / மெயில் இல்லை — Input field -->
+    <div id="confirmEmailInputWrap">
+      <div class="modal-sub" style="font-size:0.82rem;color:#64748b;margin-bottom:6px;">
+        தவறான மெயில் ஆனால் கீழே திருத்தவும்:
+      </div>
+      <input type="email" class="pwd-input" id="confirmEmailInput"
+        placeholder="மெயில் ஐடி உள்ளிடவும்"
+        style="font-size:0.9rem;margin-bottom:6px;">
+    </div>
+
+    <div id="confirmEmailError" style="color:#dc2626;font-size:0.82rem;min-height:18px;margin-bottom:8px;"></div>
+    <button class="pwd-btn" onclick="confirmAndShare()">✅ சரி — PDF Share செய்யவும்</button>
+    <br>
+    <button class="pwd-cancel" onclick="document.getElementById('emailConfirmOverlay').classList.remove('show')">❌ ரத்து செய்</button>
+  </div>
+</div>
+
+</body>
