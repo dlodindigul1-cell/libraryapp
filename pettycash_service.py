@@ -712,17 +712,80 @@ def _num(row, idx):
         return 0.0
 
 
+def _drop_empty_amount_columns(header, out_rows, keep_last_n=1):
+    """header/out_rows-ல் இருக்கும் amount columns-ல் (S.No, Month தவிர்த்து)
+    எல்லா rows-லும் value இல்லாத (0/''/None) columns-ஐ முழுசா நீக்கிவிடும்.
+    நூலகத்திற்கு நூலகம் active categories வேறு வேறா இருப்பதால் (சிலவற்றுக்கு
+    4 categories, சிலவற்றுக்கு 8), இப்படி dynamic-ஆ column-ஐ நீக்கினால்
+    table இன்னும் தெளிவா, பரந்த columns-ஆக வரும்.
+    keep_last_n: கடைசியில் இருக்கும் இத்தனை columns (மொத்தம்/grand-total
+    வகை columns) எப்போதும் வைக்கப்படும், அவை எல்லா rows-லும் 0 ஆக
+    இருந்தாலும் சரி."""
+    n_amount_cols = len(header) - 2
+    if n_amount_cols <= 0:
+        return header, out_rows
+
+    def _is_empty(v):
+        return v in (0, "", None) or v == 0.0
+
+    keep = []
+    for i in range(n_amount_cols):
+        if keep_last_n and i >= n_amount_cols - keep_last_n:
+            keep.append(True)
+            continue
+        has_value = any(
+            (len(r) > 2 + i and not _is_empty(r[2 + i]))
+            for r in out_rows
+        )
+        keep.append(has_value)
+
+    new_header = header[:2] + [header[2 + i] for i in range(n_amount_cols) if keep[i]]
+    new_out_rows = [
+        r[:2] + [r[2 + i] for i in range(n_amount_cols) if keep[i]]
+        for r in out_rows
+    ]
+    return new_header, new_out_rows
+
+
 def _yearly_abstract_html(library_name, subtitle, header, out_rows, landscape=True):
     """out_rows-ன் ஒவ்வொரு row-ம்: [S.No, Month, amount1, amount2, ...] —
     முதல் 2 columns தவிர மீதி எல்லாம் தொகைகள் (மொத்தம் row-க்கு sum ஆகும்)."""
     size_css = "size: A4 landscape;" if landscape else "size: A4;"
-    thead = "".join(f"<th>{h}</th>" for h in header)
 
     n_amount_cols = len(header) - 2
+
+    # --- column widths: S.No குறுகலாக, Month சற்று அகலமாக, மீதி
+    # amount columns-ஆக equal-ஆக பிரிக்கப்படும் ---
+    sno_w = 3.5
+    month_w = 9.0 if n_amount_cols <= 12 else 6.0
+    amount_w = (100 - sno_w - month_w) / n_amount_cols if n_amount_cols else 0
+
+    # முக்கியமான fix: xhtml2pdf, <colgroup><col width> -ஐ நம்பமுடியாத
+    # அளவுக்கு handle பண்ணுது — ஒரு column-ல் இருக்கும் எல்லா cell-களும்
+    # காலியா (empty string) இருந்தால், table-layout:fixed இருந்தும் அந்த
+    # column-ஐ width இல்லாமல் சுருக்கிவிடுது (இதனால் தான் columns ஒன்றன்
+    # மேல் ஒன்று மேலெழுதி வந்தது). இதை தவிர்க்க:
+    #   1. width-ஐ <colgroup> வழியாக மட்டும் இல்லாமல் ஒவ்வொரு <th>/<td>-லும்
+    #      நேரடியா style="width:...%" ஆக போடுகிறோம்.
+    #   2. வெறும் காலியாக (0/''/None) இருக்கும் cell-ல் "" போடாமல்
+    #      "&nbsp;"-ஐ போடுகிறோம், அதனால் cell content ஒரு போதும்
+    #      முழுக்க காலியாக இராது, column collapse ஆகாது.
+    def _w(i):
+        if i == 0:
+            return sno_w
+        if i == 1:
+            return month_w
+        return amount_w
+
+    thead = "".join(f'<th style="width:{_w(i):.3f}%">{h}</th>' for i, h in enumerate(header))
+
     totals = [0.0] * n_amount_cols
     body_rows = ""
     for r in out_rows:
-        cells = "".join(f"<td>{('' if v in (0, '', None) else v)}</td>" for v in r)
+        cells = "".join(
+            f'<td style="width:{_w(i):.3f}%">{("&nbsp;" if v in (0, "", None) else v)}</td>'
+            for i, v in enumerate(r)
+        )
         body_rows += f"<tr>{cells}</tr>"
         for i in range(n_amount_cols):
             val = r[2 + i] if len(r) > 2 + i else 0
@@ -731,24 +794,15 @@ def _yearly_abstract_html(library_name, subtitle, header, out_rows, landscape=Tr
             except (ValueError, TypeError):
                 pass
 
-    total_cells = "".join(f"<td>₹{t:,.0f}</td>" if t else "<td></td>" for t in totals)
-
-    # --- column widths: S.No குறுகலாக, Month சற்று அகலமாக, மீதி
-    # amount columns-ஆக equal-ஆக பிரிக்கப்படும் (table-layout:fixed
-    # இல்லாமல் Month column சரியில்லாத அகலத்தில் வந்தது இதனால் தான்) ---
-    sno_w = 3.5
-    month_w = 9.0
-    amount_w = (100 - sno_w - month_w) / n_amount_cols if n_amount_cols else 0
-    colgroup = (
-        f'<col style="width:{sno_w}%">'
-        f'<col style="width:{month_w}%">'
-        + "".join(f'<col style="width:{amount_w:.3f}%">' for _ in range(n_amount_cols))
+    total_cells = "".join(
+        f'<td style="width:{amount_w:.3f}%">{"₹" + format(t, ",.0f") if t else "&nbsp;"}</td>'
+        for t in totals
     )
 
     # amount column எண்ணிக்கை அதிகமா இருந்தால் (செலவு அறிக்கை — 23 columns)
     # header/body font-size சிறிதாக்கவும், அதிக columns-க்கும் table சரியாக பொருந்தும்
-    th_font = "7px" if n_amount_cols > 12 else "8.5px"
-    td_font = "7.5px" if n_amount_cols > 12 else "9px"
+    th_font = "6.5px" if n_amount_cols > 12 else "8.5px"
+    td_font = "7px" if n_amount_cols > 12 else "9px"
 
     return f"""<!DOCTYPE html>
 <html lang="ta"><head><meta charset="UTF-8"><style>
@@ -758,15 +812,14 @@ def _yearly_abstract_html(library_name, subtitle, header, out_rows, landscape=Tr
   h1 {{ text-align:center; font-size:15px; margin:2px 0; }}
   h2 {{ text-align:center; font-size:12px; margin:2px 0 10px; }}
   table {{ width:100%; table-layout:fixed; border-collapse:collapse; }}
-  th, td {{ border:1px solid #000; padding:3px 2px; text-align:center;
-           word-wrap:break-word; overflow-wrap:break-word; line-height:1.25; }}
+  th, td {{ border:1px solid #000; padding:{"1px" if n_amount_cols > 12 else "3px"} 1px; text-align:center;
+           word-wrap:break-word; overflow-wrap:break-word; line-height:1.15; }}
   th {{ background:#e0f2fe; font-weight:bold; font-size:{th_font}; }}
   tr.total td {{ font-weight:bold; background:#f3f4f6; }}
 </style></head><body>
   <h1>{_esc_html(library_name).upper()}</h1>
   <h2>{_esc_html(subtitle)}</h2>
   <table>
-    <colgroup>{colgroup}</colgroup>
     <thead><tr>{thead}</tr></thead>
     <tbody>
       {body_rows}
@@ -863,6 +916,8 @@ def build_yearly_receipt_abstract_pdf(library_name):
                 [("" if total == 0 else total)]
             )
 
+        header, out_rows = _drop_empty_amount_columns(header, out_rows)
+
         html = _yearly_abstract_html(
             library_name, f"நூலக வரவு சுருக்கம் {_current_fiscal_year_label()}",
             header, out_rows, landscape=True,
@@ -924,6 +979,8 @@ def build_yearly_expense_abstract_pdf(library_name):
         for i, r in enumerate(rows):
             nums = [_num(r, c) for c in AMOUNT_COLS]
             out_rows.append([i + 1, r[0] if r else ""] + nums)
+
+        header, out_rows = _drop_empty_amount_columns(header, out_rows, keep_last_n=2)
 
         html = _yearly_abstract_html(
             library_name, f"நூலக ஆண்டு செலவின சுருக்கம் {_current_fiscal_year_label()}",
