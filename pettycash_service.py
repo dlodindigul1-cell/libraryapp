@@ -14,6 +14,7 @@ import os
 import re
 from io import BytesIO
 from datetime import datetime, timedelta
+from urllib.parse import quote
 
 import gspread
 from googleapiclient.discovery import build
@@ -808,19 +809,25 @@ def _save_yearly_abstract_pdf(file_name, pdf_bytes, folder_id, login_email):
 # ------------------------------------------------------------
 # sendYearlyReceiptAbstract — "receipt abstract" tab column layout:
 # col1(B)=library, col0(A)=month label, col4..13(E..N)=10 income categories
+#
+# குறிப்பு: Service Account-க்கு Drive storage quota இல்லாததால்
+# (storageQuotaExceeded), இனி Drive-ல் PDF-ஐ upload செய்யாமல்,
+# app.py-ல் இருக்கும் /pettycash/yearly_receipt_pdf GET route
+# மூலம் நேரடியாக PDF-ஐ browser-க்கு stream செய்கிறோம்.
 # ------------------------------------------------------------
-def send_yearly_receipt_abstract(login_email, library_name):
+def build_yearly_receipt_abstract_pdf(library_name):
+    """(pdf_bytes, None) வெற்றியானால், (None, error_message) தோல்வியானால்."""
     try:
         if not library_name:
-            return {"success": False, "message": "நூலக பெயர் கிடைக்கவில்லை"}
+            return None, "நூலக பெயர் கிடைக்கவில்லை"
         if not ABSTRACT_SOURCE_SHEET_ID:
-            return {"success": False, "message": "ABSTRACT_SOURCE_SHEET_ID configured இல்லை"}
+            return None, "ABSTRACT_SOURCE_SHEET_ID configured இல்லை"
 
         sh = get_client().open_by_key(ABSTRACT_SOURCE_SHEET_ID).worksheet(ABSTRACT_RECEIPT_SHEET_NAME)
         data = sh.get_all_values()
         rows = [r for r in data[1:] if len(r) > 1 and _s(r[1]) == _s(library_name)]
         if not rows:
-            return {"success": False, "message": "இந்த நூலகத்திற்கு தரவு இல்லை"}
+            return None, "இந்த நூலகத்திற்கு தரவு இல்லை"
 
         header = ["S.No", "Month", "காப்புத் தொகை", "சந்தா", "காலக்கடப்பு",
                   "நூல் விலைப் பிடித்தம்", "பழைய இதழ் விற்பனை", "பழைய நூல் விற்பனை",
@@ -840,11 +847,19 @@ def send_yearly_receipt_abstract(login_email, library_name):
             library_name, f"நூலக வரவு சுருக்கம் {_current_fiscal_year_label()}",
             header, out_rows, landscape=True,
         )
-        pdf_bytes = _html_to_pdf_bytes(html)
-        file_name = f"Yearly_Receipt_Abstract_{library_name}.pdf"
-        return _save_yearly_abstract_pdf(file_name, pdf_bytes, YEARLY_RECEIPT_FOLDER_ID, login_email)
+        return _html_to_pdf_bytes(html), None
     except Exception as e:
-        return {"success": False, "message": f"Server பிழை: {e}"}
+        return None, f"Server பிழை: {e}"
+
+
+def send_yearly_receipt_abstract(login_email, library_name):
+    """POST handler — இனி Drive-ல் எதுவும் create செய்யாது; வெறும்
+    GET PDF route-ன் URL-ஐ திருப்பி அனுப்புகிறோம் (frontend அதே
+    res.url / res.originalUrl-ஐ <a href> ஆக காட்டும்)."""
+    if not library_name:
+        return {"success": False, "message": "நூலக பெயர் கிடைக்கவில்லை"}
+    url = f"/pettycash/yearly_receipt_pdf?library={quote(library_name)}"
+    return {"success": True, "message": "PDF தயார்", "url": url, "originalUrl": url}
 
 
 # ------------------------------------------------------------
@@ -853,18 +868,19 @@ def send_yearly_receipt_abstract(login_email, library_name):
 # each expense category (GAS Code.gs-ல் இருந்ததே அப்படியே — column
 # index-கள் மாறாமல் வைக்கப்பட்டுள்ளது).
 # ------------------------------------------------------------
-def send_yearly_expense_abstract(login_email, library_name):
+def build_yearly_expense_abstract_pdf(library_name):
+    """(pdf_bytes, None) வெற்றியானால், (None, error_message) தோல்வியானால்."""
     try:
         if not library_name:
-            return {"success": False, "message": "நூலக பெயர் கிடைக்கவில்லை"}
+            return None, "நூலக பெயர் கிடைக்கவில்லை"
         if not ABSTRACT_SOURCE_SHEET_ID:
-            return {"success": False, "message": "ABSTRACT_SOURCE_SHEET_ID configured இல்லை"}
+            return None, "ABSTRACT_SOURCE_SHEET_ID configured இல்லை"
 
         sh = get_client().open_by_key(ABSTRACT_SOURCE_SHEET_ID).worksheet(ABSTRACT_EXPENSE_SHEET_NAME)
         data = sh.get_all_values()
         rows = [r for r in data[1:] if len(r) > 2 and _s(r[2]) == _s(library_name)]
         if not rows:
-            return {"success": False, "message": "இந்த நூலகத்திற்கு செலவு தரவு இல்லை"}
+            return None, "இந்த நூலகத்திற்கு செலவு தரவு இல்லை"
 
         header = [
             "வரிசை எண்", "மாதம்", "நாளிதழ்கள்", "வாடகை", "மின் கட்டணம்",
@@ -893,8 +909,15 @@ def send_yearly_expense_abstract(login_email, library_name):
             library_name, f"நூலக ஆண்டு செலவின சுருக்கம் {_current_fiscal_year_label()}",
             header, out_rows, landscape=True,
         )
-        pdf_bytes = _html_to_pdf_bytes(html)
-        file_name = f"Yearly_Expense_Abstract_{library_name}.pdf"
-        return _save_yearly_abstract_pdf(file_name, pdf_bytes, YEARLY_EXPENSE_FOLDER_ID, login_email)
+        return _html_to_pdf_bytes(html), None
     except Exception as e:
-        return {"success": False, "message": f"Server பிழை: {e}"}
+        return None, f"Server பிழை: {e}"
+
+
+def send_yearly_expense_abstract(login_email, library_name):
+    """POST handler — இனி Drive-ல் எதுவும் create செய்யாது; வெறும்
+    GET PDF route-ன் URL-ஐ திருப்பி அனுப்புகிறோம்."""
+    if not library_name:
+        return {"success": False, "message": "நூலக பெயர் கிடைக்கவில்லை"}
+    url = f"/pettycash/yearly_expense_pdf?library={quote(library_name)}"
+    return {"success": True, "message": "PDF தயார்", "url": url, "originalUrl": url}

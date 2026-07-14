@@ -14,11 +14,22 @@ project-ல் இணைக்கப்படும் ஒரு blueprint-ஆ�
 ------------------------------------------------------------
 """
 
-from flask import Flask, render_template, request, jsonify, redirect
+from flask import Flask, render_template, request, jsonify, redirect, Response
 
 import sheets_service as svc
 import pdf_service as pdf
 import pettycash_service as pc
+
+
+def _pdf_error_page(message):
+    return Response(
+        f"""<!DOCTYPE html><html lang="ta"><head><meta charset="UTF-8"></head>
+        <body style="font-family:'Noto Sans Tamil','Arial Unicode MS',sans-serif;
+                     padding:40px;color:#b91c1c;font-size:16px;">
+          ❌ {message}
+        </body></html>""",
+        mimetype="text/html",
+    )
 
 app = Flask(__name__)
 
@@ -90,6 +101,18 @@ def leave_api(fn_name):
         return jsonify({"__gasError__": str(e)}), 200
 
 
+@app.route("/leave/pdf/<token>")
+def leave_pdf(token):
+    pdf_bytes, err = pdf.get_cached_pdf(token)
+    if err:
+        return _pdf_error_page(err)
+    return Response(
+        pdf_bytes,
+        mimetype="application/pdf",
+        headers={"Content-Disposition": "inline; filename=leave_application.pdf"},
+    )
+
+
 # ------------------------------------------------------------
 # சில்லறை செலவினம் routes
 # ------------------------------------------------------------
@@ -114,6 +137,32 @@ def pettycash_api(fn_name):
         return jsonify(result)
     except Exception as e:
         return jsonify({"__gasError__": str(e)}), 200
+
+
+@app.route("/pettycash/yearly_receipt_pdf")
+def yearly_receipt_pdf():
+    library_name = request.args.get("library", "")
+    pdf_bytes, err = pc.build_yearly_receipt_abstract_pdf(library_name)
+    if err:
+        return _pdf_error_page(err)
+    return Response(
+        pdf_bytes,
+        mimetype="application/pdf",
+        headers={"Content-Disposition": "inline; filename=Yearly_Receipt_Abstract.pdf"},
+    )
+
+
+@app.route("/pettycash/yearly_expense_pdf")
+def yearly_expense_pdf():
+    library_name = request.args.get("library", "")
+    pdf_bytes, err = pc.build_yearly_expense_abstract_pdf(library_name)
+    if err:
+        return _pdf_error_page(err)
+    return Response(
+        pdf_bytes,
+        mimetype="application/pdf",
+        headers={"Content-Disposition": "inline; filename=Yearly_Expense_Abstract.pdf"},
+    )
 
 
 # ------------------------------------------------------------

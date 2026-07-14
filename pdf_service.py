@@ -5,16 +5,51 @@ GAS-ன் buildApplicationHTML() / buildELMLApplicationHTML() /
 sendLeaveApplicationEmail() / sendELMLApplicationEmail()
 functions-ஐ port செய்யப்பட்ட பதிப்பு.
 
-வித்தியாசம்: Gmail-க்கு அனுப்பாமல், PDF-ஐ Google Drive-ல்
-சேமித்து, share-link-ஐ response-ல் திருப்பி அனுப்புகிறோம்
-(frontend-ல் "PDF திறக்கவும்" button ஏற்கனவே இதை காட்டும்).
+வித்தியாசம் (v2): Service Account-க்கு Drive storage quota
+இல்லாததால் (storageQuotaExceeded), இனி Drive-ல் PDF-ஐ upload
+செய்யாமல் — உருவாக்கிய PDF-ஐ சிறிது நேரம் memory-ல் வைத்து,
+app.py-ல் இருக்கும் /leave/pdf/<token> GET route மூலம்
+நேரடியாக browser-க்கு stream செய்கிறோம் (Gmail-க்கும் அனுப்பாது,
+frontend-ல் "PDF திறக்கவும்" link ஏற்கனவே இதை காட்டும்).
 ------------------------------------------------------------
 """
 
+import time
+import uuid
 from io import BytesIO
 from xhtml2pdf import pisa
 
-from drive_service import upload_pdf
+# ------------------------------------------------------------
+# In-memory PDF cache (Drive-க்கு பதிலாக) — token -> (pdf_bytes, created_at)
+# ஒரே gunicorn worker (Procfile: "web: gunicorn app:app", -w flag இல்லை)
+# process-ல் இயங்குவதால் இது போதுமானது. TTL_SECONDS கழித்து பழையவை நீக்கப்படும்.
+# ------------------------------------------------------------
+_PDF_CACHE = {}
+_PDF_TTL_SECONDS = 30 * 60  # 30 நிமிடம்
+
+
+def _store_pdf(pdf_bytes):
+    now = time.time()
+    # பழைய entries-ஐ சுத்தம் செய்யவும் (memory தேங்காமல் இருக்க)
+    for k in [k for k, (_, ts) in _PDF_CACHE.items() if now - ts > _PDF_TTL_SECONDS]:
+        _PDF_CACHE.pop(k, None)
+
+    token = uuid.uuid4().hex
+    _PDF_CACHE[token] = (pdf_bytes, now)
+    return token
+
+
+def get_cached_pdf(token):
+    """app.py-ல் இருக்கும் /leave/pdf/<token> route இதை கூப்பிடும்.
+    (pdf_bytes, None) கிடைத்தால் வெற்றி, இல்லையெனில் (None, error_message)."""
+    entry = _PDF_CACHE.get(token)
+    if entry is None:
+        return None, "இந்த PDF link காலாவதியாகிவிட்டது — மீண்டும் PDF-ஐ உருவாக்கவும்"
+    pdf_bytes, ts = entry
+    if time.time() - ts > _PDF_TTL_SECONDS:
+        _PDF_CACHE.pop(token, None)
+        return None, "இந்த PDF link காலாவதியாகிவிட்டது — மீண்டும் PDF-ஐ உருவாக்கவும்"
+    return pdf_bytes, None
 
 
 def _esc(v):
@@ -165,17 +200,16 @@ def _html_to_pdf_bytes(html_content):
 
 def send_leave_application_email(params):
     """பெயர் பழையபடி வைத்திருக்கிறோம் (frontend அதே பெயரை அழைக்கிறது) —
-    ஆனால் இப்போது மெயில் அனுப்பாது, PDF-ஐ Drive-ல் சேமித்து link திருப்பும்."""
+    ஆனால் இப்போது Drive/Gmail எதையும் தொடாது; PDF-ஐ memory-ல் cache
+    செய்து, /leave/pdf/<token> route-ன் URL-ஐ shareUrl ஆக திருப்பும்."""
     try:
         leave_type_label = "தற்செயல் விடுப்பு விண்ணப்பம்" if params.get("leaveType") == "CL" \
             else "மத/வரையறுக்கப்பட்ட விடுப்பு விண்ணப்பம்"
         html_content = build_application_html(params, leave_type_label)
         pdf_bytes = _html_to_pdf_bytes(html_content)
 
-        apply_date = str(params.get("applyDate", "")).replace("/", "-")
-        file_name = f"{params.get('empId')}_{params.get('leaveType')}_{apply_date}.pdf"
-
-        share_url = upload_pdf(file_name, pdf_bytes)
+        token = _store_pdf(pdf_bytes)
+        share_url = f"/leave/pdf/{token}"
         return {"success": True, "shareUrl": share_url}
     except Exception as e:
         return {"success": False, "error": str(e)}
@@ -186,10 +220,8 @@ def send_elml_application_email(params):
         html_content = build_elml_application_html(params)
         pdf_bytes = _html_to_pdf_bytes(html_content)
 
-        apply_date = str(params.get("applyDate", "")).replace("/", "-")
-        file_name = f"{params.get('empId')}_{params.get('leaveType')}_{apply_date}.pdf"
-
-        share_url = upload_pdf(file_name, pdf_bytes)
+        token = _store_pdf(pdf_bytes)
+        share_url = f"/leave/pdf/{token}"
         return {"success": True, "shareUrl": share_url}
     except Exception as e:
         return {"success": False, "error": str(e)}
