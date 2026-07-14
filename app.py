@@ -36,7 +36,7 @@ app = Flask(__name__)
 
 @app.route("/")
 def home():
-    return redirect("/leave")
+    return render_template("home.html")
 
 
 # ------------------------------------------------------------
@@ -76,6 +76,10 @@ PETTYCASH_DISPATCH = {
     # --- நடப்பு ஆண்டு சுருக்கம் (Yearly Abstract Reports) ---
     "sendYearlyReceiptAbstract": lambda args: pc.send_yearly_receipt_abstract(*args),
     "sendYearlyExpenseAbstract": lambda args: pc.send_yearly_expense_abstract(*args),
+    # --- சில்லறைச் செலவினப் பட்டியல் நகல் எடுத்தல் ---
+    "shareContingentBill":       lambda args: pc.share_contingent_bill(*args),
+    # --- கடந்த ஆண்டு வரவு-செலவு (தணிக்கைப் படிவம்) ---
+    "openPrevYearReceiptExpense": lambda args: pc.open_prev_year_receipt_expense(*args),
 }
 
 

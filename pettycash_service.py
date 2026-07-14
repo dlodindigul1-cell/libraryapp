@@ -997,3 +997,149 @@ def send_yearly_expense_abstract(login_email, library_name):
         return {"success": False, "message": "நூலக பெயர் கிடைக்கவில்லை"}
     url = f"/pettycash/yearly_expense_pdf?library={quote(library_name)}"
     return {"success": True, "message": "PDF தயார்", "url": url, "originalUrl": url}
+
+
+# ==================== சில்லறைச் செலவினப் பட்டியல் நகல் எடுத்தல் ====================
+# GAS-ல் shareContingentBill()-ன் Python port. இது PDF-ஐ புதிதாக
+# உருவாக்காது — "contingent" sheet-ல் ஏற்கனவே பதிவு செய்யப்பட்டபோது
+# generate ஆன claim PDF-ன் Drive URL-ஐ (Column BE, idx 56) படித்து,
+# அந்த நூலகத்திற்கான மிக சமீபத்திய (கடைசி) பதிவை எடுத்து, அதற்கு
+# view permission கொடுத்து URL-ஐ frontend-க்கு திருப்பி அனுப்புகிறோம்.
+def share_contingent_bill(login_email, library_name):
+    """(dict) — GAS shareContingentBill()-ன் Python port."""
+    try:
+        if not library_name or not login_email:
+            return {"success": False, "message": "நூலக பெயர் அல்லது மின்னஞ்சல் கிடைக்கவில்லை"}
+
+        sh = _get_contingent_sheet()
+        data = sh.get_all_values()
+
+        pdf_url = None
+        # கீழிருந்து மேலே தேடி, இந்த நூலகத்திற்கான மிக சமீபத்திய பதிவை எடுக்கும்
+        for row in reversed(data[1:]):
+            lib = row[3] if len(row) > 3 else ""       # Column D — Library Name
+            url = row[56] if len(row) > 56 else ""      # Column BE — Claim PDF URL
+            if _s(lib) == _s(library_name) and _s(url):
+                pdf_url = _s(url)
+                break
+
+        if not pdf_url:
+            return {"success": False, "message": "Claim PDF இன்னும் உருவாக்கப்படவில்லை. முதலில் பதிவு செய்யவும்."}
+
+        file_id = None
+        for pattern in (r"/d/([a-zA-Z0-9_-]{20,})",
+                        r"[?&]id=([a-zA-Z0-9_-]{20,})",
+                        r"uc\?.*id=([a-zA-Z0-9_-]{20,})"):
+            m = re.search(pattern, pdf_url, re.IGNORECASE)
+            if m:
+                file_id = m.group(1)
+                break
+
+        if not file_id:
+            return {"success": False, "message": "PDF File ID எடுக்க முடியவில்லை"}
+
+        drive = get_drive()
+        drive.permissions().create(fileId=file_id, body={"role": "reader", "type": "anyone"}).execute()
+        try:
+            drive.permissions().create(
+                fileId=file_id,
+                body={"role": "reader", "type": "user", "emailAddress": login_email},
+                sendNotificationEmail=False,
+            ).execute()
+        except Exception:
+            pass  # GAS-ல் safeAddViewer_ மாதிரியே — தோல்வியானாலும் தொடரும்
+
+        return {
+            "success": True,
+            "message": "லிங்க் தயார் — கீழே கிளிக் செய்து PDF-ஐ பார்க்கலாம்",
+            "fileId": file_id,
+            "url": pdf_url,
+        }
+    except Exception as e:
+        return {"success": False, "message": f"Server பிழை: {e}"}
+
+
+# ==================== கடந்த ஆண்டு வரவு-செலவு (தணிக்கைப் படிவம்) ====================
+# GAS-ல் openPrevYearReceiptExpense()-ன் Python port. இதுவும் PDF-ஐ
+# data-லிருந்து உருவாக்காது — முந்தைய ஆண்டுகளுக்கான receipt/expense
+# PDF-கள் ஏற்கனவே Drive-ல் upload செய்யப்பட்டு, AUDIT sheet-ல் (SENDMAIL
+# tab) நூலக பெயர் வாரியாக அவற்றின் URL பதிவு செய்யப்பட்டுள்ளது. இங்கே
+# அந்த URL-ஐ படித்து, view permission கொடுத்து திருப்பி அனுப்புகிறோம்.
+AUDIT_SHEET_ID   = os.environ.get("AUDIT_SHEET_ID", "12YOotycLq7Cy_6uc7C9HHNLexJd1D8pCXdggdBHI144")
+AUDIT_SHEET_NAME = os.environ.get("AUDIT_SHEET_NAME", "SENDMAIL")
+
+# yearOption -> (Sheet A2:E175-ல் Receipt/Expense column index, display label)
+# "2024-2025" -> B,C columns (idx 1,2) | "2025-2026" -> D,E columns (idx 3,4)
+AUDIT_YEAR_OPTIONS = {
+    "2024-2025": {"receiptCol": 1, "expenseCol": 2, "label": "2024-25"},
+    "2025-2026": {"receiptCol": 3, "expenseCol": 4, "label": "2025-26"},
+}
+
+
+def _share_file_for_audit(file_url, login_email):
+    """GAS shareFileForAudit_()-ன் Python port — Drive file URL-ல் இருந்து
+    file id-ஐ extract செய்து, anyone-with-link view + login_email viewer
+    permission கொடுக்க முயற்சிக்கும். இது best-effort — file id extract
+    ஆகாவிட்டாலோ, permission கொடுக்க முடியாவிட்டாலோ (எ.கா. URL ஒரு folder
+    link-ஆக இருந்தால்) அமைதியாக தவிர்த்துவிட்டு தொடரும் (GAS-லும் இதே
+    நடத்தை — error log ஆகும், throw ஆகாது)."""
+    if not file_url:
+        return
+    match = re.search(r"[-\w]{25,}", file_url)
+    if not match:
+        return
+    try:
+        drive = get_drive()
+        file_id = match.group(0)
+        drive.permissions().create(fileId=file_id, body={"role": "reader", "type": "anyone"}).execute()
+        try:
+            if login_email:
+                drive.permissions().create(
+                    fileId=file_id,
+                    body={"role": "reader", "type": "user", "emailAddress": login_email},
+                    sendNotificationEmail=False,
+                ).execute()
+        except Exception:
+            pass
+    except Exception:
+        pass  # கோப்பு அணுக முடியவில்லை (folder ஆக இருக்கலாம்) — தொடரும்
+
+
+def open_prev_year_receipt_expense(library_name, login_email, year_option):
+    """(dict) — GAS openPrevYearReceiptExpense()-ன் Python port.
+    yearOption: "2024-2025" அல்லது "2025-2026" ."""
+    try:
+        opt = AUDIT_YEAR_OPTIONS.get(year_option)
+        if not opt:
+            return {"success": False, "message": "தவறான ஆண்டு தேர்வு"}
+
+        sh = get_client().open_by_key(AUDIT_SHEET_ID).worksheet(AUDIT_SHEET_NAME)
+        data = sh.get("A2:E175")
+
+        for row in data:
+            lib = row[0] if len(row) > 0 else ""
+            if _s(lib) != _s(library_name):
+                continue
+
+            receipt_url = _s(row[opt["receiptCol"]]) if len(row) > opt["receiptCol"] else ""
+            expense_url = _s(row[opt["expenseCol"]]) if len(row) > opt["expenseCol"] else ""
+
+            if receipt_url and not receipt_url.endswith("receipt.pdf"):
+                receipt_url = receipt_url + "/receipt.pdf"
+            if expense_url and not expense_url.endswith("expense.pdf"):
+                expense_url = expense_url + "/expense.pdf"
+
+            _share_file_for_audit(receipt_url, login_email)
+            _share_file_for_audit(expense_url, login_email)
+
+            return {
+                "success": True,
+                "yearLabel": opt["label"],
+                "message": "லிங்க் தயார் — கீழே கிளிக் செய்து PDF-ஐ பார்க்கலாம்",
+                "receipt": receipt_url,
+                "expense": expense_url,
+            }
+
+        return {"success": False, "message": "இந்த நூலகத்திற்கு URL கிடைக்கவில்லை"}
+    except Exception as e:
+        return {"success": False, "message": f"Server பிழை: {e}"}
