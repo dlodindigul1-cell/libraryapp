@@ -62,6 +62,9 @@ PETTYCASH_DISPATCH = {
     "saveOrUpdateReceipt":                        lambda args: pc.save_or_update_receipt(*args),
     "getAvailableMonthsForLibraryAcknowledgement": lambda args: pc.get_available_months_for_library_acknowledgement(*args),
     "shareReceiptAcknowledgementByFileId":         lambda args: pc.share_receipt_acknowledgement_by_file_id(*args),
+    # --- நடப்பு ஆண்டு சுருக்கம் (Yearly Abstract Reports) ---
+    "sendYearlyReceiptAbstract": lambda args: pc.send_yearly_receipt_abstract(*args),
+    "sendYearlyExpenseAbstract": lambda args: pc.send_yearly_expense_abstract(*args),
 }
 
 

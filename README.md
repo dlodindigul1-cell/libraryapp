@@ -42,6 +42,13 @@ leave-app/
 2. `DRIVE_FOLDER_ID = 1T_uEVBJgQdDIS_OgLkAWOpUKOhGrbk6K` — இந்த Drive
    folder-ஐயும் அதே `client_email`-க்கு **Editor** ஆக share பண்ணுங்க
    (PDF இங்குதான் சேமிக்கப்படும்).
+3. **நடப்பு ஆண்டு சுருக்கம் (Yearly Abstract) reports-க்காக கூடுதலாக:**
+   - `ABSTRACT_SOURCE_SHEET_ID` spreadsheet-ஐ ("receipt abstract" /
+     "expense abstract" tabs இருக்கும் sheet) `client_email`-க்கு குறைந்தபட்சம்
+     **Viewer** ஆக share பண்ணுங்க (படிக்க மட்டும் தேவை).
+   - `YEARLY_RECEIPT_FOLDER_ID`, `YEARLY_EXPENSE_FOLDER_ID` ஆகிய 2 Drive
+     folders-ஐயும் `client_email`-க்கு **Editor** ஆக share பண்ணுங்க
+     (இங்குதான் ஒவ்வொரு PDF-உம் create/replace ஆகும்).
 
 ## படி 3 — Environment Variables (Render-ல் Set பண்ண வேண்டியவை)
 
@@ -63,6 +70,11 @@ leave-app/
 | `BANK_SHEET_ID` | `1ytHrmIcmmF60f4ZiV02lD3qSmoZ9BrstOtU6ylcccwg` |
 | `BANK_SHEET_NAME` | `FOR MOBILE APP` |
 | `ACK_PDF_FOLDER_ID` | `1rh9p0XC55Gx_nC2bg3Cr3FU9XsRSlMl3` |
+| `ABSTRACT_SOURCE_SHEET_ID` | `1FVWlKAywkMn7q7bAqQ3a8G6NlN_lvH3Ga6DA9MqRpwk` *(GAS-ல் இருந்த "receipt abstract"/"expense abstract" tabs இருக்கும் spreadsheet — வேற ID ஆ இருந்தா மாத்துங்க)* |
+| `ABSTRACT_RECEIPT_SHEET_NAME` | `receipt abstract` |
+| `ABSTRACT_EXPENSE_SHEET_NAME` | `expense abstract` |
+| `YEARLY_RECEIPT_FOLDER_ID` | `13P8qREf_XsD0p_J4w9ph7gbfNEhpkYyg` (Yearly Receipt Abstract PDF-கள் சேமிக்கப்படும் folder) |
+| `YEARLY_EXPENSE_FOLDER_ID` | `115sLao9m1iUTfZtKcY5vi6wwlQ6cazlT` (Yearly Expense Abstract PDF-கள் சேமிக்கப்படும் folder) |
 
 ⚠️ `GOOGLE_SERVICE_ACCOUNT_JSON`-ஐ Render dashboard-ல் "Environment"
 tab-ல் ஒரு secret variable-ஆ சேர்க்கணும் — code-ல் ஒருபோதும் hardcode
@@ -122,4 +134,14 @@ python app.py
   simple-ஆ இருக்கும் — Tamil font correctly render ஆக வேண்டும் எனில்,
   Render build-ல் Noto Sans Tamil `.ttf` font file-ஐ சேர்த்து
   xhtml2pdf-க்கு register பண்ண வேண்டியிருக்கலாம் (தேவைப்பட்டா அடுத்த
-  step-ல் சேர்ப்போம்).
+  step-ல் சேர்ப்போம்). இதே caveat "நடப்பு ஆண்டு சுருக்கம்" இரண்டு
+  reports-க்கும் பொருந்தும் — அட்டவணையில் Tamil text அதிகமாக இருப்பதால்
+  font சரியா தெரியலைன்னா, இதையே முதலில் சரி செய்யுங்க.
+- **Yearly Abstract reports (சுருக்கம் – வரவுகள் / செலவுகள்)**: இவை
+  `ABSTRACT_SOURCE_SHEET_ID` spreadsheet-ல் ஏற்கனவே தயார் நிலையில்
+  உள்ள "receipt abstract" / "expense abstract" tabs-ஐ **படிக்க
+  மட்டுமே** செய்கின்றன — அந்த tabs-ஐ யார் / எப்படி புதுப்பிக்கிறீர்களோ
+  அதே process தொடர வேண்டும் (இந்த Flask app அந்த tabs-ஐ எழுதாது,
+  படிக்கும்/PDF ஆக்கும் வேலையை மட்டும் செய்யும்). நூலக பெயர் அந்த
+  tabs-ல் column B (வரவு) / column C (செலவு)-ல் இருக்கும் பெயருடன்
+  சரியாக (space/spelling உட்பட) பொருந்தினால்தான் தரவு காட்டப்படும்.

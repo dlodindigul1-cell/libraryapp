@@ -12,12 +12,15 @@ GAS Code.gs-ல் இருந்த functions-ன் Python port:
 
 import os
 import re
+from io import BytesIO
 from datetime import datetime, timedelta
 
 import gspread
 from googleapiclient.discovery import build
+from googleapiclient.http import MediaIoBaseUpload
 
 from sheets_service import _get_credentials  # ஒரே Service Account, எல்லா sheets/drive-க்கும்
+from pdf_service import _html_to_pdf_bytes    # HTML → PDF (Yearly Abstract reports-க்கும் இதே பயன்படுத்துகிறோம்)
 
 # ------------------------------------------------------------
 # Config (env vars)
@@ -37,6 +40,16 @@ BANK_SHEET_ID             = os.environ.get("BANK_SHEET_ID", "")
 BANK_SHEET_NAME           = os.environ.get("BANK_SHEET_NAME", "FOR MOBILE APP")
 
 ACK_PDF_FOLDER_ID         = os.environ.get("ACK_PDF_FOLDER_ID", "")
+
+# --- நடப்பு ஆண்டு சுருக்கம் (Yearly Receipt/Expense Abstract) ---
+# "receipt abstract" / "expense abstract" tabs ஏற்கனவே தயார் செய்யப்பட்டுள்ள
+# Source Spreadsheet — contingent_code.txt (GAS)-ல் இருந்ததே default ஆக வைக்கப்பட்டுள்ளது.
+ABSTRACT_SOURCE_SHEET_ID     = os.environ.get("ABSTRACT_SOURCE_SHEET_ID", "1FVWlKAywkMn7q7bAqQ3a8G6NlN_lvH3Ga6DA9MqRpwk")
+ABSTRACT_RECEIPT_SHEET_NAME  = os.environ.get("ABSTRACT_RECEIPT_SHEET_NAME", "receipt abstract")
+ABSTRACT_EXPENSE_SHEET_NAME  = os.environ.get("ABSTRACT_EXPENSE_SHEET_NAME", "expense abstract")
+
+YEARLY_RECEIPT_FOLDER_ID = os.environ.get("YEARLY_RECEIPT_FOLDER_ID", "13P8qREf_XsD0p_J4w9ph7gbfNEhpkYyg")
+YEARLY_EXPENSE_FOLDER_ID = os.environ.get("YEARLY_EXPENSE_FOLDER_ID", "115sLao9m1iUTfZtKcY5vi6wwlQ6cazlT")
 
 _client = None
 _drive = None
@@ -671,3 +684,217 @@ def save_or_update_receipt(data):
         return {"success": True, "row": result_row, "action": action, "total": total}
     except Exception as e:
         return {"success": False, "message": str(e)}
+
+
+# ==================== நடப்பு ஆண்டு சுருக்கம் (Yearly Abstract) ====================
+# GAS-ல் sendYearlyReceiptAbstract() / sendYearlyExpenseAbstract()-ன் Python port.
+# ஏற்கனவே கணக்கிடப்பட்டுள்ள "receipt abstract" / "expense abstract" tabs-ஐ
+# ABSTRACT_SOURCE_SHEET_ID-ல் இருந்து படித்து, நூலக பெயர் வாரியாக filter
+# செய்து, HTML அட்டவணையாக உருவாக்கி PDF-ஆக Drive-ல் சேமிக்கிறோம்
+# (GAS-ல் SpreadsheetApp export URL trick பயன்படுத்தப்பட்டது — service
+# account context-ல் அது சிக்கலானது என்பதால், pdf_service.py-ல் ஏற்கனவே
+# இருக்கும் அதே xhtml2pdf HTML→PDF வழியை பயன்படுத்துகிறோம்).
+
+def _current_fiscal_year_label():
+    """ஏப்ரல்-மார்ச் அரசு நிதியாண்டு அடிப்படையில் 'நடப்பு ஆண்டு' label
+    (எ.கா. இன்று ஜூலை 2026 எனில் -> '2026-2027')."""
+    now = datetime.now()
+    start_year = now.year if now.month >= 4 else now.year - 1
+    return f"{start_year}-{start_year + 1}"
+
+
+def _num(row, idx):
+    try:
+        v = row[idx] if len(row) > idx else 0
+        return float(v) if v not in ("", None) else 0.0
+    except (ValueError, TypeError):
+        return 0.0
+
+
+def _yearly_abstract_html(library_name, subtitle, header, out_rows, landscape=True):
+    """out_rows-ன் ஒவ்வொரு row-ம்: [S.No, Month, amount1, amount2, ...] —
+    முதல் 2 columns தவிர மீதி எல்லாம் தொகைகள் (மொத்தம் row-க்கு sum ஆகும்)."""
+    size_css = "size: A4 landscape;" if landscape else "size: A4;"
+    thead = "".join(f"<th>{h}</th>" for h in header)
+
+    n_amount_cols = len(header) - 2
+    totals = [0.0] * n_amount_cols
+    body_rows = ""
+    for r in out_rows:
+        cells = "".join(f"<td>{('' if v in (0, '', None) else v)}</td>" for v in r)
+        body_rows += f"<tr>{cells}</tr>"
+        for i in range(n_amount_cols):
+            val = r[2 + i] if len(r) > 2 + i else 0
+            try:
+                totals[i] += float(val) if val not in ("", None) else 0
+            except (ValueError, TypeError):
+                pass
+
+    total_cells = "".join(f"<td>₹{t:,.0f}</td>" if t else "<td></td>" for t in totals)
+
+    return f"""<!DOCTYPE html>
+<html lang="ta"><head><meta charset="UTF-8"><style>
+  @page {{ {size_css} margin: 10mm; }}
+  body {{ font-family: 'Noto Sans Tamil', 'Arial Unicode MS', sans-serif; font-size: 9px; color:#000; }}
+  h1 {{ text-align:center; font-size:15px; margin:2px 0; }}
+  h2 {{ text-align:center; font-size:12px; margin:2px 0 10px; }}
+  table {{ width:100%; border-collapse:collapse; }}
+  th, td {{ border:1px solid #000; padding:4px 3px; text-align:center; word-break:break-word; }}
+  th {{ background:#e0f2fe; font-weight:bold; }}
+  tr.total td {{ font-weight:bold; background:#f3f4f6; }}
+</style></head><body>
+  <h1>{_esc_html(library_name).upper()}</h1>
+  <h2>{_esc_html(subtitle)}</h2>
+  <table>
+    <thead><tr>{thead}</tr></thead>
+    <tbody>
+      {body_rows}
+      <tr class="total"><td colspan="2">மொத்தம்</td>{total_cells}</tr>
+    </tbody>
+  </table>
+</body></html>"""
+
+
+def _esc_html(v):
+    return "" if v is None else str(v)
+
+
+def _save_yearly_abstract_pdf(file_name, pdf_bytes, folder_id, login_email):
+    """குறிப்பிட்ட Drive folder-ல் இதே பெயரில் இருக்கும் பழைய PDF-ஐ நீக்கிவிட்டு,
+    புதிய PDF-ஐ upload செய்து, anyone-with-link + login_email viewer ஆக share செய்யும்."""
+    try:
+        drive = get_drive()
+
+        existing = drive.files().list(
+            q=f"'{folder_id}' in parents and name='{file_name}' and trashed=false",
+            fields="files(id)"
+        ).execute()
+        for f in existing.get("files", []):
+            try:
+                drive.files().delete(fileId=f["id"]).execute()
+            except Exception:
+                pass
+
+        media = MediaIoBaseUpload(BytesIO(pdf_bytes), mimetype="application/pdf", resumable=False)
+        file = drive.files().create(
+            body={"name": file_name, "parents": [folder_id]},
+            media_body=media, fields="id, webViewLink"
+        ).execute()
+        file_id = file["id"]
+
+        drive.permissions().create(fileId=file_id, body={"role": "reader", "type": "anyone"}).execute()
+        if login_email and "@" in login_email:
+            try:
+                drive.permissions().create(
+                    fileId=file_id,
+                    body={"role": "reader", "type": "user", "emailAddress": login_email},
+                    sendNotificationEmail=False,
+                ).execute()
+            except Exception:
+                pass  # safeAddViewer_ மாதிரியே — தோல்வியானாலும் தொடரும்
+
+        meta = drive.files().get(fileId=file_id, fields="webViewLink").execute()
+        return {
+            "success": True,
+            "message": "லிங்க் தயார் — கீழே கிளிக் செய்து PDF-ஐ பார்க்கலாம்",
+            "fileId": file_id,
+            "url": meta.get("webViewLink"),
+            "originalUrl": meta.get("webViewLink"),
+        }
+    except Exception as e:
+        return {"success": False, "message": f"Server பிழை: {e}"}
+
+
+# ------------------------------------------------------------
+# sendYearlyReceiptAbstract — "receipt abstract" tab column layout:
+# col1(B)=library, col0(A)=month label, col4..13(E..N)=10 income categories
+# ------------------------------------------------------------
+def send_yearly_receipt_abstract(login_email, library_name):
+    try:
+        if not library_name:
+            return {"success": False, "message": "நூலக பெயர் கிடைக்கவில்லை"}
+        if not ABSTRACT_SOURCE_SHEET_ID:
+            return {"success": False, "message": "ABSTRACT_SOURCE_SHEET_ID configured இல்லை"}
+
+        sh = get_client().open_by_key(ABSTRACT_SOURCE_SHEET_ID).worksheet(ABSTRACT_RECEIPT_SHEET_NAME)
+        data = sh.get_all_values()
+        rows = [r for r in data[1:] if len(r) > 1 and _s(r[1]) == _s(library_name)]
+        if not rows:
+            return {"success": False, "message": "இந்த நூலகத்திற்கு தரவு இல்லை"}
+
+        header = ["S.No", "Month", "காப்புத் தொகை", "சந்தா", "காலக்கடப்பு",
+                  "நூல் விலைப் பிடித்தம்", "பழைய இதழ் விற்பனை", "பழைய நூல் விற்பனை",
+                  "புரவலர்", "பெரும்புரவலர்", "கொடையாளர்", "இதர வரவு", "மொத்தம்"]
+
+        out_rows = []
+        for i, r in enumerate(rows):
+            nums = [_num(r, c) for c in range(4, 14)]
+            total = sum(nums)
+            out_rows.append(
+                [i + 1, r[0] if r else ""] +
+                [("" if n == 0 else n) for n in nums] +
+                [("" if total == 0 else total)]
+            )
+
+        html = _yearly_abstract_html(
+            library_name, f"நூலக வரவு சுருக்கம் {_current_fiscal_year_label()}",
+            header, out_rows, landscape=True,
+        )
+        pdf_bytes = _html_to_pdf_bytes(html)
+        file_name = f"Yearly_Receipt_Abstract_{library_name}.pdf"
+        return _save_yearly_abstract_pdf(file_name, pdf_bytes, YEARLY_RECEIPT_FOLDER_ID, login_email)
+    except Exception as e:
+        return {"success": False, "message": f"Server பிழை: {e}"}
+
+
+# ------------------------------------------------------------
+# sendYearlyExpenseAbstract — "expense abstract" tab column layout:
+# col2(C)=library, col0(A)=month (raw date/text), specific columns for
+# each expense category (GAS Code.gs-ல் இருந்ததே அப்படியே — column
+# index-கள் மாறாமல் வைக்கப்பட்டுள்ளது).
+# ------------------------------------------------------------
+def send_yearly_expense_abstract(login_email, library_name):
+    try:
+        if not library_name:
+            return {"success": False, "message": "நூலக பெயர் கிடைக்கவில்லை"}
+        if not ABSTRACT_SOURCE_SHEET_ID:
+            return {"success": False, "message": "ABSTRACT_SOURCE_SHEET_ID configured இல்லை"}
+
+        sh = get_client().open_by_key(ABSTRACT_SOURCE_SHEET_ID).worksheet(ABSTRACT_EXPENSE_SHEET_NAME)
+        data = sh.get_all_values()
+        rows = [r for r in data[1:] if len(r) > 2 and _s(r[2]) == _s(library_name)]
+        if not rows:
+            return {"success": False, "message": "இந்த நூலகத்திற்கு செலவு தரவு இல்லை"}
+
+        header = [
+            "வரிசை எண்", "மாதம்", "நாளிதழ்கள்", "வாடகை", "மின் கட்டணம்",
+            "தினக்கூலி பகுதிநேரத் துப்புரவாளர்", "தினக்கூலி நூலகர்",
+            "தினக்கூலிக் காவலர்", "தினக்கூலி ஒட்டுநர்",
+            "தினக்கூலி கணினி தட்டச்சர்", "தினக்கூலி பகுதிநேர நூலகர்",
+            "பேருந்து கட்டணம்", "எழுது பொருட்கள் வாங்குதல்",
+            "நுகர்பொருள் வாங்குதல்", "மின்சாதனங்கள் வாங்குதல்",
+            "அஞ்சல் செலவினம்", "நகலெடுக்கும் கட்டணம்",
+            "பிற செலவினங்கள் 1", "பிற செலவினங்கள் 2",
+            "போக்குவரத்து கட்டணம்", "குடிநீர் கட்டணம்",
+            "தொலைபேசி கட்டணம்", "கழிவறை சுத்தம் செய்தல்",
+            "மொத்த செலவினம் (நாளிதழ்/வாடகை தவிர்த்து)",
+            "மொத்த செலவினம்",
+        ]
+        AMOUNT_COLS = [5, 6, 7, 8, 9, 10, 11, 12, 13, 14,
+                       15, 16, 17, 18, 19, 21, 23, 25,
+                       26, 27, 29, 30, 31]
+
+        out_rows = []
+        for i, r in enumerate(rows):
+            nums = [_num(r, c) for c in AMOUNT_COLS]
+            out_rows.append([i + 1, r[0] if r else ""] + nums)
+
+        html = _yearly_abstract_html(
+            library_name, f"நூலக ஆண்டு செலவின சுருக்கம் {_current_fiscal_year_label()}",
+            header, out_rows, landscape=True,
+        )
+        pdf_bytes = _html_to_pdf_bytes(html)
+        file_name = f"Yearly_Expense_Abstract_{library_name}.pdf"
+        return _save_yearly_abstract_pdf(file_name, pdf_bytes, YEARLY_EXPENSE_FOLDER_ID, login_email)
+    except Exception as e:
+        return {"success": False, "message": f"Server பிழை: {e}"}
