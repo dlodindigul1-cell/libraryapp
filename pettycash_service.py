@@ -428,7 +428,7 @@ def _add_viewer_permission_mandatory(drive, file_id, login_email, attempts=3):
             drive.permissions().create(
                 fileId=file_id,
                 body={"role": "reader", "type": "user", "emailAddress": login_email},
-                sendNotificationEmail=False,
+                sendNotificationEmail=True,
             ).execute()
             return True, None
         except Exception as e:
