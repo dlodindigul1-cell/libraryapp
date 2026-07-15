@@ -23,6 +23,10 @@ from email.message import EmailMessage
 from io import BytesIO
 from flask import request
 from weasyprint import HTML as _WeasyHTML
+from googleapiclient.discovery import build
+from googleapiclient.http import MediaIoBaseUpload
+
+from sheets_service import _get_credentials
 
 # ------------------------------------------------------------
 # Email அனுப்புதல் (Gmail SMTP + App Password)
@@ -34,6 +38,63 @@ from weasyprint import HTML as _WeasyHTML
 # silent-ஆ skip பண்ணி (PDF link மட்டும்) பழையபடி வேலை செய்யும்.
 GMAIL_ADDRESS = os.environ.get("GMAIL_ADDRESS", "")
 GMAIL_APP_PASSWORD = os.environ.get("GMAIL_APP_PASSWORD", "")
+
+# ------------------------------------------------------------
+# Render, raw SMTP (port 465/587) outbound connection-ஐ block
+# செய்வதால் ([Errno 101] Network is unreachable), Gmail SMTP
+# வேலை செய்யாது. அதனால் Drive API (HTTPS-ல் ஓடுவதால் block
+# ஆகாது) மூலம் PDF-ஐ upload செய்து, sendNotificationEmail=True
+# கொடுத்து Google-ஐயே notification அனுப்ப வைக்கிறோம் — இதுவே
+# இப்போதைய முதன்மை வழி (SMTP இன்னும் இருக்கிறது, ஆனால் Render-ல்
+# எப்போதும் தோல்வியடையும்).
+# ------------------------------------------------------------
+LEAVE_PDF_FOLDER_ID = os.environ.get("LEAVE_PDF_FOLDER_ID", "")
+
+_leave_drive = None
+
+
+def _get_leave_drive():
+    global _leave_drive
+    if _leave_drive is None:
+        _leave_drive = build("drive", "v3", credentials=_get_credentials())
+    return _leave_drive
+
+
+def _upload_and_share_pdf(pdf_bytes, file_name, to_email):
+    """PDF-ஐ LEAVE_PDF_FOLDER_ID-ல் upload செய்து, to_email-க்கு
+    Viewer access + Google-ன் தானியங்கி notification email-ஐ
+    கொடுக்கும். (drive_url, shared: bool, error: str|None) திருப்பும்."""
+    if not LEAVE_PDF_FOLDER_ID:
+        return None, False, "LEAVE_PDF_FOLDER_ID configured இல்லை"
+    try:
+        drive = _get_leave_drive()
+        media = MediaIoBaseUpload(BytesIO(pdf_bytes), mimetype="application/pdf", resumable=False)
+        file = drive.files().create(
+            body={"name": file_name, "parents": [LEAVE_PDF_FOLDER_ID]},
+            media_body=media,
+            fields="id, webViewLink",
+        ).execute()
+        file_id = file["id"]
+
+        shared, share_error = False, None
+        if to_email and "@" in to_email:
+            try:
+                drive.permissions().create(
+                    fileId=file_id,
+                    body={"role": "reader", "type": "user", "emailAddress": to_email},
+                    sendNotificationEmail=True,
+                    emailMessage="உங்கள் விடுப்பு விண்ணப்பம் (PDF) இணைக்கப்பட்டுள்ளது. கீழே உள்ள கோப்பை கிளிக் செய்து பார்க்கலாம்.",
+                ).execute()
+                shared = True
+            except Exception as e:
+                share_error = str(e)
+        else:
+            share_error = "பணியாளர் மின்னஞ்சல் கிடைக்கவில்லை"
+
+        meta = drive.files().get(fileId=file_id, fields="webViewLink").execute()
+        return meta.get("webViewLink"), shared, share_error
+    except Exception as e:
+        return None, False, str(e)
 
 
 def _absolute_url(path):
@@ -321,17 +382,14 @@ def send_leave_application_email(params):
         pdf_filename = f"{emp_id}_{leave_type}_{apply_date}.pdf"
 
         to_email = params.get("email", "")
-        mail_sent, mail_error = _send_email_with_pdf(
-            to_email,
-            f"விடுப்பு விண்ணப்பம் — {emp_name}",
-            _leave_mail_html(emp_name, _absolute_url(share_url)),
-            pdf_bytes,
-            pdf_filename,
+        drive_url, mail_sent, mail_error = _upload_and_share_pdf(
+            pdf_bytes, pdf_filename, to_email
         )
 
         return {
             "success": True,
             "shareUrl": share_url,
+            "driveUrl": drive_url,
             "emailSent": mail_sent,
             "emailError": mail_error,
         }
@@ -354,17 +412,14 @@ def send_elml_application_email(params):
         pdf_filename = f"{emp_id}_{leave_type}_{apply_date}.pdf"
 
         to_email = params.get("email", "")
-        mail_sent, mail_error = _send_email_with_pdf(
-            to_email,
-            f"விடுப்பு விண்ணப்பம் — {emp_name}",
-            _leave_mail_html(emp_name, _absolute_url(share_url)),
-            pdf_bytes,
-            pdf_filename,
+        drive_url, mail_sent, mail_error = _upload_and_share_pdf(
+            pdf_bytes, pdf_filename, to_email
         )
 
         return {
             "success": True,
             "shareUrl": share_url,
+            "driveUrl": drive_url,
             "emailSent": mail_sent,
             "emailError": mail_error,
         }
