@@ -52,6 +52,35 @@ ABSTRACT_EXPENSE_SHEET_NAME  = os.environ.get("ABSTRACT_EXPENSE_SHEET_NAME", "ex
 YEARLY_RECEIPT_FOLDER_ID = os.environ.get("YEARLY_RECEIPT_FOLDER_ID", "13P8qREf_XsD0p_J4w9ph7gbfNEhpkYyg")
 YEARLY_EXPENSE_FOLDER_ID = os.environ.get("YEARLY_EXPENSE_FOLDER_ID", "115sLao9m1iUTfZtKcY5vi6wwlQ6cazlT")
 
+# ------------------------------------------------------------
+# Admin sheets — நாளிதழ் மேலாண்மை, வாடகை, தினக்கூலி அனுமதி,
+# பணி நாட்கள் கணக்கீடு (Holidays + Staff leave days) — எல்லாமே
+# ஒரே spreadsheet-ல் (NEWSPAPER_RATE_SPREAD_ID) இருக்கு
+# ------------------------------------------------------------
+NEWSPAPER_RATE_SPREAD_ID = os.environ.get(
+    "NEWSPAPER_RATE_SPREAD_ID", "1rK8HI6moHfwc1NY_OkcckqH8mFd8fPP0I635S3PgDbY"
+)
+NEWSPAPER_LIST_SHEET_NAME = os.environ.get("NEWSPAPER_LIST_SHEET_NAME", "NEWSPAPER LIST")
+LIBRARY_NEWSPAPER_MAP_SHEET_NAME = os.environ.get("LIBRARY_NEWSPAPER_MAP_SHEET_NAME", "LIBRARY NEWSPAPER MAP")
+RENT_SHEET_NAME = os.environ.get("RENT_SHEET_NAME", "RENT")
+DAILYWAGES_SHEET_NAME = os.environ.get("DAILYWAGES_SHEET_NAME", "DAILYWAGES PERMISSION")
+HOLIDAYS_SHEET_NAME = os.environ.get("HOLIDAYS_SHEET_NAME", "HOLIDAYS")
+STAFF_LEAVE_DAYS_SHEET_NAME = os.environ.get("STAFF_LEAVE_DAYS_SHEET_NAME", "staff leave days")
+
+TOTAL_NEWSPAPER_SLOTS = 18
+NEWSPAPER_FIELD_KEYS = [
+    "dailyThanthi", "hinduTamil", "dinamani", "theekathir", "tamilMurasu",
+    "maalaiMalar", "maalaiMurasu", "theHindu", "indianExpress", "timesOfIndia",
+    "deccanChronicle", "businessLine", "economicTimes",
+    "paper14", "paper15", "paper16", "paper17", "paper18",
+]
+
+
+def newspaper_field_key_for_slot(slot):
+    if 1 <= slot <= len(NEWSPAPER_FIELD_KEYS):
+        return NEWSPAPER_FIELD_KEYS[slot - 1]
+    return None
+
 _client = None
 _drive = None
 
@@ -389,30 +418,57 @@ def get_available_months_for_library(library_name):
 # loginEmail-க்கும் தனியா viewer access கொடுக்க முயற்சி) —
 # ஒரே helper function-ஐ பகிர்ந்துகொள்கிறோம்.
 # ------------------------------------------------------------
-def _share_drive_file(login_email, file_id):
-    if not file_id or not login_email:
-        return {"success": False, "message": "கோப்பு ID அல்லது மின்னஞ்சல் கிடைக்கவில்லை"}
-    try:
-        drive = get_drive()
-        drive.permissions().create(
-            fileId=file_id, body={"role": "reader", "type": "anyone"}
-        ).execute()
+def _add_viewer_permission_mandatory(drive, file_id, login_email, attempts=3):
+    """login_email-க்கு Drive file-ல் Viewer access கொடுக்க கண்டிப்பா முயற்சி
+    செய்யும் — silent-ஆ swallow பண்ணாது. இது Gmail send limit-ஐ ஒருபோதும்
+    தொடாது (இது Drive permissions API, Gmail அல்ல)."""
+    last_error = None
+    for _ in range(attempts):
         try:
             drive.permissions().create(
                 fileId=file_id,
                 body={"role": "reader", "type": "user", "emailAddress": login_email},
                 sendNotificationEmail=False,
             ).execute()
+            return True, None
+        except Exception as e:
+            last_error = str(e)
+    return False, last_error
+
+
+def _share_drive_file(login_email, file_id):
+    if not file_id or not login_email:
+        return {"success": False, "message": "கோப்பு ID அல்லது மின்னஞ்சல் கிடைக்கவில்லை"}
+    try:
+        drive = get_drive()
+
+        # "anyone with the link" — fallback, யாராலும் link வழியா பார்க்கலாம்
+        try:
+            drive.permissions().create(
+                fileId=file_id, body={"role": "reader", "type": "anyone"}
+            ).execute()
         except Exception:
-            pass  # GAS-ல் safeAddViewer_ மாதிரியே — தோல்வியானாலும் தொடரும்
+            pass
+
+        # login_email-க்கு நேரடியா Viewer — இது கண்டிப்பா நடக்க வேண்டியது
+        email_shared, email_error = _add_viewer_permission_mandatory(drive, file_id, login_email)
 
         meta = drive.files().get(fileId=file_id, fields="webViewLink").execute()
+
+        message = "லிங்க் தயார் — கீழே கிளிக் செய்து PDF-ஐ பார்க்கலாம்"
+        if email_shared:
+            message += f" ({login_email}-க்கு நேரடியா share ஆனது)"
+        else:
+            message += f" ⚠️ ஆனால் {login_email}-க்கு நேரடியா share பண்ண முடியவில்லை (பொது link மூலம் பார்க்கலாம்)"
+
         return {
             "success": True,
-            "message": "லிங்க் தயார் — கீழே கிளிக் செய்து PDF-ஐ பார்க்கலாம்",
+            "message": message,
             "fileId": file_id,
             "originalUrl": meta.get("webViewLink"),
             "url": meta.get("webViewLink"),
+            "emailShared": email_shared,
+            "emailShareError": email_error,
         }
     except Exception as e:
         return {"success": False, "message": f"Server பிழை: {e}"}
@@ -856,20 +912,18 @@ def _save_yearly_abstract_pdf(file_name, pdf_bytes, folder_id, login_email):
         file_id = file["id"]
 
         drive.permissions().create(fileId=file_id, body={"role": "reader", "type": "anyone"}).execute()
+        email_shared, email_error = (False, None)
         if login_email and "@" in login_email:
-            try:
-                drive.permissions().create(
-                    fileId=file_id,
-                    body={"role": "reader", "type": "user", "emailAddress": login_email},
-                    sendNotificationEmail=False,
-                ).execute()
-            except Exception:
-                pass  # safeAddViewer_ மாதிரியே — தோல்வியானாலும் தொடரும்
+            email_shared, email_error = _add_viewer_permission_mandatory(drive, file_id, login_email)
 
         meta = drive.files().get(fileId=file_id, fields="webViewLink").execute()
+        message = "லிங்க் தயார் — கீழே கிளிக் செய்து PDF-ஐ பார்க்கலாம்"
+        if login_email and "@" in login_email:
+            message += (f" ({login_email}-க்கு நேரடியா share ஆனது)" if email_shared
+                        else f" ⚠️ ஆனால் {login_email}-க்கு நேரடியா share பண்ண முடியவில்லை")
         return {
             "success": True,
-            "message": "லிங்க் தயார் — கீழே கிளிக் செய்து PDF-ஐ பார்க்கலாம்",
+            "message": message,
             "fileId": file_id,
             "url": meta.get("webViewLink"),
             "originalUrl": meta.get("webViewLink"),
@@ -1040,20 +1094,21 @@ def share_contingent_bill(login_email, library_name):
 
         drive = get_drive()
         drive.permissions().create(fileId=file_id, body={"role": "reader", "type": "anyone"}).execute()
-        try:
-            drive.permissions().create(
-                fileId=file_id,
-                body={"role": "reader", "type": "user", "emailAddress": login_email},
-                sendNotificationEmail=False,
-            ).execute()
-        except Exception:
-            pass  # GAS-ல் safeAddViewer_ மாதிரியே — தோல்வியானாலும் தொடரும்
+        email_shared, email_error = _add_viewer_permission_mandatory(drive, file_id, login_email)
+
+        message = "லிங்க் தயார் — கீழே கிளிக் செய்து PDF-ஐ பார்க்கலாம்"
+        if email_shared:
+            message += f" ({login_email}-க்கு நேரடியா share ஆனது)"
+        else:
+            message += f" ⚠️ ஆனால் {login_email}-க்கு நேரடியா share பண்ண முடியவில்லை (பொது link மூலம் பார்க்கலாம்)"
 
         return {
             "success": True,
-            "message": "லிங்க் தயார் — கீழே கிளிக் செய்து PDF-ஐ பார்க்கலாம்",
+            "message": message,
             "fileId": file_id,
             "url": pdf_url,
+            "emailShared": email_shared,
+            "emailShareError": email_error,
         }
     except Exception as e:
         return {"success": False, "message": f"Server பிழை: {e}"}
@@ -1092,15 +1147,8 @@ def _share_file_for_audit(file_url, login_email):
         drive = get_drive()
         file_id = match.group(0)
         drive.permissions().create(fileId=file_id, body={"role": "reader", "type": "anyone"}).execute()
-        try:
-            if login_email:
-                drive.permissions().create(
-                    fileId=file_id,
-                    body={"role": "reader", "type": "user", "emailAddress": login_email},
-                    sendNotificationEmail=False,
-                ).execute()
-        except Exception:
-            pass
+        if login_email:
+            _add_viewer_permission_mandatory(drive, file_id, login_email)
     except Exception:
         pass  # கோப்பு அணுக முடியவில்லை (folder ஆக இருக்கலாம்) — தொடரும்
 
@@ -1143,3 +1191,286 @@ def open_prev_year_receipt_expense(library_name, login_email, year_option):
         return {"success": False, "message": "இந்த நூலகத்திற்கு URL கிடைக்கவில்லை"}
     except Exception as e:
         return {"success": False, "message": f"Server பிழை: {e}"}
+
+
+# ==================== நாளிதழ் மேலாண்மை (Newspaper Admin) ====================
+
+def _get_newspaper_rate_ss():
+    return get_client().open_by_key(NEWSPAPER_RATE_SPREAD_ID)
+
+
+def get_newspaper_master_list():
+    """"NEWSPAPER LIST" sheet-ல் இருந்து 18 slots-ன் Name/Rate படிக்கும்."""
+    try:
+        sh = _get_newspaper_rate_ss().worksheet(NEWSPAPER_LIST_SHEET_NAME)
+        rows = sh.get(f"A2:C{1 + TOTAL_NEWSPAPER_SLOTS}")
+        result = []
+        for idx in range(TOTAL_NEWSPAPER_SLOTS):
+            row = rows[idx] if idx < len(rows) else []
+            try:
+                slot = int(row[0]) if len(row) > 0 and _s(row[0]) else idx + 1
+            except ValueError:
+                slot = idx + 1
+            name = _s(row[1]) if len(row) > 1 else ""
+            try:
+                max_rate = float(row[2]) if len(row) > 2 and _s(row[2]) else 0
+            except ValueError:
+                max_rate = 0
+            result.append({"slot": slot, "name": name, "maxRate": max_rate})
+        return result
+    except Exception:
+        return []
+
+
+def get_active_newspapers_for_library(library_name):
+    """ஒரு நூலகத்திற்கு Active=Yes உள்ள நாளிதழ்களை மட்டும் திருப்பும்."""
+    try:
+        master = get_newspaper_master_list()
+        master_by_slot = {m["slot"]: m for m in master}
+
+        sh = _get_newspaper_rate_ss().worksheet(LIBRARY_NEWSPAPER_MAP_SHEET_NAME)
+        data = sh.get_all_values()
+
+        lib_row = None
+        for i in range(1, len(data)):
+            if _s(data[i][0]) == _s(library_name):
+                lib_row = data[i]
+                break
+        if not lib_row:
+            return []
+
+        result = []
+        for slot in range(1, TOTAL_NEWSPAPER_SLOTS + 1):
+            active_val = _s(lib_row[slot]).lower() if len(lib_row) > slot else ""
+            info = master_by_slot.get(slot)
+            if active_val == "yes" and info and info["name"]:
+                result.append({
+                    "slot": slot,
+                    "key": newspaper_field_key_for_slot(slot),
+                    "name": info["name"],
+                    "maxRate": info["maxRate"],
+                })
+        return result
+    except Exception:
+        return []
+
+
+def get_newspaper_admin_master_list():
+    return get_newspaper_master_list()
+
+
+def save_newspaper_master_list(rows):
+    try:
+        sh = _get_newspaper_rate_ss().worksheet(NEWSPAPER_LIST_SHEET_NAME)
+        for r in (rows or []):
+            try:
+                slot = int(r.get("slot"))
+            except (TypeError, ValueError):
+                continue
+            if slot < 1 or slot > TOTAL_NEWSPAPER_SLOTS:
+                continue
+            name = _s(r.get("name"))
+            try:
+                max_rate = float(r.get("maxRate") or 0)
+            except (TypeError, ValueError):
+                max_rate = 0
+            sh.update(f"A{slot + 1}:C{slot + 1}", [[slot, name, max_rate]], value_input_option="USER_ENTERED")
+        return {"success": True}
+    except Exception as e:
+        return {"success": False, "message": str(e)}
+
+
+def get_all_library_names_for_admin():
+    try:
+        sh = get_client().open_by_key(LIBRARY_DATA_SPREAD_ID).worksheet(LIBRARY_DATA_SHEET_NAME)
+        rows = sh.get("A2:A175")
+        return [_s(r[0]) for r in rows if r and _s(r[0])]
+    except Exception:
+        return []
+
+
+def get_library_newspaper_map_for_library(library_name):
+    try:
+        sh = _get_newspaper_rate_ss().worksheet(LIBRARY_NEWSPAPER_MAP_SHEET_NAME)
+        data = sh.get_all_values()
+
+        row = None
+        for i in range(1, len(data)):
+            if _s(data[i][0]) == _s(library_name):
+                row = data[i]
+                break
+
+        result_map = {}
+        for slot in range(1, TOTAL_NEWSPAPER_SLOTS + 1):
+            result_map[str(slot)] = bool(row) and len(row) > slot and _s(row[slot]).lower() == "yes"
+
+        return {"success": True, "map": result_map, "found": bool(row)}
+    except Exception as e:
+        return {"success": False, "message": str(e)}
+
+
+def save_library_newspaper_map(library_name, active_slots_array):
+    try:
+        sh = _get_newspaper_rate_ss().worksheet(LIBRARY_NEWSPAPER_MAP_SHEET_NAME)
+        row_values = ["Yes" if v else "No" for v in (active_slots_array or [])][:TOTAL_NEWSPAPER_SLOTS]
+        while len(row_values) < TOTAL_NEWSPAPER_SLOTS:
+            row_values.append("No")
+
+        data = sh.get_all_values()
+        row_index = None
+        for i in range(1, len(data)):
+            if _s(data[i][0]) == _s(library_name):
+                row_index = i + 1
+                break
+
+        if row_index:
+            end_col_num = 1 + TOTAL_NEWSPAPER_SLOTS  # B..S
+            end_col = chr(ord("A") + end_col_num - 1)
+            sh.update(f"B{row_index}:{end_col}{row_index}", [row_values], value_input_option="USER_ENTERED")
+        else:
+            sh.append_row([library_name] + row_values, value_input_option="USER_ENTERED")
+
+        return {"success": True}
+    except Exception as e:
+        return {"success": False, "message": str(e)}
+
+
+# ==================== வாடகை (RENT) ====================
+
+def get_rent_details_for_library(library_name):
+    try:
+        sh = _get_newspaper_rate_ss().worksheet(RENT_SHEET_NAME)
+        data = sh.get_all_values()
+        for i in range(1, len(data)):
+            row = data[i]
+            if _s(row[0] if len(row) > 0 else "") == _s(library_name):
+                owner = _s(row[1]) if len(row) > 1 else ""
+                try:
+                    amount = float(row[2]) if len(row) > 2 and _s(row[2]) else 0
+                except ValueError:
+                    amount = 0
+                return {"success": True, "ownerName": owner, "rentAmount": amount}
+        return {"success": False}
+    except Exception as e:
+        return {"success": False, "message": f"Server பிழை: {e}"}
+
+
+# ==================== தினக்கூலி அனுமதி (Daily Wage Permission) ====================
+
+def is_daily_wage_permission_allowed(library_name):
+    try:
+        sh = _get_newspaper_rate_ss().worksheet(DAILYWAGES_SHEET_NAME)
+        data = sh.get_all_values()
+        for i in range(1, len(data)):
+            row = data[i]
+            if _s(row[0] if len(row) > 0 else "") == _s(library_name):
+                return {"success": True, "allowed": True}
+        return {"success": True, "allowed": False}
+    except Exception as e:
+        return {"success": False, "message": str(e)}
+
+
+# ==================== பணி நாட்கள் கணக்கீடு (Working Days) ====================
+# கடந்த மாதம் 16 முதல் நடப்பு மாதம் 15 வரை — வெள்ளி, 2nd சனி,
+# HOLIDAYS sheet-ல் உள்ள நாட்கள் தவிர்த்து, staff leave days sheet-ல்
+# உள்ள விடுப்பு நாட்களை கழித்து கணக்கிடும்.
+
+TAMIL_MONTHS = [
+    "ஜனவரி", "பிப்ரவரி", "மார்ச்", "ஏப்ரல்", "மே", "ஜூன்",
+    "ஜூலை", "ஆகஸ்ட்", "செப்டம்பர்", "அக்டோபர்", "நவம்பர்", "டிசம்பர்",
+]
+
+
+def _add_months(year, month0, delta):
+    """month0 = 0-based month. delta மாதங்களை கூட்டி/கழித்து (year, month0) திருப்பும்."""
+    total = year * 12 + month0 + delta
+    return total // 12, total % 12
+
+
+def get_working_days_count(lib_name):
+    try:
+        today = datetime.now()
+        y, m0 = today.year, today.month - 1  # 0-based month
+        end_date = datetime(y, m0 + 1, 15)
+        py, pm0 = _add_months(y, m0, -1)
+        start_date = datetime(py, pm0 + 1, 16)
+
+        holidays = set()
+        try:
+            sh = _get_newspaper_rate_ss().worksheet(HOLIDAYS_SHEET_NAME)
+            last_row = len(sh.get_all_values())
+            if last_row > 1:
+                rows = sh.get(f"A2:A{last_row}")
+                for r in rows:
+                    if not r or not _s(r[0]):
+                        continue
+                    d = _parse_any_date_flex(r[0])
+                    if d:
+                        holidays.add(d.strftime("%d/%m/%Y"))
+        except Exception:
+            pass
+
+        total_working_days = 0
+        cur = start_date
+        while cur <= end_date:
+            dow = cur.weekday()  # Mon=0 ... Sun=6
+            is_friday = (dow == 4)
+            is_second_saturday = (dow == 5 and 7 < cur.day <= 14)
+            is_holiday = cur.strftime("%d/%m/%Y") in holidays
+            if not is_friday and not is_second_saturday and not is_holiday:
+                total_working_days += 1
+            cur += timedelta(days=1)
+
+        leave_days = 0
+        try:
+            sh2 = _get_newspaper_rate_ss().worksheet(STAFF_LEAVE_DAYS_SHEET_NAME)
+            last_row2 = len(sh2.get_all_values())
+            if last_row2 >= 3:
+                rows2 = sh2.get(f"A3:B{last_row2}")
+                for r in rows2:
+                    name = _s(r[0]) if len(r) > 0 else ""
+                    if name == _s(lib_name):
+                        val = r[1] if len(r) > 1 else ""
+                        try:
+                            leave_days = float(val) if _s(val) else 0
+                        except ValueError:
+                            leave_days = 0
+                        break
+        except Exception:
+            pass
+
+        start_str = f"{TAMIL_MONTHS[start_date.month - 1]} {start_date.day}"
+        end_str = f"{TAMIL_MONTHS[end_date.month - 1]} {end_date.day}"
+
+        return {
+            "totalWD": total_working_days,
+            "partnerLimit": total_working_days - leave_days,
+            "staffLimit": total_working_days - leave_days,
+            "leaveTaken": leave_days,
+            "period": f"{start_str} முதல் {end_str} முடிய",
+        }
+    except Exception as e:
+        return {"success": False, "message": f"Server பிழை: {e}"}
+
+
+def _parse_any_date_flex(raw):
+    """Sheets cell (text அல்லது serial-like) -> datetime, பல formats முயற்சி."""
+    if raw in (None, ""):
+        return None
+    if isinstance(raw, (int, float)):
+        try:
+            return datetime(1899, 12, 30) + timedelta(days=float(raw))
+        except (OverflowError, ValueError):
+            return None
+    raw_s = str(raw).strip()
+    try:
+        serial = float(raw_s)
+        return datetime(1899, 12, 30) + timedelta(days=serial)
+    except ValueError:
+        pass
+    for fmt in ("%d/%m/%Y", "%Y-%m-%d", "%m/%d/%Y", "%d-%m-%Y"):
+        try:
+            return datetime.strptime(raw_s, fmt)
+        except ValueError:
+            continue
+    return None

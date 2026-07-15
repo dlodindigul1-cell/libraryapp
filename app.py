@@ -80,6 +80,17 @@ PETTYCASH_DISPATCH = {
     "shareContingentBill":       lambda args: pc.share_contingent_bill(*args),
     # --- கடந்த ஆண்டு வரவு-செலவு (தணிக்கைப் படிவம்) ---
     "openPrevYearReceiptExpense": lambda args: pc.open_prev_year_receipt_expense(*args),
+    # --- நாளிதழ் மேலாண்மை (Newspaper Admin) ---
+    "getActiveNewspapersForLibrary":     lambda args: pc.get_active_newspapers_for_library(*args),
+    "getNewspaperAdminMasterList":       lambda args: pc.get_newspaper_admin_master_list(),
+    "saveNewspaperMasterList":           lambda args: pc.save_newspaper_master_list(*args),
+    "getAllLibraryNamesForAdmin":        lambda args: pc.get_all_library_names_for_admin(),
+    "getLibraryNewspaperMapForLibrary":  lambda args: pc.get_library_newspaper_map_for_library(*args),
+    "saveLibraryNewspaperMap":           lambda args: pc.save_library_newspaper_map(*args),
+    # --- வாடகை / தினக்கூலி அனுமதி / பணி நாட்கள் ---
+    "getRentDetailsForLibrary":       lambda args: pc.get_rent_details_for_library(*args),
+    "isDailyWagePermissionAllowed":   lambda args: pc.is_daily_wage_permission_allowed(*args),
+    "getWorkingDaysCount":            lambda args: pc.get_working_days_count(*args),
 }
 
 

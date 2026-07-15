@@ -18,8 +18,72 @@ import os
 import time
 import uuid
 import pathlib
+import smtplib
+from email.message import EmailMessage
 from io import BytesIO
+from flask import request
 from weasyprint import HTML as _WeasyHTML
+
+# ------------------------------------------------------------
+# Email அனுப்புதல் (Gmail SMTP + App Password)
+# ------------------------------------------------------------
+# Service Account-க்கு GmailApp.sendEmail() போன்ற ஒன்று கிடையாது
+# (domain-wide delegation இல்லாத personal Gmail-க்கு). அதனால் ஒரு
+# சாதாரண Gmail account-ன் "App Password" மூலம் SMTP-ஆக அனுப்புகிறோம்.
+# GMAIL_ADDRESS / GMAIL_APP_PASSWORD env vars set ஆகி இல்லைன்னா,
+# silent-ஆ skip பண்ணி (PDF link மட்டும்) பழையபடி வேலை செய்யும்.
+GMAIL_ADDRESS = os.environ.get("GMAIL_ADDRESS", "")
+GMAIL_APP_PASSWORD = os.environ.get("GMAIL_APP_PASSWORD", "")
+
+
+def _absolute_url(path):
+    """Email body-க்குள் இருக்கும் link வேலை செய்ய, absolute URL தேவை
+    (relative path email client-ல் broken-ஆ இருக்கும்). Flask request
+    context கிடைக்காத நேரங்களில் (எ.கா local testing) path-ஐயே திருப்பும்."""
+    try:
+        return request.url_root.rstrip("/") + path
+    except RuntimeError:
+        return path
+
+
+def _send_email_with_pdf(to_email, subject, html_body, pdf_bytes, pdf_filename):
+    """Gmail SMTP மூலம் PDF-ஐ attachment-ஆ சேர்த்து மெயில் அனுப்பும்.
+    (sent: bool, error: str|None) திருப்பும்."""
+    if not GMAIL_ADDRESS or not GMAIL_APP_PASSWORD:
+        return False, "GMAIL_ADDRESS/GMAIL_APP_PASSWORD configured இல்லை"
+    if not to_email or "@" not in to_email:
+        return False, "பணியாளர் மின்னஞ்சல் கிடைக்கவில்லை"
+
+    try:
+        msg = EmailMessage()
+        msg["Subject"] = subject
+        msg["From"] = f"நூலகர் விடுப்பு மேலாண்மை <{GMAIL_ADDRESS}>"
+        msg["To"] = to_email
+        msg.set_content("உங்கள் விடுப்பு விண்ணப்பம் PDF இணைக்கப்பட்டுள்ளது. இந்த மெயிலை HTML-ஆக பார்க்க முடியாத மெயில் app-ல் இந்த வரி தெரியும்.")
+        msg.add_alternative(html_body, subtype="html")
+        msg.add_attachment(pdf_bytes, maintype="application", subtype="pdf", filename=pdf_filename)
+
+        with smtplib.SMTP_SSL("smtp.gmail.com", 465, timeout=20) as server:
+            server.login(GMAIL_ADDRESS, GMAIL_APP_PASSWORD)
+            server.send_message(msg)
+        return True, None
+    except Exception as e:
+        return False, str(e)
+
+
+def _leave_mail_html(emp_name, pdf_url):
+    return f"""<div style='font-family:Arial,sans-serif;font-size:14px;color:#1e293b;'>
+<p>வணக்கம் <strong>{emp_name}</strong>,</p>
+<p>உங்கள் விடுப்பு விண்ணப்பம் (PDF) இந்த மெயிலுடன் இணைக்கப்பட்டுள்ளது.<br>
+கீழே உள்ள பட்டனை அழுத்தியும் PDF-ஐ திறக்கலாம் / பதிவிறக்கலாம்:</p>
+<p style='margin:20px 0;'>
+<a href='{pdf_url}' target='_blank'
+style='background:#1a4f7a;color:#fff;padding:10px 22px;border-radius:8px;
+text-decoration:none;font-weight:bold;font-size:14px;'>📄 PDF திறக்கவும்</a></p>
+<p style='font-size:12px;color:#64748b;'>தேவைப்பட்டால் Print செய்து அலுவலகத்தில் சமர்ப்பிக்கவும்.</p>
+<hr style='border:none;border-top:1px solid #e2e8f0;margin:16px 0;'>
+<p style='font-size:11px;color:#94a3b8;'>தமிழ்நாடு அரசு பொது நூலகத்துறை — திண்டுக்கல் மாவட்ட நூலக ஆணைக்குழு</p>
+</div>"""
 
 # ------------------------------------------------------------
 # Tamil font embedding
@@ -238,9 +302,9 @@ def _html_to_pdf_bytes(html_content):
 
 
 def send_leave_application_email(params):
-    """பெயர் பழையபடி வைத்திருக்கிறோம் (frontend அதே பெயரை அழைக்கிறது) —
-    ஆனால் இப்போது Drive/Gmail எதையும் தொடாது; PDF-ஐ memory-ல் cache
-    செய்து, /leave/pdf/<token> route-ன் URL-ஐ shareUrl ஆக திருப்பும்."""
+    """PDF-ஐ generate பண்ணி, memory-ல் cache பண்ணி (fallback link-க்காக),
+    மற்றும் பணியாளரின் email-க்கு (params['email']) Gmail SMTP மூலம்
+    PDF attachment-ஆ அனுப்புகிறது."""
     try:
         leave_type_label = "தற்செயல் விடுப்பு விண்ணப்பம்" if params.get("leaveType") == "CL" \
             else "மத/வரையறுக்கப்பட்ட விடுப்பு விண்ணப்பம்"
@@ -249,7 +313,28 @@ def send_leave_application_email(params):
 
         token = _store_pdf(pdf_bytes)
         share_url = f"/leave/pdf/{token}"
-        return {"success": True, "shareUrl": share_url}
+
+        emp_name = params.get("empName", "")
+        emp_id = params.get("empId", "")
+        leave_type = params.get("leaveType", "")
+        apply_date = str(params.get("applyDate", "")).replace("/", "-")
+        pdf_filename = f"{emp_id}_{leave_type}_{apply_date}.pdf"
+
+        to_email = params.get("email", "")
+        mail_sent, mail_error = _send_email_with_pdf(
+            to_email,
+            f"விடுப்பு விண்ணப்பம் — {emp_name}",
+            _leave_mail_html(emp_name, _absolute_url(share_url)),
+            pdf_bytes,
+            pdf_filename,
+        )
+
+        return {
+            "success": True,
+            "shareUrl": share_url,
+            "emailSent": mail_sent,
+            "emailError": mail_error,
+        }
     except Exception as e:
         return {"success": False, "error": str(e)}
 
@@ -261,6 +346,27 @@ def send_elml_application_email(params):
 
         token = _store_pdf(pdf_bytes)
         share_url = f"/leave/pdf/{token}"
-        return {"success": True, "shareUrl": share_url}
+
+        emp_name = params.get("empName", "")
+        emp_id = params.get("empId", "")
+        leave_type = params.get("leaveType", "")
+        apply_date = str(params.get("applyDate", "")).replace("/", "-")
+        pdf_filename = f"{emp_id}_{leave_type}_{apply_date}.pdf"
+
+        to_email = params.get("email", "")
+        mail_sent, mail_error = _send_email_with_pdf(
+            to_email,
+            f"விடுப்பு விண்ணப்பம் — {emp_name}",
+            _leave_mail_html(emp_name, _absolute_url(share_url)),
+            pdf_bytes,
+            pdf_filename,
+        )
+
+        return {
+            "success": True,
+            "shareUrl": share_url,
+            "emailSent": mail_sent,
+            "emailError": mail_error,
+        }
     except Exception as e:
         return {"success": False, "error": str(e)}
