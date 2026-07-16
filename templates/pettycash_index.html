@@ -4,16 +4,39 @@
   <base target="_top">
   <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>நூலக வரவு செலவு மேலாண்மை - திண்டுக்கல்</title>  
+<title>நூலக வரவு செலவு மேலாண்மை - திண்டுக்கல்</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Tamil:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">  
     <style>
+
+  /* ============================================================
+     நூலகர் விடுப்பு/சில்லறை செலவினம் portal-உடன் ஒரே theme
+     (maroon/gold/cream) — எல்லா selectors பழையபடியே, values மட்டும் மாறியது
+     ============================================================ */
+  :root{
+    --maroon:#7a0d16;
+    --maroon-dark:#4a0a10;
+    --gold:#c9a227;
+    --gold-soft:#f1e2b8;
+    --cream:#f6f1e7;
+    --card:#fffdf9;
+    --ink:#2b1a1a;
+    --ink-soft:#7c6a5e;
+    --line:#e7dcc7;
+    --green:#2f6d4f;
+    --green-soft:#e6f2ec;
+    --red:#b3261e;
+    --red-soft:#fbe9e7;
+    --blue:#1e5b8c;
+  }
 
   /* --- GLOBAL PAGE SETUP --- */
   body {
   margin: 0;
   padding: 20px;
-  background: linear-gradient(135deg, #4e73df, #1cc88a);
-  font-family: 'Segoe UI', Arial, sans-serif;
-  color: #333;
+  background: var(--cream);
+  font-family: 'Noto Sans Tamil', 'Poppins', 'Segoe UI', Arial, sans-serif;
+  color: var(--ink);
   min-height: 100vh;
 }
 
@@ -21,17 +44,17 @@
  .container {
   width: 100%;
   max-width: 460px;
-  margin: 20px auto;   /* 🔥 இதுதான் key */
-  background: #ffffffee;
-  backdrop-filter: blur(5px);
+  margin: 20px auto;
+  background: var(--card);
   border-radius: 18px;
-  padding: 28px;
-  box-shadow: 0 8px 25px rgba(0,0,0,0.25);
-    animation: fadeIn 0.5s ease-out;
+  padding: 26px 22px;
+  box-shadow: 0 10px 28px rgba(122,13,22,0.12);
+  border: 1px solid var(--line);
+  animation: fadeIn 0.4s ease-out;
   }
 
   @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(20px); }
+    from { opacity: 0; transform: translateY(16px); }
     to { opacity: 1; transform: translateY(0); }
   }
 
@@ -39,95 +62,103 @@
   h2 {
     text-align: center;
     margin-top: 0;
-    font-size: 24px;
-    color: #2c3e50; /* dark blue */
-    font-weight: 700;
+    font-size: 22px;
+    color: var(--maroon-dark);
+    font-weight: 800;
   }
 
   h3 {
     text-align: center;
     margin-bottom: 10px;
-    font-size: 20px;
-    color: #34495e;
-    font-weight: 600;
+    font-size: 18px;
+    color: var(--maroon-dark);
+    font-weight: 700;
   }
 
   label {
-    font-size: 15px;
+    font-size: 13.5px;
     font-weight: 600;
-    color: #2d3436;
-    margin-top: 15px;
+    color: var(--ink);
+    margin-top: 14px;
     display: block;
   }
 
   /* --- FORM INPUTS --- */
   select, input {
     width: 100%;
-    padding: 14px;
-    font-size: 16px;
-    border-radius: 12px;
-    border: 2px solid #dcdde1;
-    background: #f7f9fc;
-    transition: 0.3s;
+    padding: 12px 13px;
+    font-size: 15px;
+    border-radius: 10px;
+    border: 1.5px solid var(--line);
+    background: #ffffff;
+    color: var(--ink);
+    font-family: 'Noto Sans Tamil','Poppins',sans-serif;
+    transition: 0.2s;
+    box-sizing: border-box;
   }
 
   select:focus, input:focus {
-    border-color: #4e73df;
-    box-shadow: 0 0 5px #4e73dfaa;
+    border-color: var(--maroon);
+    box-shadow: 0 0 0 3px rgba(122,13,22,0.14);
     outline: none;
   }
 
   /* --- BUTTONS --- */
   button {
     width: 100%;
-    padding: 14px;
+    padding: 13px;
     margin-top: 12px;
     border: none;
     border-radius: 12px;
-    font-size: 17px;
+    font-size: 15.5px;
     font-weight: 700;
+    font-family: 'Noto Sans Tamil','Poppins',sans-serif;
     cursor: pointer;
-    transition: 0.25s;
+    transition: 0.2s;
   }
 
   button:hover {
-    transform: scale(1.03);
+    filter: brightness(1.04);
   }
 
   button:active {
-    transform: scale(0.97);
+    transform: scale(0.98);
   }
 
   /* --- BUTTON COLORS --- */
   button:not(.back-btn) {
-    background: linear-gradient(135deg, #4e73df, #1cc88a);
+    background: linear-gradient(135deg, var(--maroon), var(--maroon-dark));
     color: white;
+    box-shadow: 0 6px 16px rgba(122,13,22,0.22);
   }
 
   .back-btn {
-    background: linear-gradient(135deg, #e74a3b, #c0392b) !important;
-    color: white;
+    background: #ffffff !important;
+    color: var(--maroon-dark) !important;
+    border: 1.5px solid var(--line) !important;
   }
 
   /* --- MESSAGES --- */
   .success {
-    background: #d4edda;
-    border-left: 5px solid #28a745;
-    padding: 10px;
+    background: var(--green-soft);
+    border-left: 5px solid var(--green);
+    padding: 10px 12px;
     margin-top: 10px;
     border-radius: 10px;
-    color: #155724;
+    color: var(--green);
     font-weight: 600;
+    font-size: 13.5px;
   }
 
   .error {
-    background: #f8d7da;
-    border-left: 5px solid #e74a3b;
-    padding: 10px;
+    background: var(--red-soft);
+    border-left: 5px solid var(--red);
+    padding: 10px 12px;
     margin-top: 10px;
     border-radius: 10px;
-    color: #721c24;
+    color: var(--red);
     font-weight: 600;
+    font-size: 13.5px;
   }
 
   /* --- STAGES (screens) --- */
@@ -139,26 +170,35 @@
   .single-email-box {
     display: flex;
     align-items: center;
-    background: #e8fff1;
-    border: 2px solid #1cc88a;
-    padding: 15px;
+    background: var(--green-soft);
+    border: 1.5px solid var(--green);
+    padding: 14px;
     border-radius: 12px;
     margin: 10px 0;
   }
 
   .single-email-box input {
-    transform: scale(1.5);
-    margin-right: 15px;
+    transform: scale(1.4);
+    margin-right: 14px;
+    width: auto;
   }
 
-  /* --- SUB-PAGES INSIDE STAGE 4 --- */
+  /* --- SUB-PAGES INSIDE STAGE 4 (ledger-card look) --- */
   .sub-stage {
-    padding: 15px;
-    background: #f4f6f8;
-    border-radius: 12px;
-    margin-bottom: 15px;
-    box-shadow: inset 0 0 8px rgba(0,0,0,0.05);
+    padding: 16px;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    margin-bottom: 14px;
+    box-shadow: 0 6px 18px rgba(122,13,22,0.06);
+    position: relative;
   }
+  .sub-stage::before{
+    content:"";
+    position:absolute; left:0; top:12px; bottom:12px; width:4px;
+    background: var(--gold); border-radius:0 4px 4px 0;
+  }
+
 .loading-card {
   display: flex;
   flex-direction: column;
@@ -170,18 +210,18 @@
   width: 85%;
   max-width: 320px;
 
-  background: #ffffff;
+  background: var(--card);
   border-radius: 16px;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.18);
+  box-shadow: 0 10px 25px rgba(122,13,22,0.16);
 
   animation: fadeScale 0.35s ease-out;
 }
 
 .loading-card p {
   margin: 12px 0 0;
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 700;
-  color: #1e40af;
+  color: var(--maroon-dark);
   text-align: center;
 }
 
@@ -189,8 +229,8 @@
 .spinner {
   width: 38px;
   height: 38px;
-  border: 4px solid #dbeafe;
-  border-top: 4px solid #2563eb;
+  border: 4px solid var(--gold-soft);
+  border-top: 4px solid var(--maroon);
   border-radius: 50%;
   animation: spin 0.9s linear infinite;
 }
@@ -219,146 +259,95 @@
   display: inline-block;
 }
 
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-/* Stage 0 – colourful lines */
-
-#stage0 h2 {
-  color: #1e3a8a;        /* Dark Blue */
-}
-
-#stage0 h3 {
-  color: #047857;        /* Green */
-}
-
-#stage0 hr {
-  border: none;
-  height: 3px;
-  background: linear-gradient(to right, #6366f1, #22c55e);
-}
-
-#stage0 label {
-  color: #7c2d12;        /* Brown */
-}
-
-#stage0 select {
-  border: 2px solid #2563eb;
-  background-color: #eff6ff;
-  color: #1e40af;
-}
-
-#stage0 select option {
-  color: #1f2937;
-}
-
-/* Libraries list (dynamic content) */
-#librariesDiv {
-  color: #92400e;        /* Orange-brown */
-}
-/* ===============================
-   Stage 4A – 4G : Colourful Titles
-   =============================== */
-
-/* Common style for all step titles */
-#stage4 .sub-stage h4 {
-  font-weight: 800;
-  font-size: 17px;
-  padding: 8px 12px;
-  border-radius: 10px;
-  margin-top: 0;
-  margin-bottom: 15px;
-}
-
-/* 🔵 Step 4A – Newspapers */
-#stage4A h4 {
-  color: #1e40af;
-  background: #e0f2fe;
-  border-left: 6px solid #2563eb;
-}
-
-/* 🟢 Step 4B – Daily wages */
-#stage4B h4 {
-  color: #065f46;
-  background: #dcfce7;
-  border-left: 6px solid #16a34a;
-}
-
-/* 🟡 Step 4C – Electricity / Rent */
-#stage4C h4 {
-  color: #92400e;
-  background: #fef3c7;
-  border-left: 6px solid #f59e0b;
-}
-
-/* 🟣 Step 4D – Bus & Travel */
-#stage4D h4 {
-  color: #5b21b6;
-  background: #ede9fe;
-  border-left: 6px solid #7c3aed;
-}
-
-/* 🟠 Step 4E – Post / Stationery */
-#stage4E h4 {
-  color: #9a3412;
-  background: #ffedd5;
-  border-left: 6px solid #f97316;
-}
-
-/* 🔴 Step 4F – Other Expenses */
-#stage4F h4 {
-  color: #991b1b;
-  background: #fee2e2;
-  border-left: 6px solid #dc2626;
-}
-
-/* ✅ Step 4G – Completion */
-#stage4G h4 {
-  color: #064e3b;
-  background: #d1fae5;
-  border-left: 6px solid #10b981;
-}
-
-/* Spinner */
-.btn-spinner {
-  width: 18px;
-  height: 18px;
-  border: 3px solid rgba(255,255,255,0.4);
-  border-top: 3px solid #fff;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  display: inline-block;
-  vertical-align: middle;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
 button.loading {
   pointer-events: none;
   opacity: 0.7;
 }
 
+/* Stage 0 – portal header colours */
+
+#stage0 h2 {
+  color: var(--maroon-dark);
+}
+
+#stage0 h3 {
+  color: var(--maroon);
+}
+
+#stage0 hr {
+  border: none;
+  height: 3px;
+  background: repeating-linear-gradient(90deg, var(--gold) 0 10px, transparent 10px 16px);
+  margin: 14px 0;
+}
+
+#stage0 label {
+  color: var(--ink);
+}
+
+#stage0 select {
+  border: 1.5px solid var(--maroon);
+  background-color: #fff;
+  color: var(--maroon-dark);
+}
+
+#stage0 select option {
+  color: var(--ink);
+}
+
+/* Libraries list (dynamic content) */
+#librariesDiv {
+  color: var(--maroon-dark);
+}
+
+/* ===============================
+   Stage 4A – 4G : Section Titles (ledger-tab look)
+   =============================== */
+
+#stage4 .sub-stage h4 {
+  font-weight: 800;
+  font-size: 15.5px;
+  padding: 9px 12px;
+  border-radius: 9px;
+  margin-top: 0;
+  margin-bottom: 15px;
+}
+
+/* Step 4A – Newspapers */
+#stage4A h4 { color: var(--maroon-dark); background: var(--gold-soft); border-left: 5px solid var(--gold); }
+/* Step 4B – Daily wages */
+#stage4B h4 { color: var(--green); background: var(--green-soft); border-left: 5px solid var(--green); }
+/* Step 4C – Electricity / Rent */
+#stage4C h4 { color: #7a5a10; background: #fdf3d8; border-left: 5px solid var(--gold); }
+/* Step 4D – Bus & Travel */
+#stage4D h4 { color: var(--blue); background: #e6f0f7; border-left: 5px solid var(--blue); }
+/* Step 4E – Post / Stationery */
+#stage4E h4 { color: #7a3a10; background: #fbe9dd; border-left: 5px solid #c9701f; }
+/* Step 4F – Other Expenses */
+#stage4F h4 { color: var(--red); background: var(--red-soft); border-left: 5px solid var(--red); }
+/* Step 4G – Completion */
+#stage4G h4 { color: var(--green); background: var(--green-soft); border-left: 5px solid var(--green); }
+
   .section-title {
-    font-size: 20px;
+    font-size: 17px;
     font-weight: 800;
     text-align: center;
-    margin: 25px 0 10px;
-    letter-spacing: 1px;
-    text-decoration: underline;
+    margin: 24px 0 10px;
+    letter-spacing: 0.5px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--line);
   }
 
-  /* 🔵 பதிவு செய்தல் */
+  /* பதிவு செய்தல் */
   .section-title.entry {
-    color: #1e40af;   /* Deep Blue */
+    color: var(--maroon-dark);
   }
 
-  /* 🟢 அறிக்கைகள் */
+  /* அறிக்கைகள் */
   .section-title.report {
-    color: #047857;   /* Emerald Green */
+    color: var(--green);
   }
+
 /* 🔰 Stage 0 Header */
 .stage0-header {
   display: flex;
@@ -385,32 +374,33 @@ button.loading {
     width: 55px;
   }
   .header-title h2 {
-    font-size: 20px;
+    font-size: 19px;
   }
   .header-title h3 {
-    font-size: 16px;
+    font-size: 15px;
   }
 }
+
 /* ===== Premium Preview Table ===== */
 
 .premium-table {
   width: 100%;
   border-collapse: collapse;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--line);
   border-radius: 14px;
   overflow: hidden;
-  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
-  background: #ffffff;
-  font-size: 15px;
+  box-shadow: 0 6px 18px rgba(122,13,22,0.08);
+  background: var(--card);
+  font-size: 14px;
 }
 
 .premium-table td {
   padding: 10px 12px;
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 1px solid var(--line);
 }
 
 .premium-table tr:nth-child(even):not(.section-row):not(.total-row) {
-  background: #f9fafb;
+  background: #fbf7ef;
 }
 
 .section-row td {
@@ -421,18 +411,18 @@ button.loading {
 }
 
 .income-section td {
-  background: #2563eb;
+  background: var(--maroon);
 }
 
 .usage-section td {
-  background: #16a34a;
+  background: var(--green);
 }
 
 .total-row {
-  background: #dcfce7 !important;
+  background: var(--gold-soft) !important;
   font-weight: 700;
-  font-size: 16px;
-  color: #065f46;
+  font-size: 15px;
+  color: var(--maroon-dark);
 }
 
 /* Preview Card Style */
@@ -440,47 +430,43 @@ button.loading {
   display: none;
   position: fixed;
   top: 0; left: 0; width: 100%; height: 100%;
-  background: rgba(0,0,0,0.7);
+  background: rgba(43,26,26,0.65);
   z-index: 1000;
   overflow-y: auto;
   padding: 20px;
 }
 
 .preview-card {
-  background: white;
+  background: var(--card);
   max-width: 450px;
   margin: 20px auto;
-  padding: 25px;
-  border-radius: 15px;
-  box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+  padding: 24px;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
 }
 
 .preview-item {
   display: flex;
   justify-content: space-between;
   padding: 8px 0;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid var(--line);
+  font-size: 14px;
 }
 
 .preview-total {
-  font-size: 20px;
+  font-size: 19px;
   font-weight: 800;
-  color: #1e40af;
+  color: var(--maroon-dark);
   text-align: center;
   margin-top: 15px;
   padding: 10px;
-  background: #eff6ff;
+  background: var(--gold-soft);
   border-radius: 10px;
 }
+
 @keyframes blink-red {
-  0%, 100% {
-    color: #000000;              /* இயல்பு கருப்பு */
-    background-color: #ffffff;   /* வெள்ளை பின்னணி */
-  }
-  50% {
-    color: #ffffff;              /* வெள்ளை எழுத்து */
-    background-color: #dc2626;   /* சிவப்பு பின்னணி */
-  }
+  0%, 100% { color: #000000; background-color: #ffffff; }
+  50% { color: #ffffff; background-color: var(--red); }
 }
 
 .blink-red {
@@ -553,13 +539,13 @@ button.loading {
   
   📚 
   <span id="finalLib"
-        style="color:#1d4ed8; font-size:22px; font-weight:800;">
+        style="color:#4a0a10; font-size:22px; font-weight:800;">
   </span>
 
   <br>
 
   <span id="finalEmail"
-        style="color:#7c3aed; font-size:22px; font-weight:800;">
+        style="color:#8a6d1f; font-size:22px; font-weight:800;">
   </span>
 </p>
     <hr>
@@ -568,10 +554,10 @@ button.loading {
 
     <button id="contingentBtn" onclick="handleContingentClick()" style="position:relative;">  1. சில்லறை செலவினப் பட்டியல்</button>
 
-<button id="receiptBtn" onclick="go(5,'வரவினங்களை பதிவு செய்தல்')"style="background:#a64dff; color:white; position:relative;">  2. நூலக வரவினங்கள்
+<button id="receiptBtn" onclick="go(5,'வரவினங்களை பதிவு செய்தல்')"style="background:#7c4a9e; color:white; position:relative;">  2. நூலக வரவினங்கள்
 </button>
 <div id="adminNewsBtnWrap" style="display:none;">
-  <button onclick="go(6,'நாளிதழ் மேலாண்மை')" style="background:#7c3aed; color:white;">🛠 நாளிதழ் மேலாண்மை (Admin)</button>
+  <button onclick="go(6,'நாளிதழ் மேலாண்மை')" style="background:#5b3a7a; color:white;">🛠 நாளிதழ் மேலாண்மை (Admin)</button>
 </div>
 <div class="section-title report">அறிக்கைகள்</div>
  <div id="mailSuccessCard"
@@ -591,22 +577,22 @@ button.loading {
       <option value="2025-2026">2. 2025-2026</option>
     </select>
     <div style="display:flex; gap:10px; justify-content:center;">
-      <button id="prevYearConfirmBtn" onclick="confirmPrevYearReceiptExpense(this)" style="background:#7c3aed; color:white; border:none; padding:10px 18px; border-radius:8px; font-weight:700;">பெறு</button>
+      <button id="prevYearConfirmBtn" onclick="confirmPrevYearReceiptExpense(this)" style="background:#7a0d16; color:white; border:none; padding:10px 18px; border-radius:8px; font-weight:700;">பெறு</button>
       <button onclick="closePrevYearModal()" style="background:#e2e8f0; color:#334155; border:none; padding:10px 18px; border-radius:8px; font-weight:700;">ரத்து செய்</button>
     </div>
   </div>
 </div>
 
-    <button onclick="openApprovedExpenseMail(this)" style="background:#ff9800;"> 1. அனுமதிக்கப்பட்ட சில்லறைச் செலவினம்</button>
+    <button onclick="openApprovedExpenseMail(this)" style="background:#b8860b;"> 1. அனுமதிக்கப்பட்ட சில்லறைச் செலவினம்</button>
     
-    <button onclick="openReceiptAcknowledgement(this)" style="background:#10b981;"> 2.  நூலக வரவுத் தொகைக்கு ஒப்புதல்</button>
-    <button onclick="openYearlyReceiptAbstract(this)" style="background:#0ea5e9;">   3. 📊 நடப்பு ஆண்டு சுருக்கம் – நூலக வரவுகள்</button>
-    <button onclick="openYearlyExpenseAbstract(this)" style="background:#ef4444;">   4. 📊 நடப்பு ஆண்டு சுருக்கம் – நூலக செலவுகள்</button>
-    <button onclick="openPrevYearReceiptExpense(this)" style="background:#7c3aed;"> 5. 📑 கடந்த ஆண்டு வரவு-செலவு(தணிக்கைப் படிவம்</button>
-    <button onclick="openClaimPdf(this)" style="background:#1e88e5;">   6.📥 📄 சில்லறை செலவினப் பட்டியல் நகல் எடுத்தல் </button>
+    <button onclick="openReceiptAcknowledgement(this)" style="background:#2f6d4f;"> 2.  நூலக வரவுத் தொகைக்கு ஒப்புதல்</button>
+    <button onclick="openYearlyReceiptAbstract(this)" style="background:#1e5b8c;">   3. 📊 நடப்பு ஆண்டு சுருக்கம் – நூலக வரவுகள்</button>
+    <button onclick="openYearlyExpenseAbstract(this)" style="background:#b3261e;">   4. 📊 நடப்பு ஆண்டு சுருக்கம் – நூலக செலவுகள்</button>
+    <button onclick="openPrevYearReceiptExpense(this)" style="background:#6d4aa8;"> 5. 📑 கடந்த ஆண்டு வரவு-செலவு(தணிக்கைப் படிவம்</button>
+    <button onclick="openClaimPdf(this)" style="background:#0f766e;">   6.📥 📄 சில்லறை செலவினப் பட்டியல் நகல் எடுத்தல் </button>
    
 
-     <button onclick="backToType()" style="background:#f44336;margin-top:30px;">    வெளியேறு</button>
+     <button onclick="backToType()" style="background:#b3261e;margin-top:30px;">    வெளியேறு</button>
         <!-- 🔳 Remittance QR Code (BELOW the button) -->
 <div style="margin-top:15px; text-align:center;">
 
@@ -659,7 +645,7 @@ button.loading {
 </div>
 
     <div id="stage4" class="stage">
-    <h3 id="pageTitle" style="color:#28a745;"></h3>
+    <h3 id="pageTitle" style="color:#2f6d4f;"></h3>
     <p style="text-align:center;font-weight:bold;color:#666;">நூலகம்: <span id="libForContingent"></span></p>
     <hr>
 
@@ -887,12 +873,12 @@ button.loading {
 
 <div id="contingentPreviewOverlay" class="preview-overlay">
   <div class="preview-card">
-    <h3 style="color:#2563eb;">பதிவு விவரங்கள் சரிபார்ப்பு</h3>
+    <h3 style="color:#1e5b8c;">பதிவு விவரங்கள் சரிபார்ப்பு</h3>
     <div id="previewContent"></div>
     <div id="previewTotalDisplay" class="preview-total"></div>
     
     <div style="display:flex; gap:10px; margin-top:20px;">
-      <button type="button" onclick="submitFromPreview()" style="background:#16a34a;">✅ சரி (பதிவு செய்யலாம்)</button>
+      <button type="button" onclick="submitFromPreview()" style="background:#2f6d4f;">✅ சரி (பதிவு செய்யலாம்)</button>
       <button type="button" onclick="closePreview()" class="back-btn">❌ தவறு (திருத்து)</button>
     </div>
   </div>
@@ -914,17 +900,17 @@ button.loading {
     max-width: 400px;
     margin: 20px auto;
     padding: 25px;
-    background: #ffffff;
+    background: var(--card, #fffdf9);
     border-radius: 14px;
-    box-shadow: 0 6px 20px rgba(0,0,0,0.1);
-    border: 1px solid #e2e8f0;
+    box-shadow: 0 6px 20px rgba(122,13,22,0.10);
+    border: 1px solid var(--line, #e7dcc7);
 }
 
  #stage5 label {
   display: block;
   margin: 12px 0 5px;
   font-weight: 600;
-  color: #1e3a8a;
+  color: var(--maroon-dark, #4a0a10);
 }
 
   #stage5 input[type="text"],
@@ -932,29 +918,30 @@ button.loading {
   #stage5 input[type="number"] {
     width: 100%;
     padding: 10px 12px;
-    border: 1px solid #a5b4fc;
-    border-radius: 8px;
-    font-size: 16px;
+    border: 1.5px solid var(--line, #e7dcc7);
+    border-radius: 9px;
+    font-size: 15px;
     background-color: #ffffff;
     transition: border-color 0.2s;
+    box-sizing: border-box;
   }
 
   #stage5 input:focus {
-    border-color: #6366f1;
+    border-color: var(--maroon, #7a0d16);
     outline: none;
-    box-shadow: 0 0 0 3px rgba(99,102,241,0.2);
+    box-shadow: 0 0 0 3px rgba(122,13,22,0.14);
   }
 
   #stage5 input[readonly] {
-    background-color: #f1f5f9;
+    background-color: var(--gold-soft, #f1e2b8);
     font-weight: bold;
-    color: #1e40af;
+    color: var(--maroon-dark, #4a0a10);
   }
 
   #receiptForm h4 {
-    color: #1d4ed8;
+    color: var(--maroon-dark, #4a0a10);
     margin: 25px 0 15px;
-    border-bottom: 2px solid #bfdbfe;
+    border-bottom: 2px solid var(--gold-soft, #f1e2b8);
     padding-bottom: 8px;
   }
 
@@ -965,15 +952,15 @@ button.loading {
   }
 
   #receiptMsg {
-    background: #d1fae5;
-    color: #065f46;
-    border: 1px solid #a7f3d0;
+    background: var(--green-soft, #e6f2ec);
+    color: var(--green, #2f6d4f);
+    border: 1px solid #bfe0cf;
   }
 
   #receiptError {
-    background: #fee2e2;
-    color: #991b1b;
-    border: 1px solid #fecaca;
+    background: var(--red-soft, #fbe9e7);
+    color: var(--red, #b3261e);
+    border: 1px solid #f3c9c4;
   }
 
 @keyframes blinkGlow {
@@ -989,7 +976,7 @@ button.loading {
 }
 .blinkSelect{
   animation: blinkColor 1s infinite;
-  border: 3px solid red;
+  border: 3px solid var(--red, #b3261e);
 }
 
 @keyframes blinkColor{
@@ -1009,7 +996,7 @@ button.loading {
 
 </style>
   <div id="stage5" class="stage">
-    <h3 id="receiptTitle" style="color:#28a745;">வரவினங்களை பதிவு செய்தல்</h3>
+    <h3 id="receiptTitle" style="color:#2f6d4f;">வரவினங்களை பதிவு செய்தல்</h3>
     <p style="text-align:center;font-weight:bold;color:#666;">நூலகம்: <span id="libForReceipt"></span></p>
     <hr>
     <div style="margin-bottom:15px">
@@ -1069,14 +1056,14 @@ button.loading {
   <p style="text-align:center; font-size:16px; font-weight:600;">
     நீங்கள் செலுத்திய தொகை ரூ.
     <span id="bankAmountDisplay"
-          style="color:#16a34a; font-size:20px; font-weight:800;">
+          style="color:#2f6d4f; font-size:20px; font-weight:800;">
     </span>
 </p>
 
 <p style="text-align:center; font-size:15px; font-weight:600; margin-top:5px;">
     செலுத்திய தேதி :
     <span id="bankDateDisplay"
-          style="color:#2563eb; font-size:17px; font-weight:800;">
+          style="color:#1e5b8c; font-size:17px; font-weight:800;">
     </span>
 </p>
 
@@ -1118,7 +1105,7 @@ button.loading {
 
   மீதமுள்ள தொகை ரூ.
   <span id="remainingAmountDisplay"
-        style="color:#15803d; font-size:18px;">
+        style="color:#2f6d4f; font-size:18px;">
   </span>
 </div>
 <label for="paymentDate" style="text-align:center;">
@@ -1245,7 +1232,7 @@ button.loading {
 </form>
 <!-- Confirmation Preview Card (மறைந்திருக்கும்) -->
 <div id="receiptPreview" style="display:none; margin:25px 0; padding:20px; background:#f0fdf4; border:2px solid #16a34a; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.1);">
-  <h4 style="color:#15803d; text-align:center; margin-top:0;">பதிவு உறுதிப்படுத்தல் – தயவுசெய்து சரிபார்க்கவும்</h4>
+  <h4 style="color:#2f6d4f; text-align:center; margin-top:0;">பதிவு உறுதிப்படுத்தல் – தயவுசெய்து சரிபார்க்கவும்</h4>
   
  <div style="margin-top:15px;">
   <table id="previewTable" class="premium-table">
@@ -1258,10 +1245,10 @@ button.loading {
 </div>
 
   <div style="margin-top:25px; text-align:center;">
-    <button onclick="confirmAndSubmitReceipt(this)" style="background:#16a34a; color:white; padding:14px 32px; font-size:1.1em; border:none; border-radius:10px; margin-right:15px; cursor:pointer;">
+    <button onclick="confirmAndSubmitReceipt(this)" style="background:#2f6d4f; color:white; padding:14px 32px; font-size:1.1em; border:none; border-radius:10px; margin-right:15px; cursor:pointer;">
       ✅ சரி – பதிவு செய்
     </button>
-    <button onclick="cancelReceiptSubmit(this)" style="background:#ef4444; color:white; padding:14px 32px; font-size:1.1em; border:none; border-radius:10px; cursor:pointer;">
+    <button onclick="cancelReceiptSubmit(this)" style="background:#b3261e; color:white; padding:14px 32px; font-size:1.1em; border:none; border-radius:10px; cursor:pointer;">
       ❌ ரத்து செய்
     </button>
   </div>
@@ -1278,7 +1265,7 @@ button.loading {
 
     <!-- ===== Section A: Master List (18 Slots) ===== -->
     <div class="sub-stage">
-      <h4 style="color:#1e40af;background:#e0f2fe;border-left:6px solid #2563eb;padding:8px 12px;border-radius:10px;">
+      <h4 style="color:#4a0a10;background:#f1e2b8;border-left:6px solid #c9a227;padding:8px 12px;border-radius:10px;">
         📋 நாளிதழ் பட்டியல் (Master List — 18 Slots)
       </h4>
       <p style="font-size:13px;color:#666;">
@@ -1287,7 +1274,7 @@ button.loading {
       <div id="newsMasterListDiv">
         <p style="text-align:center;color:#888;">ஏற்றப்படுகிறது...</p>
       </div>
-      <button type="button" onclick="saveNewspaperMasterListUI()" style="background:#16a34a;color:white;">
+      <button type="button" onclick="saveNewspaperMasterListUI()" style="background:#2f6d4f;color:white;">
         💾 Master List Save செய்
       </button>
       <div id="newsMasterSaveMsg" class="success" style="display:none;"></div>
@@ -1295,7 +1282,7 @@ button.loading {
 
     <!-- ===== Section B: Library-wise Active/Inactive Map ===== -->
     <div class="sub-stage" style="margin-top:20px;">
-      <h4 style="color:#065f46;background:#dcfce7;border-left:6px solid #16a34a;padding:8px 12px;border-radius:10px;">
+      <h4 style="color:#2f6d4f;background:#e6f2ec;border-left:6px solid #2f6d4f;padding:8px 12px;border-radius:10px;">
         🏛️ நூலகம் வாரியாக நாளிதழ் ஒதுக்கீடு (ON/OFF)
       </h4>
       <label>நூலகத்தைத் தேர்ந்தெடுக்கவும்</label>
@@ -1307,7 +1294,7 @@ button.loading {
         <p style="text-align:center;color:#888;">மேலே ஒரு நூலகத்தைத் தேர்ந்தெடுக்கவும்.</p>
       </div>
 
-      <button type="button" id="saveLibraryMapBtn" onclick="saveLibraryNewspaperMapUI()" style="background:#16a34a;color:white;display:none;">
+      <button type="button" id="saveLibraryMapBtn" onclick="saveLibraryNewspaperMapUI()" style="background:#2f6d4f;color:white;display:none;">
         💾 இந்த நூலகத்திற்கு Save செய்
       </button>
       <div id="libraryMapSaveMsg" class="success" style="display:none;"></div>
