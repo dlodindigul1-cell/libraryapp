@@ -334,7 +334,7 @@ def submit_or_update_contingent(data):
         row_data[49] = unique_key  # AY column (0-based idx 49)
 
         if existing_row_index:
-            end_col = chr(ord("A") + len(row_data) - 1)
+            end_col = gspread.utils.rowcol_to_a1(1, len(row_data)).rstrip("0123456789")
             sh.update(f"A{existing_row_index}:{end_col}{existing_row_index}", [row_data],
                       value_input_option="USER_ENTERED")
             # BD/BE (columns 56,57 1-based) clear பண்ணுதல்
